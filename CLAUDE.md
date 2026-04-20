@@ -30,6 +30,19 @@ npm run db:migrate     # Run migrations
 npm run db:studio      # Open Drizzle Studio (DB GUI)
 ```
 
+## Schema changes — mandatory workflow
+
+**Always** follow these steps when changing `schema.ts`. Skipping any step breaks production migrations.
+
+1. Edit `src/lib/server/db/schema.ts`
+2. Run `npm run db:generate` in a real terminal (requires TTY — cannot run via Claude Code's bash tool)
+   - Drizzle will prompt about renames vs. drop+add — answer accordingly
+   - This creates: `drizzle/NNNN_<name>.sql` + `drizzle/meta/NNNN_snapshot.json` + updates `drizzle/meta/_journal.json`
+3. Commit **all three** generated/updated files together with the schema change
+4. Update all server files that reference the old column name
+
+**Never** manually write migration SQL files — the journal and snapshot won't be updated, and `migrate()` will silently skip the migration on prod startup.
+
 ## Architecture
 
 ### Routes

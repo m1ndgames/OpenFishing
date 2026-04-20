@@ -27,7 +27,7 @@
       "idx": 3,
       "version": "6",
       "when": 1745280000000,
-      "tag": "0003_rename_weather_to_light_conditions",
+      "tag": "0003_light_conditions",
       "breakpoints": true
     }
   ]
