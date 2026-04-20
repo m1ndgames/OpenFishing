@@ -76,9 +76,9 @@ export const actions: Actions = {
 
 			const insertLure = client.prepare(
 				`INSERT INTO lure (id, lure_number, name, brand, type, color, weight, size, notes,
-				 photo_path, species, running_depth, water_type, weather, qr_coded, created_at, updated_at)
+				 photo_path, species, running_depth, water_type, light_conditions, qr_coded, created_at, updated_at)
 				 VALUES (@id, @lure_number, @name, @brand, @type, @color, @weight, @size, @notes,
-				 @photo_path, @species, @running_depth, @water_type, @weather, @qr_coded, @created_at, @updated_at)`
+				 @photo_path, @species, @running_depth, @water_type, @light_conditions, @qr_coded, @created_at, @updated_at)`
 			);
 			const insertTag = client.prepare(
 				`INSERT INTO tag (id, lure_id, name) VALUES (@id, @lure_id, @name)`
@@ -99,7 +99,7 @@ export const actions: Actions = {
 					species: l.species ?? null,
 					running_depth: l.runningDepth ?? null,
 					water_type: l.waterType ?? null,
-					weather: l.weather ?? null,
+					light_conditions: l.lightConditions ?? null,
 					qr_coded: l.qrCoded ? 1 : 0,
 					created_at: l.createdAt ? new Date(l.createdAt as string).getTime() : null,
 					updated_at: l.updatedAt ? new Date(l.updatedAt as string).getTime() : null

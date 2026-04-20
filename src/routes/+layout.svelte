@@ -16,7 +16,7 @@
 <svelte:head>
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
-	<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+	<link href="https://fonts.googleapis.com/css2?family=Carter+One&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 	<link rel="icon" href={favicon} />
 	<title>OpenFishing</title>
 </svelte:head>
@@ -30,7 +30,7 @@
 	<header style="background-color:#0b1a2c; border-bottom: 1px solid #172f4a;">
 		<div class="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between gap-3">
 			<div class="flex items-center gap-1">
-				<a href="/" class="shrink-0 flex items-center gap-2 mr-2" style="font-family:'Syne',sans-serif; font-weight:800; font-size:1.2rem; color:#e0eaf8; text-decoration:none; letter-spacing:-0.02em;">
+				<a href="/" class="shrink-0 flex items-center gap-2 mr-2" style="font-family:'Carter One',sans-serif; font-weight:800; font-size:1.2rem; color:#e0eaf8; text-decoration:none; letter-spacing:-0.02em;">
 					<svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="color:#22d3ee; flex-shrink:0;">
 						<path d="M12 3C9.5 3 7.5 4.5 6.5 6.5C5 6.2 3 7 2 9C4 9.5 5.5 9 6.5 8C7 10 8.5 11.5 10.5 12C8 13.5 6 16.5 6 20C8 19 9.5 17 10 15C11 16.5 12.5 17.5 14 17.5C15.5 17.5 17 16.5 18 15C18.5 17 20 19 22 20C22 16.5 20 13.5 17.5 12C19.5 11.5 21 10 21.5 8C22.5 9 24 9.5 26 9C25 7 23 6.2 21.5 6.5C20.5 4.5 18.5 3 12 3Z" fill="currentColor" opacity="0.2"/>
 						<path d="M4 20 Q8 16 12 14 Q16 12 20 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/>

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { ActionData, PageData } from './$types';
 	import TagInput from '$lib/components/TagInput.svelte';
+	import CropModal from '$lib/components/CropModal.svelte';
 
 	let { form, data }: { form: ActionData; data: PageData } = $props();
 	const { t } = data;
@@ -10,14 +11,31 @@
 	let cameraInput: HTMLInputElement;
 	let previewUrl = $state<string | null>(null);
 	let photoError = $state(false);
+	let showCrop = $state(false);
+	let cropSrc = $state<string | null>(null);
 
 	function handleFile(file: File | null | undefined) {
 		photoError = false;
 		if (!file) return;
+		if (cropSrc) URL.revokeObjectURL(cropSrc);
+		cropSrc = URL.createObjectURL(file);
+		showCrop = true;
+	}
+
+	function onCropConfirm(blob: Blob) {
+		showCrop = false;
+		if (previewUrl) URL.revokeObjectURL(previewUrl);
+		const file = new File([blob], 'photo.jpg', { type: 'image/jpeg' });
 		const dt = new DataTransfer();
 		dt.items.add(file);
 		photoInput.files = dt.files;
 		previewUrl = URL.createObjectURL(file);
+	}
+
+	function onCropCancel() {
+		showCrop = false;
+		uploadInput.value = '';
+		if (cameraInput) cameraInput.value = '';
 	}
 
 	function clearPhoto() {
@@ -73,8 +91,8 @@
 	<datalist id="suggest-colors">
 		{#each data.suggestions.colors as color}<option value={color}></option>{/each}
 	</datalist>
-	<datalist id="suggest-weather">
-		{#each data.suggestions.weathers as w}<option value={w}></option>{/each}
+	<datalist id="suggest-light-conditions">
+		{#each data.suggestions.lightConditions as w}<option value={w}></option>{/each}
 	</datalist>
 
 	<!-- Trigger-only inputs -->
@@ -99,7 +117,7 @@
 				<div style="position:relative; border-radius:12px; overflow:hidden; background:#0d1f35; aspect-ratio:4/3; margin-bottom:10px;">
 					<img src={previewUrl} alt="Preview" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;" />
 					<button type="button" onclick={clearPhoto}
-						style="position:absolute; top:10px; right:10px; background:rgba(0,0,0,0.6); border:none; color:white; border-radius:50%; width:30px; height:30px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:0.75rem; z-index:10;"
+						style="position:absolute; top:10px; right:10px; background:rgba(0,0,0,0.6); border:none; color:#EDF5FA; border-radius:50%; width:30px; height:30px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:0.75rem; z-index:10;"
 						aria-label="Remove photo">✕</button>
 					<svg style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none;" viewBox="0 0 400 300" preserveAspectRatio="none">
 						<path d="M16,36 L16,16 L36,16" fill="none" stroke="rgba(34,211,238,0.5)" stroke-width="2" stroke-linecap="round"/>
@@ -210,8 +228,8 @@
 				</select>
 			</div>
 			<div>
-				<label style={labelStyle} for="weather">{t.weather}</label>
-				<input id="weather" name="weather" type="text" list="suggest-weather" placeholder="e.g. Sunny"
+				<label style={labelStyle} for="light_conditions">{t.lightConditions}</label>
+				<input id="light_conditions" name="light_conditions" type="text" list="suggest-light-conditions" placeholder="e.g. Sunny"
 					style={inputStyle} onfocus={focusInput} onblur={blurInput} />
 			</div>
 		</div>
@@ -249,3 +267,7 @@
 		</div>
 	</form>
 </div>
+
+{#if showCrop && cropSrc}
+	<CropModal src={cropSrc} onConfirm={onCropConfirm} onCancel={onCropCancel} />
+{/if}

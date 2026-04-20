@@ -16,7 +16,7 @@
 <!-- Screen view -->
 <div class="print:hidden">
 	<div style="margin-bottom:24px; display:flex; align-items:center; justify-content:space-between; gap:16px;">
-		<h1 style="font-family:'Syne',sans-serif; font-weight:800; font-size:1.5rem; color:#e0eaf8; margin:0;">{t.qrCodesTitle}</h1>
+		<h1 style="font-family:'Carter One',sans-serif; font-weight:800; font-size:1.5rem; color:#e0eaf8; margin:0;">{t.qrCodesTitle}</h1>
 		{#if items.length > 0}
 			<button
 				onclick={() => window.print()}
@@ -48,7 +48,7 @@
 					<rect x="24" y="24" width="4" height="4" fill="currentColor" opacity="0.4"/>
 				</svg>
 			</div>
-			<p style="font-family:'Syne',sans-serif; font-weight:700; font-size:1rem; color:#8ab8cc; margin:0 0 6px;">{t.noUnlabeledLures}</p>
+			<p style="font-family:'Carter One',sans-serif; font-weight:700; font-size:1rem; color:#8ab8cc; margin:0 0 6px;">{t.noUnlabeledLures}</p>
 		</div>
 	{:else}
 		<div style="display:flex; flex-direction:column; gap:6px;">
@@ -60,7 +60,7 @@
 					</div>
 
 					<!-- Lure number -->
-					<span style="width:56px; flex-shrink:0; font-family:'JetBrains Mono',monospace; font-size:0.8rem; font-weight:600; color:#fbbf24;">{formatNumber(item.lureNumber)}</span>
+					<span style="width:56px; flex-shrink:0; font-family:'JetBrains Mono',monospace; font-size:0.8rem; font-weight:600; color:#7dd3fc;">{formatNumber(item.lureNumber)}</span>
 
 					<!-- Brand -->
 					<span style="width:120px; flex-shrink:0; font-size:0.8rem; color:#5d8fa8; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{item.brand ?? '—'}</span>

@@ -18,15 +18,15 @@ export const load: PageServerLoad = async ({ params }) => {
 		return rows.map((r) => Object.values(r)[0] as T).filter(Boolean);
 	};
 
-	const [names, brands, types, colors, weathers] = await Promise.all([
+	const [names, brands, types, colors, lightConditions] = await Promise.all([
 		distinct<string>({ val: lure.name }),
 		distinct<string>({ val: lure.brand }),
 		distinct<string>({ val: lure.type }),
 		distinct<string>({ val: lure.color }),
-		distinct<string>({ val: lure.weather })
+		distinct<string>({ val: lure.lightConditions })
 	]);
 
-	return { lure: existing, suggestions: { names, brands, types, colors, weathers } };
+	return { lure: existing, suggestions: { names, brands, types, colors, lightConditions } };
 };
 
 export const actions: Actions = {
@@ -47,7 +47,7 @@ export const actions: Actions = {
 		const species = (data.get('species') as string)?.trim() || null;
 		const runningDepth = (data.get('running_depth') as string)?.trim() || null;
 		const waterType = (data.get('water_type') as string)?.trim() || null;
-		const weather = (data.get('weather') as string)?.trim() || null;
+		const lightConditions = (data.get('light_conditions') as string)?.trim() || null;
 		const qrCoded = data.getAll('qr_coded').includes('1');
 
 		const photoFile = data.get('photo') as File;
@@ -69,7 +69,7 @@ export const actions: Actions = {
 
 		await db
 			.update(lure)
-			.set({ name, brand, type, color, weight, size, notes, photoPath, species, runningDepth, waterType, weather, qrCoded, updatedAt: new Date() })
+			.set({ name, brand, type, color, weight, size, notes, photoPath, species, runningDepth, waterType, lightConditions, qrCoded, updatedAt: new Date() })
 			.where(eq(lure.id, params.id));
 
 		await db.delete(tag).where(eq(tag.lureId, params.id));

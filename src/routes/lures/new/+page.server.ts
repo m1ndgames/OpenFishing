@@ -11,15 +11,15 @@ export const load: PageServerLoad = async () => {
 		return rows.map((r) => Object.values(r)[0] as T).filter(Boolean);
 	};
 
-	const [names, brands, types, colors, weathers] = await Promise.all([
+	const [names, brands, types, colors, lightConditions] = await Promise.all([
 		distinct<string>({ val: lure.name }),
 		distinct<string>({ val: lure.brand }),
 		distinct<string>({ val: lure.type }),
 		distinct<string>({ val: lure.color }),
-		distinct<string>({ val: lure.weather })
+		distinct<string>({ val: lure.lightConditions })
 	]);
 
-	return { suggestions: { names, brands, types, colors, weathers } };
+	return { suggestions: { names, brands, types, colors, lightConditions } };
 };
 
 export const actions: Actions = {
@@ -39,7 +39,7 @@ export const actions: Actions = {
 		const species = (data.get('species') as string)?.trim() || null;
 		const runningDepth = (data.get('running_depth') as string)?.trim() || null;
 		const waterType = (data.get('water_type') as string)?.trim() || null;
-		const weather = (data.get('weather') as string)?.trim() || null;
+		const lightConditions = (data.get('light_conditions') as string)?.trim() || null;
 
 		const photoFile = data.get('photo') as File;
 		if (!photoFile || photoFile.size === 0) return fail(400, { error: 'photoRequired' });
@@ -50,7 +50,7 @@ export const actions: Actions = {
 
 		const [newLure] = await db
 			.insert(lure)
-			.values({ name, brand, type, color, weight, size, notes, photoPath, species, runningDepth, waterType, weather, lureNumber })
+			.values({ name, brand, type, color, weight, size, notes, photoPath, species, runningDepth, waterType, lightConditions, lureNumber })
 			.returning();
 
 		if (tagsRaw) {

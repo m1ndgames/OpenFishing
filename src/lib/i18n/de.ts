@@ -38,7 +38,7 @@ export default {
 	runningDepth_medium: 'Mittel',
 	runningDepth_deep: 'Tief',
 	waterType: 'Gewässertyp',
-	weather: 'Wetter',
+	lightConditions: 'Lichtverhältnisse',
 	notes: 'Notizen',
 	notesPlaceholder: 'Weitere Details…',
 	cancel: 'Abbrechen',

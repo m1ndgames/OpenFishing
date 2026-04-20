@@ -57,7 +57,7 @@
 			<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
 			{t.back}
 		</a>
-		<h1 style="font-family:'Syne',sans-serif; font-weight:800; font-size:1.5rem; color:#e0eaf8; margin:0;">{t.editLureTitle}</h1>
+		<h1 style="font-family:'Carter One',sans-serif; font-weight:800; font-size:1.5rem; color:#e0eaf8; margin:0;">{t.editLureTitle}</h1>
 	</div>
 
 	{#if form?.error}
@@ -81,8 +81,8 @@
 	<datalist id="suggest-colors">
 		{#each suggestions.colors as color}<option value={color}></option>{/each}
 	</datalist>
-	<datalist id="suggest-weather">
-		{#each suggestions.weathers as w}<option value={w}></option>{/each}
+	<datalist id="suggest-light-conditions">
+		{#each suggestions.lightConditions as w}<option value={w}></option>{/each}
 	</datalist>
 
 	<!-- Trigger-only inputs -->
@@ -104,7 +104,7 @@
 				<div style="position:relative; border-radius:12px; overflow:hidden; background:#0d1f35; aspect-ratio:4/3; margin-bottom:10px;">
 					<img src={displayPhoto} alt={lure.name} style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;" />
 					<button type="button" onclick={removePhoto}
-						style="position:absolute; top:10px; right:10px; background:rgba(0,0,0,0.6); border:none; color:white; border-radius:50%; width:30px; height:30px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:0.75rem; z-index:10;"
+						style="position:absolute; top:10px; right:10px; background:rgba(0,0,0,0.6); border:none; color:#EDF5FA; border-radius:50%; width:30px; height:30px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:0.75rem; z-index:10;"
 						aria-label="Remove photo">✕</button>
 					<svg style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none;" viewBox="0 0 400 300" preserveAspectRatio="none">
 						<path d="M16,36 L16,16 L36,16" fill="none" stroke="rgba(34,211,238,0.5)" stroke-width="2" stroke-linecap="round"/>
@@ -208,8 +208,8 @@
 				</select>
 			</div>
 			<div>
-				<label style={labelStyle} for="weather">{t.weather}</label>
-				<input id="weather" name="weather" type="text" list="suggest-weather" value={lure.weather ?? ''}
+				<label style={labelStyle} for="light_conditions">{t.lightConditions}</label>
+				<input id="light_conditions" name="light_conditions" type="text" list="suggest-light-conditions" value={lure.lightConditions ?? ''}
 					style={inputStyle} onfocus={focusInput} onblur={blurInput} />
 			</div>
 		</div>
@@ -242,7 +242,7 @@
 		</label>
 
 		<!-- Save / Cancel -->
-		<div style="display:flex; gap:10px; padding-top:4px; border-top:1px solid #172f4a; margin-top:-4px;">
+		<div style="display:flex; justify-content:space-between; gap:10px; padding-top:16px; border-top:1px solid #172f4a; margin-top:8px;">
 			<button type="submit"
 				style="background:#06b6d4; color:#030a12; font-size:0.875rem; font-weight:700; padding:10px 24px; border-radius:9px; border:none; cursor:pointer; transition:background 0.15s; font-family:'DM Sans',sans-serif;"
 				onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='#22d3ee';}}

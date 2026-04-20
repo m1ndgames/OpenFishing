@@ -17,17 +17,6 @@
 </script>
 
 <div style="max-width:580px;">
-	<div style="margin-bottom:20px; display:flex; align-items:center; gap:12px;">
-		<a href="/" style="color:#3d6a84; font-size:0.875rem; text-decoration:none; display:flex; align-items:center; gap:4px; transition:color 0.15s;"
-			onmouseenter={function(e){(e.currentTarget as HTMLElement).style.color='#22d3ee';}}
-			onmouseleave={function(e){(e.currentTarget as HTMLElement).style.color='#3d6a84';}}
-		>
-			<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-			{t.back}
-		</a>
-		<h1 style="font-family:'Syne',sans-serif; font-weight:800; font-size:1.5rem; color:#e0eaf8; margin:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{lure.name}</h1>
-	</div>
-
 	<div style="background:#0b1a2c; border:1px solid #172f4a; border-radius:16px; overflow:hidden;">
 
 		<!-- Photo -->
@@ -49,16 +38,19 @@
 					{#if !lure.qrCoded}
 						<div style="position:absolute; bottom:2px; right:2px; width:18px; height:18px; background:#f59e0b; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 1px 3px rgba(0,0,0,0.4);">
 							<svg width="8" height="8" viewBox="0 0 10 10" fill="none">
-								<path d="M5 2.5v3" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-								<circle cx="5" cy="7.5" r="0.9" fill="white"/>
+								<path d="M5 2.5v3" stroke="#EDF5FA" stroke-width="1.5" stroke-linecap="round"/>
+								<circle cx="5" cy="7.5" r="0.9" fill="#EDF5FA"/>
 							</svg>
 						</div>
 					{/if}
 				</div>
 				{#if lure.lureNumber}
-					<span style="font-family:'JetBrains Mono',monospace; font-size:0.68rem; color:#fbbf24; letter-spacing:0.05em;">#{String(lure.lureNumber).padStart(4, '0')}</span>
+					<span style="font-family:'JetBrains Mono',monospace; font-size:0.68rem; color:#7dd3fc; letter-spacing:0.05em;">#{String(lure.lureNumber).padStart(4, '0')}</span>
 				{/if}
 			</div>
+
+			<!-- Lure name -->
+			<h1 style="font-family:'Carter One',sans-serif; font-weight:800; font-size:1.4rem; color:#e0eaf8; margin:0 0 16px; padding-right:88px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{lure.name}</h1>
 
 			<!-- Core details grid -->
 			<dl style="display:grid; grid-template-columns:1fr 1fr; gap:16px 24px; font-size:0.875rem; padding-right:88px; margin-bottom:16px;">
@@ -104,10 +96,10 @@
 						<dd style="font-weight:600; color:#e0eaf8; margin:0;">{waterTypeLabels[lure.waterType] ?? lure.waterType}</dd>
 					</div>
 				{/if}
-				{#if lure.weather}
+				{#if lure.lightConditions}
 					<div>
-						<dt style="font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; color:#3d6a84; margin-bottom:3px;">{t.weather}</dt>
-						<dd style="font-weight:600; color:#e0eaf8; margin:0;">{lure.weather}</dd>
+						<dt style="font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; color:#3d6a84; margin-bottom:3px;">{t.lightConditions}</dt>
+						<dd style="font-weight:600; color:#e0eaf8; margin:0;">{lure.lightConditions}</dd>
 					</div>
 				{/if}
 			</dl>
@@ -121,7 +113,7 @@
 					<p style="font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; color:#3d6a84; margin:0 0 8px;">{t.fishSpecies}</p>
 					<div style="display:flex; flex-wrap:wrap; gap:6px;">
 						{#each lure.species.split(/\s+/).filter(Boolean) as s}
-							<span style="font-size:0.78rem; padding:3px 10px; border-radius:6px; background:rgba(6,182,212,0.1); color:#22d3ee; border:1px solid rgba(6,182,212,0.2); font-weight:500;">{s}</span>
+							<span style="font-size:0.78rem; padding:3px 10px; border-radius:20px; background:rgba(6,182,212,0.1); color:#22d3ee; border:1px solid rgba(6,182,212,0.2); font-weight:500;">{s}</span>
 						{/each}
 					</div>
 				</div>
@@ -158,7 +150,7 @@
 			{/if}
 
 			<!-- Actions -->
-			<div style="display:flex; gap:8px; padding-top:4px; border-top:1px solid #172f4a; margin-top:4px;">
+			<div style="display:flex; gap:8px; padding-top:16px; border-top:1px solid #172f4a; margin-top:16px;">
 				<a href="/lures/{lure.id}/edit"
 					style="display:inline-block; background:#06b6d4; color:#030a12; font-size:0.875rem; font-weight:600; padding:9px 20px; border-radius:9px; text-decoration:none; transition:background 0.15s; font-family:'DM Sans',sans-serif;"
 					onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='#22d3ee';}}

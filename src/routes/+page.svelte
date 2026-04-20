@@ -171,12 +171,12 @@
 				</svg>
 			</div>
 			{#if anyActive}
-				<p style="font-family:'Syne',sans-serif; font-weight:700; font-size:1.1rem; color:#8ab8cc; margin:0 0 6px;">{t.noLuresMatch} {t.filterActive}</p>
+				<p style="font-family:'Carter One',sans-serif; font-weight:700; font-size:1.1rem; color:#8ab8cc; margin:0 0 6px;">{t.noLuresMatch} {t.filterActive}</p>
 				<p style="color:#3d6a84; font-size:0.875rem; margin:0;">
 					<button onclick={clearAll} style="color:#22d3ee; background:none; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:0.875rem; text-decoration:underline; padding:0;">{t.clear}</button>
 				</p>
 			{:else}
-				<p style="font-family:'Syne',sans-serif; font-weight:700; font-size:1.1rem; color:#8ab8cc; margin:0 0 6px;">{t.noLuresYet}</p>
+				<p style="font-family:'Carter One',sans-serif; font-weight:700; font-size:1.1rem; color:#8ab8cc; margin:0 0 6px;">{t.noLuresYet}</p>
 				<p style="color:#3d6a84; font-size:0.875rem; margin:0 0 20px;">
 					<a href="/lures/new" style="color:#22d3ee;">{t.addFirstLure}</a>
 					{t.toGetStarted}
@@ -221,8 +221,8 @@
 
 						<!-- Lure number badge -->
 						{#if lure.lureNumber != null}
-							<div style="position:absolute; top:8px; left:8px; background:rgba(3,10,18,0.8); border:1px solid rgba(251,191,36,0.3); border-radius:6px; padding:2px 7px; backdrop-filter:blur(4px);">
-								<span style="font-family:'JetBrains Mono',monospace; font-size:0.7rem; font-weight:600; color:#fbbf24; letter-spacing:0.05em;">{padNum(lure.lureNumber)}</span>
+							<div style="position:absolute; top:8px; left:8px; background:rgba(3,10,18,0.8); border:1px solid rgba(6,182,212,0.3); border-radius:6px; padding:2px 7px; backdrop-filter:blur(4px);">
+								<span style="font-family:'JetBrains Mono',monospace; font-size:0.7rem; font-weight:600; color:#7dd3fc; letter-spacing:0.05em;">{padNum(lure.lureNumber)}</span>
 							</div>
 						{/if}
 
@@ -238,7 +238,7 @@
 
 					<!-- Card body -->
 					<div style="padding:14px 14px 12px;">
-						<h2 style="font-family:'Syne',sans-serif; font-weight:700; font-size:0.95rem; color:#e0eaf8; margin:0 0 4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+						<h2 style="font-family:'Carter One',sans-serif; font-weight:700; font-size:0.95rem; color:#e0eaf8; margin:0 0 4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
 							{lure.name}
 						</h2>
 
@@ -250,10 +250,10 @@
 
 						<div style="display:flex; gap:5px; flex-wrap:wrap;">
 							{#if lure.type}
-								<span style="font-size:0.7rem; padding:2px 8px; border-radius:5px; background:rgba(6,182,212,0.1); color:#22d3ee; border:1px solid rgba(6,182,212,0.2);">{lure.type}</span>
+								<span style="font-size:0.7rem; padding:2px 8px; border-radius:20px; background:rgba(6,182,212,0.1); color:#22d3ee; border:1px solid rgba(6,182,212,0.2);">{lure.type}</span>
 							{/if}
 							{#if lure.color}
-								<span style="font-size:0.7rem; padding:2px 8px; border-radius:5px; background:rgba(251,191,36,0.08); color:#fbbf24; border:1px solid rgba(251,191,36,0.2);">{lure.color}</span>
+								<span style="font-size:0.7rem; padding:2px 8px; border-radius:20px; background:rgba(251,191,36,0.08); color:#fbbf24; border:1px solid rgba(251,191,36,0.2);">{lure.color}</span>
 							{/if}
 						</div>
 
