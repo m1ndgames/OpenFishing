@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1776681582711,
+      "tag": "0000_cute_marvex",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1776698454388,
+      "tag": "0001_long_marvel_zombies",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1776703370260,
+      "tag": "0002_luxuriant_legion",
+      "breakpoints": true
+    }
+  ]
+}
