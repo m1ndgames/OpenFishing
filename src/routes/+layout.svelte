@@ -10,6 +10,7 @@
 	const luresActive = $derived(
 		$page.url.pathname === '/' || $page.url.pathname.startsWith('/lures')
 	);
+	const settingsActive = $derived($page.url.pathname.startsWith('/settings'));
 </script>
 
 <svelte:head>
@@ -50,6 +51,18 @@
 				>
 					{t.navLures}
 				</a>
+
+				<a
+					href="/settings"
+					class="text-sm font-medium px-4 py-1.5 rounded-lg transition-all shrink-0"
+					style={settingsActive
+						? 'color:#22d3ee; background:rgba(6,182,212,0.1); border:1px solid rgba(6,182,212,0.25);'
+						: 'color:#5d8fa8; border:1px solid transparent;'}
+					onmouseenter={function(e) { if (!settingsActive) { (e.currentTarget as HTMLElement).style.cssText += 'color:#c2dce8; background:rgba(255,255,255,0.05);'; } }}
+					onmouseleave={function(e) { if (!settingsActive) { (e.currentTarget as HTMLElement).style.cssText = 'color:#5d8fa8; border:1px solid transparent;'; } }}
+				>
+					{t.navSettings}
+				</a>
 			</div>
 
 			<!-- Language switcher -->
@@ -70,24 +83,34 @@
 	<!-- Sub nav -->
 	<div class="no-print" style="background-color:#0b1a2c; border-bottom:1px solid rgba(23,47,74,0.6);">
 		<div class="max-w-6xl mx-auto px-4 h-11 flex items-center gap-2">
-			<a
-				href="/lures/new"
-				class="text-sm font-semibold px-4 py-1.5 rounded-lg transition-all shrink-0"
-				style="background:#06b6d4; color:#030a12; border:1px solid transparent;"
-				onmouseenter={function(e) { (e.currentTarget as HTMLElement).style.background = '#22d3ee'; }}
-				onmouseleave={function(e) { (e.currentTarget as HTMLElement).style.background = '#06b6d4'; }}
-			>
-				+ {t.addLure}
-			</a>
-			<a
-				href="/qr"
-				class="text-sm font-medium px-3 py-1.5 rounded-lg transition-all shrink-0"
-				style={$page.url.pathname === '/qr'
-					? 'color:#22d3ee; background:rgba(6,182,212,0.1); border:1px solid rgba(6,182,212,0.25);'
-					: 'color:#5d8fa8; border:1px solid transparent;'}
-			>
-				{t.navQrCodes}
-			</a>
+			{#if settingsActive}
+				<a
+					href="/settings"
+					class="text-sm font-medium px-3 py-1.5 rounded-lg transition-all shrink-0"
+					style="color:#22d3ee; background:rgba(6,182,212,0.1); border:1px solid rgba(6,182,212,0.25);"
+				>
+					Backup
+				</a>
+			{:else}
+				<a
+					href="/lures/new"
+					class="text-sm font-semibold px-4 py-1.5 rounded-lg transition-all shrink-0"
+					style="background:#06b6d4; color:#030a12; border:1px solid transparent;"
+					onmouseenter={function(e) { (e.currentTarget as HTMLElement).style.background = '#22d3ee'; }}
+					onmouseleave={function(e) { (e.currentTarget as HTMLElement).style.background = '#06b6d4'; }}
+				>
+					+ {t.addLure}
+				</a>
+				<a
+					href="/qr"
+					class="text-sm font-medium px-3 py-1.5 rounded-lg transition-all shrink-0"
+					style={$page.url.pathname === '/qr'
+						? 'color:#22d3ee; background:rgba(6,182,212,0.1); border:1px solid rgba(6,182,212,0.25);'
+						: 'color:#5d8fa8; border:1px solid transparent;'}
+				>
+					{t.navQrCodes}
+				</a>
+			{/if}
 		</div>
 	</div>
 

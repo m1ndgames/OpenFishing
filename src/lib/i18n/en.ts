@@ -70,6 +70,7 @@ export default {
 
 	// QR codes page
 	navQrCodes: 'QR Codes',
+	navSettings: 'Settings',
 	qrCodesTitle: 'Missing QR Labels',
 	noUnlabeledLures: 'All lures have been labeled.',
 	printQrCodes: 'Print QR Codes',
