@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { ActionData, PageData } from './$types';
 	import TagInput from '$lib/components/TagInput.svelte';
+	import CropModal from '$lib/components/CropModal.svelte';
 
 	let { form, data }: { form: ActionData; data: PageData } = $props();
 	const { lure, suggestions, t } = data;
@@ -10,17 +11,34 @@
 	let cameraInput: HTMLInputElement;
 	let previewUrl = $state<string | null>(null);
 	let clearPhoto = $state(false);
+	let showCrop = $state(false);
+	let cropSrc = $state<string | null>(null);
 
 	const existingPhoto = lure.photoPath ? `/uploads/${lure.photoPath}` : null;
 	const displayPhoto = $derived(clearPhoto ? null : (previewUrl ?? existingPhoto));
 
 	function handleFile(file: File | null | undefined) {
 		if (!file) return;
+		if (cropSrc) URL.revokeObjectURL(cropSrc);
+		cropSrc = URL.createObjectURL(file);
+		showCrop = true;
+	}
+
+	function onCropConfirm(blob: Blob) {
+		showCrop = false;
+		if (previewUrl) URL.revokeObjectURL(previewUrl);
+		const file = new File([blob], 'photo.jpg', { type: 'image/jpeg' });
 		const dt = new DataTransfer();
 		dt.items.add(file);
 		photoInput.files = dt.files;
 		previewUrl = URL.createObjectURL(file);
 		clearPhoto = false;
+	}
+
+	function onCropCancel() {
+		showCrop = false;
+		uploadInput.value = '';
+		if (cameraInput) cameraInput.value = '';
 	}
 
 	function removePhoto() {
@@ -272,3 +290,7 @@
 		</button>
 	</form>
 </div>
+
+{#if showCrop && cropSrc}
+	<CropModal src={cropSrc} onConfirm={onCropConfirm} onCancel={onCropCancel} />
+{/if}
