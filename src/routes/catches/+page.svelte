@@ -4,15 +4,106 @@
 	let { data }: { data: PageData } = $props();
 	const { t, catches } = data;
 
+	// Filter state
+	let fSpecies    = $state('');
+	let fLure       = $state('');
+	let datePreset  = $state<'' | '30d' | '1y' | 'custom'>('');
+	let dateFrom    = $state('');
+	let dateTo      = $state('');
+
+	// Distinct option lists derived from all catches
+	const speciesOptions = $derived([...new Set(catches.map(c => c.species).filter(Boolean))].sort() as string[]);
+	const lureOptions    = $derived([...new Set(catches.map(c => c.lure?.name).filter(Boolean))].sort() as string[]);
+
+	const anyActive = $derived(!!(fSpecies || fLure || datePreset));
+
+	const filtered = $derived(catches.filter(c => {
+		if (fSpecies && c.species !== fSpecies) return false;
+		if (fLure    && c.lure?.name !== fLure) return false;
+
+		if (datePreset) {
+			const d   = new Date(c.caughtAt).getTime();
+			const now = Date.now();
+			if (datePreset === '30d' && d < now - 30 * 86400_000) return false;
+			if (datePreset === '1y'  && d < now - 365 * 86400_000) return false;
+			if (datePreset === 'custom') {
+				if (dateFrom && d < new Date(dateFrom).getTime()) return false;
+				if (dateTo) {
+					const end = new Date(dateTo); end.setHours(23, 59, 59, 999);
+					if (d > end.getTime()) return false;
+				}
+			}
+		}
+
+		return true;
+	}));
+
+	function clearAll() { fSpecies = ''; fLure = ''; datePreset = ''; dateFrom = ''; dateTo = ''; }
+
 	function formatDate(d: Date) {
 		return new Date(d).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' });
 	}
 	function formatTime(d: Date) {
 		return new Date(d).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
 	}
+
+	const selectStyle = (active: boolean) =>
+		`flex-shrink:0; font-size:0.8rem; padding:6px 10px; border-radius:8px; cursor:pointer; outline:none; font-family:'DM Sans',sans-serif; ${active ? 'background:rgba(6,182,212,0.12); border:1px solid rgba(6,182,212,0.4); color:#22d3ee;' : 'background:#0f2238; border:1px solid #243f5e; color:#8ab8cc;'}`;
 </script>
 
 <div>
+	<!-- Filter bar -->
+	<div style="background:#0b1a2c; border:1px solid #172f4a; border-radius:14px; padding:14px 16px; display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
+
+		<!-- All filters in one row -->
+		<div style="display:flex; gap:8px; overflow-x:auto; padding-bottom:2px; align-items:center;">
+			{#if speciesOptions.length > 0}
+				<select bind:value={fSpecies} style={selectStyle(!!fSpecies)}>
+					<option value="">{t.catchSpeciesLabel}: {t.filterAll}</option>
+					{#each speciesOptions as o}<option value={o}>{o}</option>{/each}
+				</select>
+			{/if}
+			{#if lureOptions.length > 0}
+				<select bind:value={fLure} style={selectStyle(!!fLure)}>
+					<option value="">{t.catchLureLabel}: {t.filterAll}</option>
+					{#each lureOptions as o}<option value={o}>{o}</option>{/each}
+				</select>
+			{/if}
+
+			{#if speciesOptions.length > 0 || lureOptions.length > 0}
+				<div style="width:1px; height:20px; background:#172f4a; flex-shrink:0;"></div>
+			{/if}
+
+			{#each [['', t.filterAll], ['30d', t.catchFilterLast30], ['1y', t.catchFilterLast365], ['custom', t.catchFilterCustom]] as [val, label]}
+				<button
+					type="button"
+					onclick={() => { datePreset = val as typeof datePreset; if (val !== 'custom') { dateFrom = ''; dateTo = ''; } }}
+					style="flex-shrink:0; font-size:0.8rem; padding:6px 12px; border-radius:8px; cursor:pointer; outline:none; font-family:'DM Sans',sans-serif; border:1px solid; transition:all 0.15s; {datePreset === val ? 'background:rgba(6,182,212,0.12); border-color:rgba(6,182,212,0.4); color:#22d3ee;' : 'background:#0f2238; border-color:#243f5e; color:#8ab8cc;'}"
+				>{label}</button>
+			{/each}
+
+			{#if datePreset === 'custom'}
+				<div style="width:1px; height:20px; background:#172f4a; flex-shrink:0;"></div>
+				<input type="date" bind:value={dateFrom}
+					style="flex-shrink:0; font-size:0.8rem; padding:6px 10px; border-radius:8px; outline:none; font-family:'DM Sans',sans-serif; background:#0f2238; border:1px solid {dateFrom ? 'rgba(6,182,212,0.4)' : '#243f5e'}; color:{dateFrom ? '#22d3ee' : '#8ab8cc'}; cursor:pointer;"
+				/>
+				<span style="font-size:0.8rem; color:#3d6a84; flex-shrink:0;">→</span>
+				<input type="date" bind:value={dateTo}
+					style="flex-shrink:0; font-size:0.8rem; padding:6px 10px; border-radius:8px; outline:none; font-family:'DM Sans',sans-serif; background:#0f2238; border:1px solid {dateTo ? 'rgba(6,182,212,0.4)' : '#243f5e'}; color:{dateTo ? '#22d3ee' : '#8ab8cc'}; cursor:pointer;"
+				/>
+			{/if}
+		</div>
+
+		<!-- Active filter summary -->
+		{#if anyActive}
+			<div style="display:flex; align-items:center; justify-content:space-between; font-size:0.8rem;">
+				<span style="color:#3d6a84;">{filtered.length} {filtered.length === 1 ? t.catchSpeciesLabel : t.navCatches} {t.matching} {t.filterActive}</span>
+				<button onclick={clearAll} style="color:#22d3ee; font-weight:600; background:none; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:0.8rem; padding:0;">{t.clear}</button>
+			</div>
+		{/if}
+	</div>
+
+	<!-- Empty state (no catches at all) -->
 	{#if catches.length === 0}
 		<div style="text-align:center; padding:80px 24px;">
 			<div style="display:inline-flex; align-items:center; justify-content:center; width:80px; height:80px; border-radius:50%; background:#0b1a2c; border:1px solid #172f4a; margin-bottom:20px;">
@@ -31,9 +122,17 @@
 				{t.addCatch}
 			</a>
 		</div>
+
+	<!-- Empty state (filters active, no matches) -->
+	{:else if filtered.length === 0}
+		<div style="text-align:center; padding:60px 24px;">
+			<p style="font-family:'Carter One',sans-serif; font-size:1rem; color:#8ab8cc; margin:0 0 8px;">{t.noLuresMatch} {t.filterActive}</p>
+			<button onclick={clearAll} style="color:#22d3ee; background:none; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:0.875rem; text-decoration:underline; padding:0;">{t.clear}</button>
+		</div>
+
 	{:else}
 		<div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px;">
-			{#each catches as c}
+			{#each filtered as c (c.id)}
 				<a href="/catches/{c.id}" style="text-decoration:none; display:block; background:#0b1a2c; border:1px solid #172f4a; border-radius:16px; overflow:hidden; transition:border-color 0.15s, box-shadow 0.15s;"
 					onmouseenter={function(e){(e.currentTarget as HTMLElement).style.borderColor='rgba(6,182,212,0.3)'; (e.currentTarget as HTMLElement).style.boxShadow='0 4px 20px rgba(6,182,212,0.08)';}}
 					onmouseleave={function(e){(e.currentTarget as HTMLElement).style.borderColor='#172f4a'; (e.currentTarget as HTMLElement).style.boxShadow='';}}

@@ -123,6 +123,9 @@ export default {
 	catchAddPhotos: 'Fotos hinzufügen',
 	catchNoSpot: 'Keine Stelle',
 	catchNoLure: 'Kein Köder',
+	catchFilterLast30: 'Letzte 30 Tage',
+	catchFilterLast365: 'Letztes Jahr',
+	catchFilterCustom: 'Eigener Zeitraum',
 
 	// Errors
 	nameRequired: 'Name ist erforderlich',
