@@ -24,10 +24,20 @@
 		<div style="background:#0b1a2c; border:1px solid #172f4a; border-radius:16px; overflow:hidden;">
 
 			<!-- Stats row -->
-			<div style="padding:16px 20px; border-bottom:1px solid #172f4a; display:flex; align-items:center; gap:24px;">
+			<div style="padding:16px 20px; border-bottom:1px solid #172f4a; display:flex; align-items:center; gap:24px; flex-wrap:wrap;">
 				<div>
 					<p style="font-size:0.7rem; text-transform:uppercase; letter-spacing:0.08em; color:#3d6a84; margin:0 0 3px;">Lures</p>
 					<p style="font-family:'JetBrains Mono',monospace; font-size:1.1rem; font-weight:600; color:#e0eaf8; margin:0;">{data.lureCount}</p>
+				</div>
+				<div style="height:32px; width:1px; background:#172f4a;"></div>
+				<div>
+					<p style="font-size:0.7rem; text-transform:uppercase; letter-spacing:0.08em; color:#3d6a84; margin:0 0 3px;">Spots</p>
+					<p style="font-family:'JetBrains Mono',monospace; font-size:1.1rem; font-weight:600; color:#e0eaf8; margin:0;">{data.spotCount}</p>
+				</div>
+				<div style="height:32px; width:1px; background:#172f4a;"></div>
+				<div>
+					<p style="font-size:0.7rem; text-transform:uppercase; letter-spacing:0.08em; color:#3d6a84; margin:0 0 3px;">Catches</p>
+					<p style="font-family:'JetBrains Mono',monospace; font-size:1.1rem; font-weight:600; color:#e0eaf8; margin:0;">{data.catchCount}</p>
 				</div>
 				<div style="height:32px; width:1px; background:#172f4a;"></div>
 				<div>
@@ -41,7 +51,7 @@
 				<div style="display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap;">
 					<div>
 						<p style="font-weight:600; color:#c2dce8; margin:0 0 4px; font-size:0.925rem;">Export backup</p>
-						<p style="font-size:0.8rem; color:#3d6a84; margin:0;">Downloads all lures, tags and photos as a ZIP archive.</p>
+						<p style="font-size:0.8rem; color:#3d6a84; margin:0;">Downloads all lures, spots, catches and photos as a ZIP archive.</p>
 					</div>
 					<a
 						href="/api/settings/export"
@@ -71,7 +81,7 @@
 
 				{#if form?.success}
 					<div style="background:rgba(74,222,128,0.08); border:1px solid rgba(74,222,128,0.2); color:#4ade80; font-size:0.82rem; padding:10px 14px; border-radius:9px; margin-bottom:12px;">
-						Import successful — {form.lureCount} lures, {form.tagCount} tags restored.
+						Import successful — {form.lureCount} lures, {form.spotCount} spots, {form.catchCount} catches restored.
 					</div>
 				{/if}
 

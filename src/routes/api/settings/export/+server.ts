@@ -1,6 +1,6 @@
 import type { RequestHandler } from './$types';
 import { db, client } from '$lib/server/db';
-import { lure, tag } from '$lib/server/db/schema';
+import { lure, tag, spot, spotTag, spotPhoto, fishCatch, catchPhoto } from '$lib/server/db/schema';
 import { getSchemaHash } from '$lib/server/db/schema-hash';
 import { UPLOAD_DIR } from '$lib/server/uploads';
 import { readFileSync, existsSync } from 'fs';
@@ -16,12 +16,16 @@ function getAppVersion(): string {
 }
 
 export const GET: RequestHandler = () => {
-	const lures = db.select().from(lure).orderBy(lure.lureNumber).all();
+	const lures = db.select().from(lure).all();
 	const tags = db.select().from(tag).all();
+	const spots = db.select().from(spot).all();
+	const spotTags = db.select().from(spotTag).all();
+	const spotPhotos = db.select().from(spotPhoto).all();
+	const catches = db.select().from(fishCatch).all();
+	const catchPhotos = db.select().from(catchPhoto).all();
 
 	const zip = new AdmZip();
 
-	// Add JSON manifest
 	const payload = {
 		meta: {
 			exportedAt: new Date().toISOString(),
@@ -29,17 +33,32 @@ export const GET: RequestHandler = () => {
 			schemaHash: getSchemaHash(client)
 		},
 		lures,
-		tags
+		tags,
+		spots,
+		spotTags,
+		spotPhotos,
+		catches,
+		catchPhotos
 	};
 	zip.addFile('backup.json', Buffer.from(JSON.stringify(payload, null, 2), 'utf-8'));
 
-	// Add photo files
+	// Lure photos
 	for (const l of lures) {
 		if (!l.photoPath) continue;
 		const filePath = join(UPLOAD_DIR, l.photoPath);
-		if (existsSync(filePath)) {
-			zip.addLocalFile(filePath, 'uploads');
-		}
+		if (existsSync(filePath)) zip.addLocalFile(filePath, 'uploads');
+	}
+
+	// Spot photos
+	for (const p of spotPhotos) {
+		const filePath = join(UPLOAD_DIR, p.filename);
+		if (existsSync(filePath)) zip.addLocalFile(filePath, 'uploads');
+	}
+
+	// Catch photos
+	for (const p of catchPhotos) {
+		const filePath = join(UPLOAD_DIR, p.filename);
+		if (existsSync(filePath)) zip.addLocalFile(filePath, 'uploads');
 	}
 
 	const date = new Date().toISOString().split('T')[0];
