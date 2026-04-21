@@ -33,7 +33,7 @@
 	<div class="h-px no-print" style="background: linear-gradient(90deg, transparent, #22d3ee 30%, #06b6d4 50%, #22d3ee 70%, transparent);"></div>
 
 	<!-- ── DESKTOP NAV (md+) ── -->
-	<header class="no-print hidden md:block" style="background-color:#0b1a2c; border-bottom:1px solid #172f4a;">
+	<header class="no-print hidden md:block" style="background-color:#0b1a2c; border-bottom:1px solid #172f4a; position:relative; z-index:1000;">
 		<div class="max-w-6xl mx-auto px-4 h-14 flex items-center gap-2">
 
 			<!-- Logo -->
