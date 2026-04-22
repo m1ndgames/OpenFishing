@@ -131,6 +131,22 @@ export default {
 	catchFilterLast365: 'Last year',
 	catchFilterCustom: 'Custom range',
 
+	// Stats
+	navStats: 'Stats',
+	statsTitle: 'Statistics',
+	statsTotalCatches: 'Total Catches',
+	statsSpeciesCount: 'Species',
+	statsSpotsCount: 'Spots',
+	statsCnRRate: 'C&R Rate',
+	statsPersonalBests: 'Personal Bests',
+	statsTopLures: 'Top Lures',
+	statsTopSpots: 'Top Spots',
+	statsMonthly: 'Monthly Activity',
+	statsTimeOfDay: 'Time of Day',
+	statsWeekday: 'Day of Week',
+	statsCatches: 'catches',
+	statsNoData: 'No catches logged yet.',
+
 	// Weather
 	biteIndex: 'Bite Index',
 	biteRatingPoor: 'Poor',

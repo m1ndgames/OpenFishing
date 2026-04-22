@@ -131,6 +131,22 @@ export default {
 	catchFilterLast365: 'Letztes Jahr',
 	catchFilterCustom: 'Eigener Zeitraum',
 
+	// Stats
+	navStats: 'Statistik',
+	statsTitle: 'Statistiken',
+	statsTotalCatches: 'Fänge gesamt',
+	statsSpeciesCount: 'Fischarten',
+	statsSpotsCount: 'Angelstellen',
+	statsCnRRate: 'C&R Rate',
+	statsPersonalBests: 'Persönliche Bestleistungen',
+	statsTopLures: 'Top Köder',
+	statsTopSpots: 'Top Stellen',
+	statsMonthly: 'Monatliche Aktivität',
+	statsTimeOfDay: 'Tageszeit',
+	statsWeekday: 'Wochentag',
+	statsCatches: 'Fänge',
+	statsNoData: 'Noch keine Fänge eingetragen.',
+
 	// Weather
 	biteIndex: 'Bissindex',
 	biteRatingPoor: 'Schlecht',
