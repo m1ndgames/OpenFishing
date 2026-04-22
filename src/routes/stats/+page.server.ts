@@ -24,14 +24,14 @@ export const load: PageServerLoad = async () => {
 	const distinctSpecies = new Set(catches.map(c => c.species).filter(Boolean)).size;
 
 	// ── Personal bests per species ────────────────────────────────────────────
-	const speciesMap = new Map<string, { count: number; maxLength: number | null; maxWeight: number | null; cnr: number }>();
+	const speciesMap = new Map<string, { count: number; maxLength: number | null; maxLengthId: string | null; maxWeight: number | null; maxWeightId: string | null; cnr: number }>();
 	for (const c of catches) {
 		if (!c.species) continue;
-		const s = speciesMap.get(c.species) ?? { count: 0, maxLength: null, maxWeight: null, cnr: 0 };
+		const s = speciesMap.get(c.species) ?? { count: 0, maxLength: null, maxLengthId: null, maxWeight: null, maxWeightId: null, cnr: 0 };
 		s.count++;
 		if (c.catchAndRelease) s.cnr++;
-		if (c.lengthCm  != null && (s.maxLength === null || c.lengthCm  > s.maxLength))  s.maxLength  = c.lengthCm;
-		if (c.weightG   != null && (s.maxWeight === null || c.weightG   > s.maxWeight))   s.maxWeight  = c.weightG;
+		if (c.lengthCm != null && (s.maxLength === null || c.lengthCm > s.maxLength)) { s.maxLength = c.lengthCm; s.maxLengthId = c.id; }
+		if (c.weightG  != null && (s.maxWeight === null || c.weightG  > s.maxWeight)) { s.maxWeight = c.weightG;  s.maxWeightId = c.id; }
 		speciesMap.set(c.species, s);
 	}
 	const speciesStats = [...speciesMap.entries()]

@@ -94,45 +94,45 @@
 
 		<!-- Dropdowns -->
 		{#if types.length > 0 || brands.length > 0 || colors.length > 0 || waters.length > 0 || depths.length > 0 || species.length > 0}
-			<div style="display:flex; gap:8px; overflow-x:auto; padding-bottom:2px;">
+			<div style="display:flex; gap:8px; flex-wrap:wrap;">
 				{#if types.length > 0}
 					<select bind:value={fType}
-						style="flex-shrink:0; font-size:0.8rem; padding:6px 10px; border-radius:8px; cursor:pointer; outline:none; font-family:'DM Sans',sans-serif; {fType ? 'background:rgba(6,182,212,0.12); border:1px solid rgba(6,182,212,0.4); color:#22d3ee;' : 'background:#0f2238; border:1px solid #243f5e; color:#8ab8cc;'}">
+						style="flex-shrink:0; font-size:0.875rem; padding:7px 12px; border-radius:9px; cursor:pointer; outline:none; font-family:'DM Sans',sans-serif; box-sizing:border-box; {fType ? 'background:#0f2238; border:1px solid rgba(6,182,212,0.5); color:#22d3ee;' : 'background:#0f2238; border:1px solid #243f5e; color:#c2dce8;'}">
 						<option value="">{t.type}: {t.filterAll}</option>
 						{#each types as o}<option value={o}>{o}</option>{/each}
 					</select>
 				{/if}
 				{#if brands.length > 0}
 					<select bind:value={fBrand}
-						style="flex-shrink:0; font-size:0.8rem; padding:6px 10px; border-radius:8px; cursor:pointer; outline:none; font-family:'DM Sans',sans-serif; {fBrand ? 'background:rgba(6,182,212,0.12); border:1px solid rgba(6,182,212,0.4); color:#22d3ee;' : 'background:#0f2238; border:1px solid #243f5e; color:#8ab8cc;'}">
+						style="flex-shrink:0; font-size:0.875rem; padding:7px 12px; border-radius:9px; cursor:pointer; outline:none; font-family:'DM Sans',sans-serif; box-sizing:border-box; {fBrand ? 'background:#0f2238; border:1px solid rgba(6,182,212,0.5); color:#22d3ee;' : 'background:#0f2238; border:1px solid #243f5e; color:#c2dce8;'}">
 						<option value="">{t.brand}: {t.filterAll}</option>
 						{#each brands as o}<option value={o}>{o}</option>{/each}
 					</select>
 				{/if}
 				{#if colors.length > 0}
 					<select bind:value={fColor}
-						style="flex-shrink:0; font-size:0.8rem; padding:6px 10px; border-radius:8px; cursor:pointer; outline:none; font-family:'DM Sans',sans-serif; {fColor ? 'background:rgba(6,182,212,0.12); border:1px solid rgba(6,182,212,0.4); color:#22d3ee;' : 'background:#0f2238; border:1px solid #243f5e; color:#8ab8cc;'}">
+						style="flex-shrink:0; font-size:0.875rem; padding:7px 12px; border-radius:9px; cursor:pointer; outline:none; font-family:'DM Sans',sans-serif; box-sizing:border-box; {fColor ? 'background:#0f2238; border:1px solid rgba(6,182,212,0.5); color:#22d3ee;' : 'background:#0f2238; border:1px solid #243f5e; color:#c2dce8;'}">
 						<option value="">{t.color}: {t.filterAll}</option>
 						{#each colors as o}<option value={o}>{o}</option>{/each}
 					</select>
 				{/if}
 				{#if waters.length > 0}
 					<select bind:value={fWater}
-						style="flex-shrink:0; font-size:0.8rem; padding:6px 10px; border-radius:8px; cursor:pointer; outline:none; font-family:'DM Sans',sans-serif; {fWater ? 'background:rgba(6,182,212,0.12); border:1px solid rgba(6,182,212,0.4); color:#22d3ee;' : 'background:#0f2238; border:1px solid #243f5e; color:#8ab8cc;'}">
+						style="flex-shrink:0; font-size:0.875rem; padding:7px 12px; border-radius:9px; cursor:pointer; outline:none; font-family:'DM Sans',sans-serif; box-sizing:border-box; {fWater ? 'background:#0f2238; border:1px solid rgba(6,182,212,0.5); color:#22d3ee;' : 'background:#0f2238; border:1px solid #243f5e; color:#c2dce8;'}">
 						<option value="">{t.waterType}: {t.filterAll}</option>
 						{#each waters as o}<option value={o}>{t[`waterType_${o}` as keyof typeof t] ?? o}</option>{/each}
 					</select>
 				{/if}
 				{#if depths.length > 0}
 					<select bind:value={fDepth}
-						style="flex-shrink:0; font-size:0.8rem; padding:6px 10px; border-radius:8px; cursor:pointer; outline:none; font-family:'DM Sans',sans-serif; {fDepth ? 'background:rgba(6,182,212,0.12); border:1px solid rgba(6,182,212,0.4); color:#22d3ee;' : 'background:#0f2238; border:1px solid #243f5e; color:#8ab8cc;'}">
+						style="flex-shrink:0; font-size:0.875rem; padding:7px 12px; border-radius:9px; cursor:pointer; outline:none; font-family:'DM Sans',sans-serif; box-sizing:border-box; {fDepth ? 'background:#0f2238; border:1px solid rgba(6,182,212,0.5); color:#22d3ee;' : 'background:#0f2238; border:1px solid #243f5e; color:#c2dce8;'}">
 						<option value="">{t.runningDepth}: {t.filterAll}</option>
 						{#each depths as o}<option value={o}>{t[`runningDepth_${o}` as keyof typeof t] ?? o}</option>{/each}
 					</select>
 				{/if}
 				{#if species.length > 0}
 					<select bind:value={fSpecies}
-						style="flex-shrink:0; font-size:0.8rem; padding:6px 10px; border-radius:8px; cursor:pointer; outline:none; font-family:'DM Sans',sans-serif; {fSpecies ? 'background:rgba(6,182,212,0.12); border:1px solid rgba(6,182,212,0.4); color:#22d3ee;' : 'background:#0f2238; border:1px solid #243f5e; color:#8ab8cc;'}">
+						style="flex-shrink:0; font-size:0.875rem; padding:7px 12px; border-radius:9px; cursor:pointer; outline:none; font-family:'DM Sans',sans-serif; box-sizing:border-box; {fSpecies ? 'background:#0f2238; border:1px solid rgba(6,182,212,0.5); color:#22d3ee;' : 'background:#0f2238; border:1px solid #243f5e; color:#c2dce8;'}">
 						<option value="">{t.fishSpecies}: {t.filterAll}</option>
 						{#each species as o}<option value={o}>{o}</option>{/each}
 					</select>
@@ -221,7 +221,7 @@
 
 						<!-- Lure number badge -->
 						{#if lure.lureNumber != null}
-							<div style="position:absolute; top:8px; left:8px; background:rgba(3,10,18,0.8); border:1px solid rgba(6,182,212,0.3); border-radius:6px; padding:2px 7px; backdrop-filter:blur(4px);">
+							<div style="position:absolute; top:8px; left:8px; background:rgba(3,10,18,0.45); border:1px solid rgba(6,182,212,0.25); border-radius:6px; padding:2px 7px; backdrop-filter:blur(6px);">
 								<span style="font-family:'JetBrains Mono',monospace; font-size:0.7rem; font-weight:600; color:#7dd3fc; letter-spacing:0.05em;">{padNum(lure.lureNumber)}</span>
 							</div>
 						{/if}

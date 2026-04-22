@@ -9,9 +9,7 @@
 	const backupActive  = $derived($page.url.pathname === '/settings' || $page.url.pathname === '/settings/');
 </script>
 
-<div style="max-width:640px;">
-	<h1 class="no-print" style="font-family:'Carter One',sans-serif; font-size:1.5rem; color:#e0eaf8; margin:0 0 20px;">{t.navSettings}</h1>
-
+<div>
 	<!-- Sub-nav -->
 	<nav class="no-print" style="display:flex; gap:6px; margin-bottom:28px; padding:4px; background:#0b1a2c; border:1px solid #172f4a; border-radius:12px; width:fit-content;">
 		<a href="/settings"

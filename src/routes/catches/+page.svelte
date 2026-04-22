@@ -50,7 +50,7 @@
 	}
 
 	const selectStyle = (active: boolean) =>
-		`flex-shrink:0; font-size:0.8rem; padding:6px 10px; border-radius:8px; cursor:pointer; outline:none; font-family:'DM Sans',sans-serif; ${active ? 'background:rgba(6,182,212,0.12); border:1px solid rgba(6,182,212,0.4); color:#22d3ee;' : 'background:#0f2238; border:1px solid #243f5e; color:#8ab8cc;'}`;
+		`flex-shrink:0; font-size:0.875rem; padding:7px 12px; border-radius:9px; cursor:pointer; outline:none; font-family:'DM Sans',sans-serif; box-sizing:border-box; ${active ? 'background:#0f2238; border:1px solid rgba(6,182,212,0.5); color:#22d3ee;' : 'background:#0f2238; border:1px solid #243f5e; color:#c2dce8;'}`;
 </script>
 
 <div>
@@ -58,7 +58,7 @@
 	<div style="background:#0b1a2c; border:1px solid #172f4a; border-radius:14px; padding:14px 16px; display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
 
 		<!-- All filters in one row -->
-		<div style="display:flex; gap:8px; overflow-x:auto; padding-bottom:2px; align-items:center;">
+		<div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
 			{#if speciesOptions.length > 0}
 				<select bind:value={fSpecies} style={selectStyle(!!fSpecies)}>
 					<option value="">{t.catchSpeciesLabel}: {t.filterAll}</option>
@@ -72,17 +72,11 @@
 				</select>
 			{/if}
 
-			{#if speciesOptions.length > 0 || lureOptions.length > 0}
-				<div style="width:1px; height:20px; background:#172f4a; flex-shrink:0;"></div>
-			{/if}
-
 			<button
 				type="button"
 				onclick={() => fCnR = !fCnR}
 				style="flex-shrink:0; font-size:0.8rem; padding:6px 12px; border-radius:8px; cursor:pointer; outline:none; font-family:'DM Sans',sans-serif; border:1px solid; transition:all 0.15s; {fCnR ? 'background:rgba(6,182,212,0.12); border-color:rgba(6,182,212,0.4); color:#22d3ee;' : 'background:#0f2238; border-color:#243f5e; color:#8ab8cc;'}"
 			>{t.catchAndReleaseShort}</button>
-
-			<div style="width:1px; height:20px; background:#172f4a; flex-shrink:0;"></div>
 
 			{#each [['', t.filterAll], ['30d', t.catchFilterLast30], ['1y', t.catchFilterLast365], ['custom', t.catchFilterCustom]] as [val, label]}
 				<button

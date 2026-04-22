@@ -30,10 +30,8 @@
 	const label = 'font-size:0.68rem; font-weight:500; color:#3d6a84; text-transform:uppercase; letter-spacing:0.06em;';
 </script>
 
-<div style="max-width:680px;">
-	<h1 style="font-family:'Carter One',sans-serif; font-size:1.5rem; color:#e0eaf8; margin:0 0 20px;">{t.statsTitle}</h1>
-
-	{#if totals.totalCatches === 0}
+<div>
+{#if totals.totalCatches === 0}
 		<div style="text-align:center; padding:60px 24px; {card}">
 			<p style="font-size:0.875rem; color:#3d6a84; margin:0;">{t.statsNoData}</p>
 		</div>
@@ -74,11 +72,21 @@
 						<tr style="border-bottom:1px solid #0f2238;">
 							<td style="padding:8px 12px 8px 0; font-weight:600; color:#c2dce8; white-space:nowrap;">{s.species}</td>
 							<td style="padding:8px 12px 8px 0; text-align:right; font-family:'JetBrains Mono',monospace; color:#5d8fa8;">{s.count}</td>
-							<td style="padding:8px 12px 8px 0; text-align:right; font-family:'JetBrains Mono',monospace; color:#22d3ee; white-space:nowrap;">
-								{s.maxLength != null ? `${s.maxLength} cm` : '—'}
+							<td style="padding:8px 12px 8px 0; text-align:right; white-space:nowrap;">
+								{#if s.maxLength != null && s.maxLengthId}
+									<a href="/catches/{s.maxLengthId}" style="font-family:'JetBrains Mono',monospace; color:#22d3ee; text-decoration:none; transition:color 0.15s;"
+										onmouseenter={function(e){(e.currentTarget as HTMLElement).style.color='#67e8f9';}}
+										onmouseleave={function(e){(e.currentTarget as HTMLElement).style.color='#22d3ee';}}
+									>{s.maxLength} cm</a>
+								{:else}—{/if}
 							</td>
-							<td style="padding:8px 12px 8px 0; text-align:right; font-family:'JetBrains Mono',monospace; color:#22d3ee; white-space:nowrap;">
-								{s.maxWeight != null ? `${s.maxWeight} g` : '—'}
+							<td style="padding:8px 12px 8px 0; text-align:right; white-space:nowrap;">
+								{#if s.maxWeight != null && s.maxWeightId}
+									<a href="/catches/{s.maxWeightId}" style="font-family:'JetBrains Mono',monospace; color:#22d3ee; text-decoration:none; transition:color 0.15s;"
+										onmouseenter={function(e){(e.currentTarget as HTMLElement).style.color='#67e8f9';}}
+										onmouseleave={function(e){(e.currentTarget as HTMLElement).style.color='#22d3ee';}}
+									>{s.maxWeight} g</a>
+								{:else}—{/if}
 							</td>
 							<td style="padding:8px 0 8px 0; text-align:right; color:#3d6a84; font-size:0.75rem;">
 								{s.cnr > 0 ? s.cnr : '—'}

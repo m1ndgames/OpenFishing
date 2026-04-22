@@ -33,3 +33,36 @@
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
 }
+
+select {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2 4.5l4 4 4-4' stroke='%235d8fa8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 10px center !important;
+  padding-right: 30px !important;
+}
+
+select:focus,
+select:focus-visible,
+select:-moz-focusring {
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.15) !important;
+  border-color: #06b6d4 !important;
+}
+
+select:-moz-focusring {
+  color: transparent;
+  text-shadow: 0 0 0 #8ab8cc;
+}
+
+option {
+  background: #0f2238;
+  color: #c2dce8;
+}
+
+option:checked {
+  background: #1a3f5c;
+  color: #22d3ee;
+}

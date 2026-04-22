@@ -19,7 +19,6 @@
 <div>
 	<!-- Database section -->
 	<section style="margin-bottom:32px;">
-		<h2 style="font-family:'Carter One',sans-serif; font-weight:700; font-size:1rem; color:#8ab8cc; text-transform:uppercase; letter-spacing:0.08em; margin:0 0 14px;">Database</h2>
 
 		<div style="background:#0b1a2c; border:1px solid #172f4a; border-radius:16px; overflow:hidden;">
 
