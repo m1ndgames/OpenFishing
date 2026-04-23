@@ -161,12 +161,12 @@ export default {
 	statsTopPresentations: 'Top Köderführungen',
 
 	// Weather
-	biteIndex: 'Bissindex',
+	biteIndex: 'Beissindex',
 	biteRatingPoor: 'Schlecht',
 	biteRatingFair: 'Mäßig',
 	biteRatingGood: 'Gut',
 	biteRatingExcellent: 'Sehr gut',
-	biteInfoTitle: 'Wie wird der Bissindex berechnet?',
+	biteInfoTitle: 'Wie wird der Beissindex berechnet?',
 	biteInfoPressure: 'Drucktendenz',
 	biteInfoPressureDesc: 'Fallender Luftdruck (nahende Front) löst Fressaktivität aus.',
 	biteInfoLight: 'Lichtverhältnisse',
