@@ -198,6 +198,16 @@ export default {
 	lightGolden: 'Goldene Stunde',
 	lightDusk: 'Abenddämmerung',
 
+	// Share links
+	shareLink: 'Teilen-Link',
+	shareGenerate: 'Teilen-Link erstellen',
+	shareRevoke: 'Link entfernen',
+	shareCopied: 'Kopiert!',
+	shareCopy: 'Kopieren',
+	sharePublicNote: 'Jeder mit diesem Link kann es ohne Anmeldung ansehen',
+	shareViewOnly: 'Geteilt · Nur ansehen',
+	shareSignIn: 'Anmelden',
+
 	// Errors
 	nameRequired: 'Name ist erforderlich',
 	photoRequired: 'Ein Foto ist erforderlich',

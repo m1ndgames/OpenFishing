@@ -20,6 +20,7 @@ export const lure = sqliteTable('lure', {
 	lightConditions: integer('light_conditions'),
 	favourite: integer('favourite', { mode: 'boolean' }).notNull().default(false),
 	qrCoded: integer('qr_coded', { mode: 'boolean' }).notNull().default(false),
+	shareToken: text('share_token'),
 	createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
 	updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date())
 });
@@ -36,6 +37,7 @@ export const spot = sqliteTable('spot', {
 	lat: real('lat').notNull(),
 	lng: real('lng').notNull(),
 	notes: text('notes'),
+	shareToken: text('share_token'),
 	createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
 	updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date())
 });
@@ -65,6 +67,7 @@ export const fishCatch = sqliteTable('fish_catch', {
 	catchAndRelease: integer('catch_and_release', { mode: 'boolean' }).notNull().default(false),
 	presentation: text('presentation'),
 	lureId: text('lure_id').references(() => lure.id, { onDelete: 'set null' }),
+	shareToken: text('share_token'),
 	createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
 	updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date())
 });

@@ -8,6 +8,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Optional built-in password auth via `AUTH_PASSWORD` env var. If unset, the app is fully open. When set, `src/hooks.server.ts` intercepts every request and redirects to `/login` if the `of_session` cookie is missing or invalid. The session token is an HMAC-SHA256 of the password — no DB storage, no server-side state. Changing the password invalidates all sessions immediately.
 
+Share links allow individual lures, spots, and catches to be shared publicly even when auth is enabled. A `shareToken` UUID column on each entity controls access. The `/share/*` and `/uploads/*` paths are always bypassed by the auth hook. Share management UI (create/copy/revoke) is shown on detail pages only when `AUTH_PASSWORD` is set.
+
 ## Tech Stack
 
 - **SvelteKit** — full-stack (UI + server routes, no separate backend)
@@ -66,16 +68,22 @@ npm run db:studio      # Open Drizzle Studio (DB GUI)
 | `/uploads/[filename]` | Serve uploaded photos from `UPLOAD_PATH` |
 | `/api/lang` | POST — sets `lang` cookie for i18n |
 | `/api/lures/[id]/favourite` | POST — toggles favourite state, returns `{ favourite: bool }` |
+| `/api/lures/[id]/share` | POST — creates share token, DELETE — revokes it |
+| `/api/spots/[id]/share` | POST — creates share token, DELETE — revokes it |
+| `/api/catches/[id]/share` | POST — creates share token, DELETE — revokes it |
+| `/share/lures/[token]` | Public read-only lure view (no auth required) |
+| `/share/spots/[token]` | Public read-only spot view (no auth required) |
+| `/share/catches/[token]` | Public read-only catch view (no auth required) |
 | `/login` | Password login page (only shown when `AUTH_PASSWORD` is set) |
 
 ### Data model
 
-- `lure` — id (UUID), lureNumber (sequential int), name, brand, type, color, weight, size, notes, photoPath, species, runningDepth, waterType, lightConditions (integer 0–10), favourite (boolean), qrCoded (boolean), createdAt, updatedAt
+- `lure` — id (UUID), lureNumber (sequential int), name, brand, type, color, weight, size, notes, photoPath, species, runningDepth, waterType, lightConditions (integer 0–10), favourite (boolean), qrCoded (boolean), shareToken (nullable UUID), createdAt, updatedAt
 - `tag` — id, lureId (FK → lure, cascade delete), name
-- `spot` — id (UUID), name, lat, lng, notes, createdAt, updatedAt
+- `spot` — id (UUID), name, lat, lng, notes, shareToken (nullable UUID), createdAt, updatedAt
 - `spotTag` — id, spotId (FK → spot, cascade delete), name
 - `spotPhoto` — id, spotId (FK → spot, cascade delete), filename, sortOrder
-- `fishCatch` — id (UUID), caughtAt, species, weightG, lengthCm, lat (nullable), lng (nullable), notes, catchAndRelease, presentation, lureId (FK → lure, set null on delete), createdAt, updatedAt
+- `fishCatch` — id (UUID), caughtAt, species, weightG, lengthCm, lat (nullable), lng (nullable), notes, catchAndRelease, presentation, lureId (FK → lure, set null on delete), shareToken (nullable UUID), createdAt, updatedAt
 - `catchPhoto` — id, catchId (FK → fishCatch, cascade delete), filename, sortOrder
 
 Tags are stored in separate tag tables (one row per tag). Species is stored as a space-separated string in `lure.species`. Both use the `TagInput` chip component at `src/lib/components/TagInput.svelte`. `TagInput` accepts a `suggest` prop (`string[]`) that wires a `<datalist>` for autocomplete.
@@ -96,7 +104,7 @@ This approach avoids storing a redundant FK while still supporting the "no spot 
 
 ### Navigation
 
-The layout (`src/routes/+layout.svelte`) renders the full nav chrome for all routes **except** `/login`, which is detected via `$page.url.pathname` and renders `{@render children()}` directly. The nav has:
+The layout (`src/routes/+layout.svelte`) renders the full nav chrome for all routes **except** `/login` and `/share/*`, which are detected via `$page.url.pathname` and render `{@render children()}` directly (share pages include their own minimal OpenFishing header). The nav has:
 - **Desktop**: Logo + section links + "Add" dropdown + language switcher
 - **Mobile**: Top bar (logo + Add dropdown + lang) + fixed bottom tab bar
 
@@ -131,6 +139,10 @@ The overview page (`/`) loads all lures once from the server and filters client-
 ### Favourites
 
 `lure.favourite` is a boolean (SQLite integer). Toggled via `POST /api/lures/[id]/favourite` which flips the value and returns `{ favourite: bool }`. The overview page tracks state in a local `Record<string, boolean>` initialized from server data and updated optimistically on click — the card heart icon and the favourites filter row both react to this local state.
+
+### Share links
+
+Each of `lure`, `spot`, and `fishCatch` has a nullable `shareToken` column. When non-null, the token grants unauthenticated read-only access to `/share/[entity]/[token]`. The share management UI (create/copy URL/revoke) appears on detail pages only when `AUTH_PASSWORD` is set — if auth is disabled, everything is already public so the UI is hidden. The `/share/*` and `/uploads/*` paths are exempted from the auth hook so photos render correctly on share pages. Share tokens are standard UUIDs generated with `crypto.randomUUID()`.
 
 ### Auto-suggest
 

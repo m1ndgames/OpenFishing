@@ -3,6 +3,7 @@ import type { PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
 import { spot, spotPhoto, fishCatch, catchPhoto } from '$lib/server/db/schema';
 import { eq, asc, isNotNull } from 'drizzle-orm';
+import { env } from '$env/dynamic/private';
 
 function getMoonPhaseIndex(date: Date): number {
 	const reference = new Date('2000-01-06T18:14:00Z').getTime();
@@ -141,5 +142,9 @@ export const load: PageServerLoad = async ({ params }) => {
 	// Sort newest first
 	nearbyCatches.sort((a, b) => new Date(b.caughtAt).getTime() - new Date(a.caughtAt).getTime());
 
-	return { spot: found, nearbyCatches, weather };
+	const baseUrl = env.BASE_URL ?? 'http://localhost:5173';
+	const authEnabled = !!env.AUTH_PASSWORD;
+	const shareUrl = found.shareToken ? `${baseUrl}/share/spots/${found.shareToken}` : null;
+
+	return { spot: found, nearbyCatches, weather, authEnabled, shareUrl };
 };

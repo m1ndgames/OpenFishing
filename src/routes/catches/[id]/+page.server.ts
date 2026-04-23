@@ -3,6 +3,7 @@ import type { PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
 import { fishCatch, catchPhoto, spot } from '$lib/server/db/schema';
 import { eq, asc } from 'drizzle-orm';
+import { env } from '$env/dynamic/private';
 
 function haversineMeters(lat1: number, lng1: number, lat2: number, lng2: number): number {
 	const R = 6_371_000;
@@ -40,5 +41,9 @@ export const load: PageServerLoad = async ({ params }) => {
 		if (nearest && nearestDist < 100) nearbySpot = nearest;
 	}
 
-	return { catch: found, nearbySpot };
+	const baseUrl = env.BASE_URL ?? 'http://localhost:5173';
+	const authEnabled = !!env.AUTH_PASSWORD;
+	const shareUrl = found.shareToken ? `${baseUrl}/share/catches/${found.shareToken}` : null;
+
+	return { catch: found, nearbySpot, authEnabled, shareUrl };
 };

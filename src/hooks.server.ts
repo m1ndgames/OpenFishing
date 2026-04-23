@@ -12,8 +12,10 @@ export const handle: Handle = async ({ event, resolve }) => {
 	// Auth disabled when no password is configured
 	if (!password) return resolve(event);
 
-	// Login page is always accessible
+	// Login and share pages are always accessible
 	if (event.url.pathname === '/login') return resolve(event);
+	if (event.url.pathname.startsWith('/share/')) return resolve(event);
+	if (event.url.pathname.startsWith('/uploads/')) return resolve(event);
 
 	const token = event.cookies.get('of_session');
 	if (token !== sessionToken(password)) {

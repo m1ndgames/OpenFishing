@@ -8,6 +8,7 @@
 	const { t, lang } = data;
 
 	const isLoginPage    = $derived($page.url.pathname === '/login');
+	const isSharePage    = $derived($page.url.pathname.startsWith('/share/'));
 	const luresActive    = $derived($page.url.pathname === '/' || $page.url.pathname.startsWith('/lures'));
 	const spotsActive    = $derived($page.url.pathname.startsWith('/spots'));
 	const catchesActive  = $derived($page.url.pathname.startsWith('/catches'));
@@ -29,7 +30,7 @@
 	<title>OpenFishing</title>
 </svelte:head>
 
-{#if isLoginPage}
+{#if isLoginPage || isSharePage}
 	{@render children()}
 {:else}
 <div class="min-h-screen" style="background-color:#060d17; background-image: radial-gradient(ellipse at 15% 60%, rgba(6,182,212,0.04) 0%, transparent 55%), radial-gradient(ellipse at 85% 10%, rgba(251,191,36,0.025) 0%, transparent 45%);">

@@ -4,7 +4,28 @@
 	import 'leaflet/dist/leaflet.css';
 
 	let { data }: { data: PageData } = $props();
-	const { t, spot, nearbyCatches, weather } = data;
+	const { t, spot, nearbyCatches, weather, authEnabled } = data;
+
+	let shareUrl = $state(data.shareUrl);
+	let copied = $state(false);
+
+	async function createShare() {
+		const res = await fetch(`/api/spots/${spot.id}/share`, { method: 'POST' });
+		const json = await res.json();
+		shareUrl = json.shareUrl;
+	}
+
+	async function revokeShare() {
+		await fetch(`/api/spots/${spot.id}/share`, { method: 'DELETE' });
+		shareUrl = null;
+	}
+
+	function copyShare() {
+		if (!shareUrl) return;
+		navigator.clipboard.writeText(shareUrl);
+		copied = true;
+		setTimeout(() => (copied = false), 2000);
+	}
 
 	const moonPhaseLabels = [t.moonNew, t.moonWaxCrescent, t.moonFirstQ, t.moonWaxGibbous, t.moonFull, t.moonWanGibbous, t.moonLastQ, t.moonWanCrescent];
 	const moonEmojis = ['🌑', '🌒', '🌓', '🌔', '🌕', '🌖', '🌗', '🌘'];
@@ -311,6 +332,41 @@
 					<span style="color:{biteColor(weather.biteIndex)}; font-weight:700;"> {weather.biteIndex}/10</span>
 				</div>
 			</div>
+		</div>
+	{/if}
+
+	<!-- Share link management -->
+	{#if authEnabled}
+		<div style="background:#0b1a2c; border:1px solid #172f4a; border-radius:14px; padding:20px; margin-top:16px;">
+			<p style="font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; color:#3d6a84; margin:0 0 10px; display:flex; align-items:center; gap:6px;">
+				<svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+				{t.shareLink}
+			</p>
+			{#if shareUrl}
+				<div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin-bottom:8px;">
+					<input type="text" value={shareUrl} readonly
+						style="flex:1; min-width:0; background:#060d17; border:1px solid #172f4a; border-radius:8px; color:#8ab8cc; font-family:'JetBrains Mono',monospace; font-size:0.72rem; padding:7px 10px; outline:none;" />
+					<button onclick={copyShare}
+						style="background:{copied ? 'rgba(74,222,128,0.12)' : '#0f2238'}; color:{copied ? '#4ade80' : '#8ab8cc'}; border:1px solid {copied ? 'rgba(74,222,128,0.3)' : '#243f5e'}; font-size:0.8rem; font-weight:500; padding:7px 14px; border-radius:8px; cursor:pointer; white-space:nowrap; transition:all 0.15s; font-family:'DM Sans',sans-serif;">
+						{copied ? t.shareCopied : t.shareCopy}
+					</button>
+					<button onclick={revokeShare}
+						style="background:#0f2238; color:#f87171; border:1px solid rgba(248,113,113,0.2); font-size:0.8rem; font-weight:500; padding:7px 14px; border-radius:8px; cursor:pointer; white-space:nowrap; font-family:'DM Sans',sans-serif;"
+						onmouseenter={function(e){(e.currentTarget as HTMLElement).style.borderColor='rgba(248,113,113,0.5)';}}
+						onmouseleave={function(e){(e.currentTarget as HTMLElement).style.borderColor='rgba(248,113,113,0.2)';}}>
+						{t.shareRevoke}
+					</button>
+				</div>
+				<p style="font-size:0.72rem; color:#3d6a84; margin:0;">{t.sharePublicNote}</p>
+			{:else}
+				<button onclick={createShare}
+					style="display:inline-flex; align-items:center; gap:6px; background:#0f2238; color:#8ab8cc; font-size:0.8rem; font-weight:500; padding:8px 14px; border-radius:8px; border:1px solid #243f5e; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.15s;"
+					onmouseenter={function(e){(e.currentTarget as HTMLElement).style.borderColor='rgba(6,182,212,0.4)'; (e.currentTarget as HTMLElement).style.color='#22d3ee';}}
+					onmouseleave={function(e){(e.currentTarget as HTMLElement).style.borderColor='#243f5e'; (e.currentTarget as HTMLElement).style.color='#8ab8cc';}}>
+					<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+					{t.shareGenerate}
+				</button>
+			{/if}
 		</div>
 	{/if}
 

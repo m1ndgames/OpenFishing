@@ -28,5 +28,8 @@ export const load: PageServerLoad = async ({ params }) => {
 		color: { dark: '#1e293b', light: '#ffffff' }
 	});
 
-	return { lure, qrSvg, lureCatches };
+	const authEnabled = !!env.AUTH_PASSWORD;
+	const shareUrl = lure.shareToken ? `${baseUrl}/share/lures/${lure.shareToken}` : null;
+
+	return { lure, qrSvg, lureCatches, authEnabled, shareUrl };
 };

@@ -198,6 +198,16 @@ export default {
 	lightGolden: 'Golden Hour',
 	lightDusk: 'Dusk',
 
+	// Share links
+	shareLink: 'Share Link',
+	shareGenerate: 'Create share link',
+	shareRevoke: 'Remove link',
+	shareCopied: 'Copied!',
+	shareCopy: 'Copy',
+	sharePublicNote: 'Anyone with this link can view without signing in',
+	shareViewOnly: 'Shared · View only',
+	shareSignIn: 'Sign In',
+
 	// Errors
 	nameRequired: 'Name is required',
 	photoRequired: 'A photo is required',
