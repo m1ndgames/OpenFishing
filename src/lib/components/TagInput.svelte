@@ -1,5 +1,5 @@
 <script lang="ts">
-	let { name = 'tags', value = '' }: { name?: string; value?: string } = $props();
+	let { name = 'tags', value = '', suggest = [] }: { name?: string; value?: string; suggest?: string[] } = $props();
 
 	let tags = $state<string[]>(value ? value.split(/\s+/).filter(Boolean) : []);
 	let inputValue = $state('');
@@ -56,7 +56,14 @@
 		onkeydown={onKeydown}
 		onblur={addTag}
 		type="text"
+		list={suggest.length > 0 ? `suggest-taginput-${name}` : undefined}
 		placeholder={tags.length === 0 ? 'e.g. pike saltwater topwater' : ''}
 		style="flex:1; min-width:96px; outline:none; background:transparent; color:#c2dce8; font-size:0.875rem; border:none; padding:1px 2px; font-family:'DM Sans',sans-serif;"
 	/>
 </div>
+
+{#if suggest.length > 0}
+	<datalist id="suggest-taginput-{name}">
+		{#each suggest as s}<option value={s}></option>{/each}
+	</datalist>
+{/if}

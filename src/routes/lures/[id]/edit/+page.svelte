@@ -257,7 +257,7 @@
 		</div>
 		<div>
 			<label style={labelStyle}>{t.fishSpecies}</label>
-			<TagInput name="species" value={lure.species ?? ''} />
+			<TagInput name="species" value={lure.species ?? ''} suggest={suggestions.species} />
 		</div>
 
 		<!-- Notes -->

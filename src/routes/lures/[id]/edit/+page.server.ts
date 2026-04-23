@@ -18,6 +18,12 @@ export const load: PageServerLoad = async ({ params }) => {
 		return rows.map((r) => Object.values(r)[0] as T).filter(Boolean);
 	};
 
+	const speciesRows = await db
+		.select({ val: lure.species })
+		.from(lure)
+		.where(isNotNull(lure.species));
+	const species = [...new Set(speciesRows.flatMap((r) => (r.val as string).split(/\s+/).filter(Boolean)))].sort();
+
 	const [names, brands, types, colors] = await Promise.all([
 		distinct<string>({ val: lure.name }),
 		distinct<string>({ val: lure.brand }),
@@ -25,7 +31,7 @@ export const load: PageServerLoad = async ({ params }) => {
 		distinct<string>({ val: lure.color })
 	]);
 
-	return { lure: existing, suggestions: { names, brands, types, colors } };
+	return { lure: existing, suggestions: { names, brands, types, colors, species } };
 };
 
 export const actions: Actions = {

@@ -200,7 +200,7 @@
 		<div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
 			<div>
 				<label style={labelStyle}>{t.fishSpecies}</label>
-				<TagInput name="species" />
+				<TagInput name="species" suggest={data.suggestions.species} />
 			</div>
 			<div>
 				<label style={labelStyle} for="running_depth">{t.runningDepth}</label>
