@@ -4,7 +4,7 @@
 	let { data }: { data: PageData } = $props();
 	const { t } = data;
 
-	const PAGE_SIZES = [4, 8, 16, 32, 50, 100];
+	const PAGE_SIZES = [4, 8, 12, 24, 48, 100];
 
 	type ChipMode = 'include' | 'exclude';
 	type ChipFilter = Record<string, ChipMode>;
@@ -21,7 +21,7 @@
 	);
 
 	let page     = $state(1);
-	let pageSize = $state(16);
+	let pageSize = $state(12);
 
 	const types   = $derived([...new Set(data.lures.map(l => l.type).filter(Boolean))].sort() as string[]);
 	const depths  = $derived([...new Set(data.lures.map(l => l.runningDepth).filter(Boolean))].sort() as string[]);
@@ -354,15 +354,6 @@
 						{:else}
 							<div style="height:20px; margin-bottom:8px;"></div>
 						{/if}
-
-						<div style="display:flex; gap:5px; flex-wrap:wrap;">
-							{#if lure.type}
-								<span style="font-size:0.7rem; padding:2px 8px; border-radius:20px; background:rgba(6,182,212,0.1); color:#22d3ee; border:1px solid rgba(6,182,212,0.2);">{lure.type}</span>
-							{/if}
-							{#if lure.color}
-								<span style="font-size:0.7rem; padding:2px 8px; border-radius:20px; background:rgba(251,191,36,0.08); color:#fbbf24; border:1px solid rgba(251,191,36,0.2);">{lure.color}</span>
-							{/if}
-						</div>
 
 						{#if lure.tags.length > 0}
 							<div style="display:flex; flex-wrap:wrap; gap:4px; margin-top:7px;">
