@@ -147,6 +147,8 @@
 					<option value="es" selected={lang === 'es'}>🇪🇸 ES</option>
 					<option value="it" selected={lang === 'it'}>🇮🇹 IT</option>
 					<option value="pt" selected={lang === 'pt'}>🇵🇹 PT</option>
+					<option value="pl" selected={lang === 'pl'}>🇵🇱 PL</option>
+					<option value="uk" selected={lang === 'uk'}>🇺🇦 UK</option>
 				</select>
 			</form>
 		</div>
@@ -217,6 +219,8 @@
 					<option value="es" selected={lang === 'es'}>🇪🇸 ES</option>
 					<option value="it" selected={lang === 'it'}>🇮🇹 IT</option>
 					<option value="pt" selected={lang === 'pt'}>🇵🇹 PT</option>
+					<option value="pl" selected={lang === 'pl'}>🇵🇱 PL</option>
+					<option value="uk" selected={lang === 'uk'}>🇺🇦 UK</option>
 				</select>
 			</form>
 		</div>
