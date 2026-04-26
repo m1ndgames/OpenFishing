@@ -1,9 +1,13 @@
 export default {
 	// Header
 	navLures: 'Приманки',
+	add: 'Додати',
 	addLure: 'Додати приманку',
 	addSpot: 'Додати місце',
 	addCatch: 'Додати улов',
+	navAddLure: 'Приманку',
+	navAddSpot: 'Місце',
+	navAddCatch: 'Улов',
 	settingsBackupRestore: 'Резервне копіювання та відновлення',
 
 	// Spots
@@ -67,6 +71,9 @@ export default {
 	amount: 'Кількість',
 	size: 'Розмір',
 	tags: 'Теги',
+	lureTagsPlaceholder: 'напр. Гримуча UV-Активна Ароматна',
+	spotTagsPlaceholder: 'напр. Низька-Вода Похід Спуск-Човна',
+	speciesPlaceholder: 'напр. Щука Окунь Форель',
 	fishSpecies: 'Вид риби',
 	presentation: 'Стиль проводки',
 	runningDepth: 'Глибина ходу',

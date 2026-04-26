@@ -127,7 +127,7 @@
 	onDestroy(() => { mapInstance?.remove(); });
 </script>
 
-<div style="max-width:600px;">
+<div style="max-width:600px; margin:0 auto;">
 	<div style="margin-bottom:24px; display:flex; align-items:center; gap:12px;">
 		<a href="/spots/{spot.id}" style="color:#3d6a84; font-size:0.875rem; text-decoration:none; display:flex; align-items:center; gap:4px; white-space:nowrap;"
 			onmouseenter={function(e){(e.currentTarget as HTMLElement).style.color='#22d3ee';}}
@@ -192,7 +192,7 @@
 		<!-- Tags -->
 		<div>
 			<label style={labelStyle}>{t.spotTagsLabel}</label>
-			<TagInput name="tags" value={spot.tags.map(tag => tag.name).join(' ')} />
+			<TagInput name="tags" value={spot.tags.map(tag => tag.name).join(' ')} placeholder={t.spotTagsPlaceholder} />
 		</div>
 
 		<!-- Notes -->

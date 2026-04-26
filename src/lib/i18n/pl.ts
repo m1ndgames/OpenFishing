@@ -1,9 +1,13 @@
 export default {
 	// Header
 	navLures: 'Przynęty',
+	add: 'Dodaj',
 	addLure: 'Dodaj przynętę',
 	addSpot: 'Dodaj łowisko',
 	addCatch: 'Dodaj połów',
+	navAddLure: 'Przynętę',
+	navAddSpot: 'Łowisko',
+	navAddCatch: 'Połów',
 	settingsBackupRestore: 'Kopia zapasowa i przywracanie',
 
 	// Spots
@@ -67,6 +71,9 @@ export default {
 	amount: 'Ilość',
 	size: 'Rozmiar',
 	tags: 'Tagi',
+	lureTagsPlaceholder: 'np. Grzechotka UV-Aktywna Zapachowa',
+	spotTagsPlaceholder: 'np. Niski-Stan Wycieczka Pochylnia',
+	speciesPlaceholder: 'np. Szczupak Okoń Pstrąg',
 	fishSpecies: 'Gatunek ryby',
 	presentation: 'Styl prowadzenia',
 	runningDepth: 'Głębokość pracy',

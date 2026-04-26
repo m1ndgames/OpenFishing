@@ -70,7 +70,7 @@
 	}
 </script>
 
-<div style="max-width:560px;">
+<div style="max-width:560px; margin:0 auto;">
 {#if form?.error}
 		<div style="margin-bottom:16px; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); color:#f87171; font-size:0.875rem; padding:12px 16px; border-radius:10px;">
 			{t[form.error as keyof typeof t] ?? form.error}
@@ -205,7 +205,7 @@
 		<div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
 			<div>
 				<label style={labelStyle}>{t.tags}</label>
-				<TagInput name="tags" />
+				<TagInput name="tags" placeholder={t.lureTagsPlaceholder} />
 			</div>
 			<div>
 				<label style={labelStyle} for="running_depth">{t.runningDepth}</label>
@@ -261,7 +261,7 @@
 		<!-- Fish Species -->
 		<div>
 			<label style={labelStyle}>{t.fishSpecies}</label>
-			<TagInput name="species" suggest={data.suggestions.species} />
+			<TagInput name="species" suggest={data.suggestions.species} placeholder={t.speciesPlaceholder} />
 		</div>
 
 		<!-- Notes -->

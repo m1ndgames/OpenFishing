@@ -100,7 +100,7 @@
 					onmouseleave={function(e){ if (!showAddMenu) (e.currentTarget as HTMLElement).style.background='#06b6d4'; }}
 				>
 					<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-					Add
+					{t.add}
 					<svg width="10" height="10" viewBox="0 0 10 10" fill="none" style="margin-left:1px; transition:transform 0.15s; transform:{showAddMenu ? 'rotate(180deg)' : 'rotate(0deg)'}">
 						<path d="M2 3.5l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 					</svg>
@@ -113,7 +113,7 @@
 							onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background=''; (e.currentTarget as HTMLElement).style.color='#c2dce8';}}
 						>
 							<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 20 Q8 16 12 14 Q16 12 20 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="20" cy="8" r="2" fill="currentColor"/></svg>
-							{t.addLure}
+							{t.navAddLure}
 						</a>
 						<a href="/spots/new" onclick={() => showAddMenu = false}
 							style="display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:7px; text-decoration:none; color:#c2dce8; font-size:0.875rem; font-weight:500; transition:background 0.1s;"
@@ -121,7 +121,7 @@
 							onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background=''; (e.currentTarget as HTMLElement).style.color='#c2dce8';}}
 						>
 							<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.69 2 6 4.69 6 8c0 4.5 6 12 6 12s6-7.5 6-12c0-3.31-2.69-6-6-6z" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="8" r="2" stroke="currentColor" stroke-width="1.4"/></svg>
-							{t.addSpot}
+							{t.navAddSpot}
 						</a>
 						<a href="/catches/new" onclick={() => showAddMenu = false}
 							style="display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:7px; text-decoration:none; color:#c2dce8; font-size:0.875rem; font-weight:500; transition:background 0.1s;"
@@ -129,7 +129,7 @@
 							onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background=''; (e.currentTarget as HTMLElement).style.color='#c2dce8';}}
 						>
 							<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M2 12 C4 8 7 6 10 7 C13 8 14 11 17 11 C20 11 22 9 22 9 C22 9 21 14 18 15 C15 16 13 14 10 14 C7 14 4 16 2 12Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M22 9 L20 6 M22 9 L20 12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-							{t.addCatch}
+							{t.navAddCatch}
 						</a>
 					</div>
 				{/if}
@@ -175,7 +175,7 @@
 					style="display:flex; align-items:center; gap:5px; font-size:0.78rem; font-weight:700; padding:6px 11px; border-radius:8px; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; background:{showAddMenu ? '#22d3ee' : '#06b6d4'}; color:#030a12;"
 				>
 					<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-					Add
+					{t.add}
 				</button>
 				{#if showAddMenu}
 					<div style="position:absolute; top:calc(100% + 6px); right:0; min-width:160px; background:#0f2238; border:1px solid #243f5e; border-radius:10px; padding:4px; z-index:100; box-shadow:0 8px 24px rgba(0,0,0,0.5);">
@@ -185,7 +185,7 @@
 							onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='';}}
 						>
 							<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 20 Q8 16 12 14 Q16 12 20 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="20" cy="8" r="2" fill="currentColor"/></svg>
-							{t.addLure}
+							{t.navAddLure}
 						</a>
 						<a href="/spots/new" onclick={() => showAddMenu = false}
 							style="display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:7px; text-decoration:none; color:#c2dce8; font-size:0.875rem; font-weight:500;"
@@ -193,7 +193,7 @@
 							onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='';}}
 						>
 							<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.69 2 6 4.69 6 8c0 4.5 6 12 6 12s6-7.5 6-12c0-3.31-2.69-6-6-6z" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="8" r="2" stroke="currentColor" stroke-width="1.4"/></svg>
-							{t.addSpot}
+							{t.navAddSpot}
 						</a>
 						<a href="/catches/new" onclick={() => showAddMenu = false}
 							style="display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:7px; text-decoration:none; color:#c2dce8; font-size:0.875rem; font-weight:500;"
@@ -201,7 +201,7 @@
 							onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='';}}
 						>
 							<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M2 12 C4 8 7 6 10 7 C13 8 14 11 17 11 C20 11 22 9 22 9 C22 9 21 14 18 15 C15 16 13 14 10 14 C7 14 4 16 2 12Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M22 9 L20 6 M20 12 L22 9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-							{t.addCatch}
+							{t.navAddCatch}
 						</a>
 					</div>
 				{/if}

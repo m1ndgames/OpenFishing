@@ -1,5 +1,5 @@
 <script lang="ts">
-	let { name = 'tags', value = '', suggest = [] }: { name?: string; value?: string; suggest?: string[] } = $props();
+	let { name = 'tags', value = '', suggest = [], placeholder = 'e.g. add tags…' }: { name?: string; value?: string; suggest?: string[]; placeholder?: string } = $props();
 
 	let tags = $state<string[]>(value ? value.split(/\s+/).filter(Boolean) : []);
 	let inputValue = $state('');
@@ -57,7 +57,7 @@
 		onblur={addTag}
 		type="text"
 		list={suggest.length > 0 ? `suggest-taginput-${name}` : undefined}
-		placeholder={tags.length === 0 ? 'e.g. pike saltwater topwater' : ''}
+		placeholder={tags.length === 0 ? placeholder : ''}
 		style="flex:1; min-width:96px; outline:none; background:transparent; color:#c2dce8; font-size:0.875rem; border:none; padding:1px 2px; font-family:'DM Sans',sans-serif;"
 	/>
 </div>

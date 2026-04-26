@@ -1,9 +1,13 @@
 export default {
 	// Header
 	navLures: 'Lures',
+	add: 'Add',
 	addLure: 'Add Lure',
 	addSpot: 'Add Spot',
 	addCatch: 'Add Catch',
+	navAddLure: 'Lure',
+	navAddSpot: 'Spot',
+	navAddCatch: 'Catch',
 	settingsBackupRestore: 'Backup & Restore',
 
 	// Spots
@@ -67,6 +71,9 @@ export default {
 	amount: 'Amount',
 	size: 'Size',
 	tags: 'Tags',
+	lureTagsPlaceholder: 'e.g. Rattling UV-Active Scented',
+	spotTagsPlaceholder: 'e.g. Low-Tide Needs-Hike Boat-Ramp',
+	speciesPlaceholder: 'e.g. Pike Perch Bass',
 	fishSpecies: 'Fish Species',
 	presentation: 'Retrieve Style',
 	runningDepth: 'Running Depth',

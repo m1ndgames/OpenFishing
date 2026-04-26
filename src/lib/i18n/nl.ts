@@ -1,9 +1,13 @@
 export default {
 	// Header
 	navLures: 'Aasbox',
+	add: 'Toevoegen',
 	addLure: 'Aas toevoegen',
 	addSpot: 'Spot toevoegen',
 	addCatch: 'Vangst toevoegen',
+	navAddLure: 'Aas',
+	navAddSpot: 'Spot',
+	navAddCatch: 'Vangst',
 	settingsBackupRestore: 'Back-up & Herstellen',
 
 	// Spots
@@ -67,6 +71,9 @@ export default {
 	amount: 'Aantal',
 	size: 'Maat',
 	tags: 'Tags',
+	lureTagsPlaceholder: 'bijv. Rammelend UV-Actief Geurend',
+	spotTagsPlaceholder: 'bijv. Laagwater Wandeling Bootshelling',
+	speciesPlaceholder: 'bijv. Snoek Baars Forel',
 	fishSpecies: 'Vissoort',
 	presentation: 'Techniek',
 	runningDepth: 'Loopdiepte',

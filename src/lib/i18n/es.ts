@@ -1,9 +1,13 @@
 export default {
 	// Header
 	navLures: 'Señuelos',
+	add: 'Añadir',
 	addLure: 'Añadir señuelo',
 	addSpot: 'Añadir punto',
 	addCatch: 'Añadir captura',
+	navAddLure: 'Señuelo',
+	navAddSpot: 'Punto',
+	navAddCatch: 'Captura',
 	settingsBackupRestore: 'Copia de seguridad y restauración',
 
 	// Spots
@@ -67,6 +71,9 @@ export default {
 	amount: 'Cantidad',
 	size: 'Tamaño',
 	tags: 'Etiquetas',
+	lureTagsPlaceholder: 'ej. Sonajero UV-Activo Aromático',
+	spotTagsPlaceholder: 'ej. Marea-Baja Senderismo Rampa-Bote',
+	speciesPlaceholder: 'ej. Lucio Perca Trucha',
 	fishSpecies: 'Especie de pez',
 	presentation: 'Estilo de recuperación',
 	runningDepth: 'Profundidad de nado',

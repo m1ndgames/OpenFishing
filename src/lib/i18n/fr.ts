@@ -1,9 +1,13 @@
 export default {
 	// Header
 	navLures: 'Leurres',
+	add: 'Ajouter',
 	addLure: 'Ajouter un leurre',
 	addSpot: 'Ajouter un spot',
 	addCatch: 'Ajouter une prise',
+	navAddLure: 'Leurre',
+	navAddSpot: 'Spot',
+	navAddCatch: 'Prise',
 	settingsBackupRestore: 'Sauvegarde & Restauration',
 
 	// Spots
@@ -67,6 +71,9 @@ export default {
 	amount: 'Quantité',
 	size: 'Taille',
 	tags: 'Tags',
+	lureTagsPlaceholder: 'ex. Crécelle UV-Actif Parfumé',
+	spotTagsPlaceholder: 'ex. Marée-Basse Randonnée Rampe-Bateau',
+	speciesPlaceholder: 'ex. Brochet Perche Truite',
 	fishSpecies: 'Espèce de poisson',
 	presentation: 'Style de récupération',
 	runningDepth: 'Profondeur de nage',

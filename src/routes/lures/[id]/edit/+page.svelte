@@ -67,7 +67,7 @@
 	}
 </script>
 
-<div style="max-width:560px;">
+<div style="max-width:560px; margin:0 auto;">
 	<div style="margin-bottom:24px; display:flex; align-items:center; gap:12px;">
 		<a href="/lures/{lure.id}" style="color:#3d6a84; font-size:0.875rem; text-decoration:none; display:flex; align-items:center; gap:4px; white-space:nowrap;"
 			onmouseenter={function(e){(e.currentTarget as HTMLElement).style.color='#22d3ee';}}
@@ -258,11 +258,11 @@
 		<!-- Species + Tags -->
 		<div>
 			<label style={labelStyle}>{t.fishSpecies}</label>
-			<TagInput name="species" value={lure.species ?? ''} suggest={suggestions.species} />
+			<TagInput name="species" value={lure.species ?? ''} suggest={suggestions.species} placeholder={t.speciesPlaceholder} />
 		</div>
 		<div>
 			<label style={labelStyle}>{t.tags}</label>
-			<TagInput name="tags" value={lure.tags.map((tag) => tag.name).join(' ')} />
+			<TagInput name="tags" value={lure.tags.map((tag) => tag.name).join(' ')} placeholder={t.lureTagsPlaceholder} />
 		</div>
 
 		<!-- Notes -->

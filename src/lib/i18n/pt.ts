@@ -1,9 +1,13 @@
 export default {
 	// Header
 	navLures: 'Iscas',
+	add: 'Adicionar',
 	addLure: 'Adicionar isca',
 	addSpot: 'Adicionar local',
 	addCatch: 'Adicionar captura',
+	navAddLure: 'Isca',
+	navAddSpot: 'Local',
+	navAddCatch: 'Captura',
 	settingsBackupRestore: 'Backup e restauração',
 
 	// Spots
@@ -67,6 +71,9 @@ export default {
 	amount: 'Quantidade',
 	size: 'Tamanho',
 	tags: 'Tags',
+	lureTagsPlaceholder: 'ex. Chocalho UV-Ativo Perfumado',
+	spotTagsPlaceholder: 'ex. Maré-Baixa Caminhada Rampa-Barco',
+	speciesPlaceholder: 'ex. Lúcio Perca Truta',
 	fishSpecies: 'Espécie de peixe',
 	presentation: 'Estilo de recuperação',
 	runningDepth: 'Profundidade de nado',

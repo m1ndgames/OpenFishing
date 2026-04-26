@@ -136,7 +136,7 @@
 	}
 </script>
 
-<div style="max-width:560px;">
+<div style="max-width:560px; margin:0 auto;">
 	{#if form?.error}
 		<div style="margin-bottom:16px; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); color:#f87171; font-size:0.875rem; padding:12px 16px; border-radius:10px;">
 			{t[form.error as keyof typeof t] ?? form.error}

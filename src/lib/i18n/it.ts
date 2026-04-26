@@ -1,9 +1,13 @@
 export default {
 	// Header
 	navLures: 'Esche',
+	add: 'Aggiungi',
 	addLure: 'Aggiungi esca',
 	addSpot: 'Aggiungi spot',
 	addCatch: 'Aggiungi cattura',
+	navAddLure: 'Esca',
+	navAddSpot: 'Spot',
+	navAddCatch: 'Cattura',
 	settingsBackupRestore: 'Backup e ripristino',
 
 	// Spots
@@ -67,6 +71,9 @@ export default {
 	amount: 'Quantità',
 	size: 'Dimensione',
 	tags: 'Tag',
+	lureTagsPlaceholder: 'es. Crepitante UV-Attivo Profumato',
+	spotTagsPlaceholder: 'es. Bassa-Marea Escursione Rampa-Barca',
+	speciesPlaceholder: 'es. Luccio Pesce-Persico Trota',
 	fishSpecies: 'Specie di pesce',
 	presentation: 'Stile di recupero',
 	runningDepth: 'Profondità di nuoto',

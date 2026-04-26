@@ -1,9 +1,13 @@
 export default {
 	// Header
 	navLures: 'Köderbox',
+	add: 'Hinzufügen',
 	addLure: 'Köder hinzufügen',
 	addSpot: 'Stelle hinzufügen',
 	addCatch: 'Fang hinzufügen',
+	navAddLure: 'Köder',
+	navAddSpot: 'Stelle',
+	navAddCatch: 'Fang',
 	settingsBackupRestore: 'Backup & Wiederherstellen',
 
 	// Spots
@@ -67,6 +71,9 @@ export default {
 	amount: 'Anzahl',
 	size: 'Größe',
 	tags: 'Tags',
+	lureTagsPlaceholder: 'z.B. Rasselnd UV-Aktiv Duftend',
+	spotTagsPlaceholder: 'z.B. Niedrigwasser Wanderung Bootsrampe',
+	speciesPlaceholder: 'z.B. Hecht Barsch Forelle',
 	fishSpecies: 'Zielfisch',
 	presentation: 'Köderführung',
 	runningDepth: 'Lauftiefe',
