@@ -78,12 +78,12 @@ npm run db:studio      # Open Drizzle Studio (DB GUI)
 
 ### Data model
 
-- `lure` — id (UUID), lureNumber (sequential int), name, brand, type, color, weight, size, notes, photoPath, species, runningDepth, waterType, lightConditions (integer 0–10), favourite (boolean), qrCoded (boolean), shareToken (nullable UUID), createdAt, updatedAt
+- `lure` — id (UUID), lureNumber (sequential int), name, brand, type, color, weight, size, notes, photoPath, species, runningDepth, waterType, lightConditions (integer 0–10), amount (integer, default 1), favourite (boolean), qrCoded (boolean), lost (boolean), shareToken (nullable UUID), createdAt, updatedAt
 - `tag` — id, lureId (FK → lure, cascade delete), name
 - `spot` — id (UUID), name, lat, lng, notes, shareToken (nullable UUID), createdAt, updatedAt
 - `spotTag` — id, spotId (FK → spot, cascade delete), name
 - `spotPhoto` — id, spotId (FK → spot, cascade delete), filename, sortOrder
-- `fishCatch` — id (UUID), caughtAt, species, weightG, lengthCm, lat (nullable), lng (nullable), notes, catchAndRelease, presentation, lureId (FK → lure, set null on delete), shareToken (nullable UUID), createdAt, updatedAt
+- `fishCatch` — id (UUID), caughtAt, species, weightG, lengthCm, lat (nullable), lng (nullable), notes, catchAndRelease, presentation, biteIndex (nullable real), lureId (FK → lure, set null on delete), shareToken (nullable UUID), createdAt, updatedAt
 - `catchPhoto` — id, catchId (FK → fishCatch, cascade delete), filename, sortOrder
 
 Tags are stored in separate tag tables (one row per tag). Species is stored as a space-separated string in `lure.species`. Both use the `TagInput` chip component at `src/lib/components/TagInput.svelte`. `TagInput` accepts a `suggest` prop (`string[]`) that wires a `<datalist>` for autocomplete.
@@ -134,11 +134,21 @@ Filter bars use `flex-wrap:wrap` (not `overflow-x:auto`) so they reflow to multi
 
 ### Filtering & pagination
 
-The overview page (`/`) loads all lures once from the server and filters client-side using Svelte 5 `$derived`. Filters use an include/exclude chip model (`ChipFilter = Record<string, 'include' | 'exclude'>`): clicking once includes (cyan), again excludes (red strikethrough), again clears. Active filters: type, running depth, light conditions, fish species, favourites toggle. Pagination default is 12 per page. Do not move filtering to the server.
+The overview page (`/`) loads all lures once from the server and filters client-side using Svelte 5 `$derived`. Filters use an include/exclude chip model (`ChipFilter = Record<string, 'include' | 'exclude'>`): clicking once includes (cyan), again excludes (red strikethrough), again clears. Active filters: type, running depth, light conditions, fish species, size range (min/max), weight range (min/max), favourites toggle, has-catch toggle. The filter panel is toggled via a pill button that turns cyan when filters are active. Pagination default is 12 per page. Do not move filtering to the server.
 
 ### Favourites
 
 `lure.favourite` is a boolean (SQLite integer). Toggled via `POST /api/lures/[id]/favourite` which flips the value and returns `{ favourite: bool }`. The overview page tracks state in a local `Record<string, boolean>` initialized from server data and updated optimistically on click — the card heart icon and the favourites filter row both react to this local state.
+
+### Lost lures
+
+`lure.lost` is a boolean (SQLite integer, default false). Marking a lure as lost (via the `markLost` form action on the edit page) sets `lost = true` and clears `qrCoded = false` in a single DB update. A `markFound` action reverses only `lost`. Lost lures remain fully intact in the DB so all linked catch records and stats are preserved. The edit page shows "Mark as Lost" (amber) or "Mark as Found" (green) depending on current state, with a confirm dialog for marking lost. The detail page shows an amber "Lost" badge; the overview card shows an amber `LOST` pill overlay on the photo.
+
+### Bite index
+
+The bite index (0–10) is a weighted score: pressure trend × 0.5, light conditions × 0.3, temperature stability × 0.2. Scores: pressure falling > 1.5 hPa/3h = 10, stable = 7, rising = 2; dawn/dusk = 10, golden = 8, night/morning = 6, day = 2; temp delta < 3 °C = 10, ≥ 3 °C = 2. Data comes from the Open-Meteo API (5 s timeout, silently ignored on failure).
+
+The shared utility lives in `src/lib/server/biteIndex.ts` and exports `fetchWeather(lat, lng)`. Both `spots/[id]/+page.server.ts` (live display) and `catches/new/+page.server.ts` (snapshot on insert) import from it. The snapshot is stored as `fishCatch.biteIndex` (nullable real) and displayed on the catch detail page with the same progress-bar + color + rating label (Poor/Fair/Good/Excellent) as the spot page. Thresholds: ≥ 8.5 Excellent (#22d3ee), ≥ 6.5 Good (#4ade80), ≥ 4 Fair (#f59e0b), < 4 Poor (#ef4444).
 
 ### Share links
 
