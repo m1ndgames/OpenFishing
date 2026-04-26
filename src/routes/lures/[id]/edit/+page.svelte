@@ -307,6 +307,30 @@
 			{t.deleteLure}
 		</button>
 	</form>
+
+	<!-- Mark as Lost / Found -->
+	{#if lure.lost}
+		<form method="POST" action="?/markFound" style="margin-top:8px;">
+			<button type="submit"
+				style="width:100%; background:rgba(34,197,94,0.06); color:#4ade80; font-size:0.875rem; font-weight:500; padding:10px 20px; border-radius:9px; border:1px solid rgba(34,197,94,0.2); cursor:pointer; transition:all 0.15s; font-family:'DM Sans',sans-serif;"
+				onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='rgba(34,197,94,0.12)'; (e.currentTarget as HTMLElement).style.borderColor='rgba(34,197,94,0.35)';}}
+				onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='rgba(34,197,94,0.06)'; (e.currentTarget as HTMLElement).style.borderColor='rgba(34,197,94,0.2)';}}
+			>
+				{t.markAsFound}
+			</button>
+		</form>
+	{:else}
+		<form method="POST" action="?/markLost" style="margin-top:8px;"
+			onsubmit={(e) => { if (!confirm(t.markAsLostConfirm)) e.preventDefault(); }}>
+			<button type="submit"
+				style="width:100%; background:rgba(245,158,11,0.06); color:#fbbf24; font-size:0.875rem; font-weight:500; padding:10px 20px; border-radius:9px; border:1px solid rgba(245,158,11,0.2); cursor:pointer; transition:all 0.15s; font-family:'DM Sans',sans-serif;"
+				onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='rgba(245,158,11,0.12)'; (e.currentTarget as HTMLElement).style.borderColor='rgba(245,158,11,0.35)';}}
+				onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='rgba(245,158,11,0.06)'; (e.currentTarget as HTMLElement).style.borderColor='rgba(245,158,11,0.2)';}}
+			>
+				{t.markAsLost}
+			</button>
+		</form>
+	{/if}
 </div>
 
 {#if showCrop && cropSrc}

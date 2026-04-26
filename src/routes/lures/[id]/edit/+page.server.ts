@@ -98,5 +98,21 @@ export const actions: Actions = {
 		if (existing?.photoPath) await deleteUpload(existing.photoPath);
 		await db.delete(lure).where(eq(lure.id, params.id));
 		redirect(303, '/');
+	},
+
+	markLost: async ({ params }) => {
+		await db
+			.update(lure)
+			.set({ lost: true, qrCoded: false, updatedAt: new Date() })
+			.where(eq(lure.id, params.id));
+		redirect(303, `/lures/${params.id}`);
+	},
+
+	markFound: async ({ params }) => {
+		await db
+			.update(lure)
+			.set({ lost: false, updatedAt: new Date() })
+			.where(eq(lure.id, params.id));
+		redirect(303, `/lures/${params.id}`);
 	}
 };

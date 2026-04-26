@@ -109,6 +109,10 @@ export default {
 	labeledStatus: 'Beschriftet',
 	notLabeledYet: 'Noch kein Etikett',
 	scanToOpen: 'Scannen zum Öffnen',
+	lostStatus: 'Verloren',
+	markAsLost: 'Als verloren markieren',
+	markAsLostConfirm: 'Diesen Köder als verloren markieren? Der QR-Label-Status wird ebenfalls entfernt.',
+	markAsFound: 'Als gefunden markieren',
 
 	// Detail
 	lureId: 'Köder-Nr.',

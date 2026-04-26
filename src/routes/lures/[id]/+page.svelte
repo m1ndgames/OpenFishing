@@ -164,13 +164,21 @@
 				</div>
 			{/if}
 
-			<!-- Labeled status -->
-			{#if lure.qrCoded}
-				<div style="margin-bottom:14px;">
-					<span style="display:inline-flex; align-items:center; gap:6px; background:rgba(74,222,128,0.08); color:#4ade80; font-size:0.78rem; font-weight:600; padding:4px 10px; border-radius:20px; border:1px solid rgba(74,222,128,0.2);">
-						<svg width="10" height="10" viewBox="0 0 11 11" fill="none"><path d="M2 5.5L4.5 8L9 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-						{t.labeledStatus}
-					</span>
+			<!-- Labeled / Lost status -->
+			{#if lure.qrCoded || lure.lost}
+				<div style="margin-bottom:14px; display:flex; flex-wrap:wrap; gap:8px;">
+					{#if lure.qrCoded}
+						<span style="display:inline-flex; align-items:center; gap:6px; background:rgba(74,222,128,0.08); color:#4ade80; font-size:0.78rem; font-weight:600; padding:4px 10px; border-radius:20px; border:1px solid rgba(74,222,128,0.2);">
+							<svg width="10" height="10" viewBox="0 0 11 11" fill="none"><path d="M2 5.5L4.5 8L9 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+							{t.labeledStatus}
+						</span>
+					{/if}
+					{#if lure.lost}
+						<span style="display:inline-flex; align-items:center; gap:6px; background:rgba(245,158,11,0.1); color:#fbbf24; font-size:0.78rem; font-weight:600; padding:4px 10px; border-radius:20px; border:1px solid rgba(245,158,11,0.25);">
+							<svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+							{t.lostStatus}
+						</span>
+					{/if}
 				</div>
 			{/if}
 

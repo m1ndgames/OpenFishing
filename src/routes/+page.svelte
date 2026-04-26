@@ -427,6 +427,13 @@
 							</div>
 						{/if}
 
+						<!-- Lost indicator -->
+						{#if lure.lost}
+							<div style="position:absolute; bottom:8px; left:8px; background:rgba(245,158,11,0.85); border-radius:6px; padding:2px 7px; backdrop-filter:blur(4px);">
+								<span style="font-size:0.65rem; font-weight:700; color:#030a12; letter-spacing:0.06em; text-transform:uppercase;">{t.lostStatus}</span>
+							</div>
+						{/if}
+
 						<!-- Favourite heart -->
 						<button
 							type="button"

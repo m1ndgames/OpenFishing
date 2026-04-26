@@ -109,6 +109,10 @@ export default {
 	labeledStatus: 'Labeled',
 	notLabeledYet: 'Not labeled yet',
 	scanToOpen: 'Scan to open this lure',
+	lostStatus: 'Lost',
+	markAsLost: 'Mark as Lost',
+	markAsLostConfirm: 'Mark this lure as lost? The QR label status will also be cleared.',
+	markAsFound: 'Mark as Found',
 
 	// Detail
 	lureId: 'Lure #',
