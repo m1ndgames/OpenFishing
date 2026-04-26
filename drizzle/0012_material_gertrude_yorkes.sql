@@ -1,0 +1,1 @@
+ALTER TABLE `lure` ADD `lost` integer DEFAULT false NOT NULL;
