@@ -67,6 +67,7 @@ export const fishCatch = sqliteTable('fish_catch', {
 	notes: text('notes'),
 	catchAndRelease: integer('catch_and_release', { mode: 'boolean' }).notNull().default(false),
 	presentation: text('presentation'),
+	biteIndex: real('bite_index'),
 	lureId: text('lure_id').references(() => lure.id, { onDelete: 'set null' }),
 	shareToken: text('share_token'),
 	createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),

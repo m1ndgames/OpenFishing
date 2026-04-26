@@ -49,6 +49,20 @@
 		return l.lureNumber ? `#${String(l.lureNumber).padStart(4, '0')} ${l.name}` : l.name;
 	}
 
+	function biteColor(score: number) {
+		if (score >= 8.5) return '#22d3ee';
+		if (score >= 6.5) return '#4ade80';
+		if (score >= 4)   return '#f59e0b';
+		return '#ef4444';
+	}
+
+	function biteRating(score: number) {
+		if (score >= 8.5) return t.biteRatingExcellent;
+		if (score >= 6.5) return t.biteRatingGood;
+		if (score >= 4)   return t.biteRatingFair;
+		return t.biteRatingPoor;
+	}
+
 	onMount(async () => {
 		if (!hasLocation || !mapEl) return;
 		const L = (await import('leaflet')).default;
@@ -192,6 +206,22 @@
 						</a>
 					</div>
 				{/if}
+			</div>
+		{/if}
+
+		<!-- Bite index at time of catch -->
+		{#if c.biteIndex != null}
+			<div>
+				<p style="font-size:0.72rem; font-weight:500; color:#3d6a84; text-transform:uppercase; letter-spacing:0.06em; margin:0 0 8px;">{t.biteIndex}</p>
+				<div style="display:flex; align-items:center; gap:14px;">
+					<div style="flex:1;">
+						<div style="background:#172f4a; border-radius:4px; height:5px; margin-bottom:6px;">
+							<div style="background:{biteColor(c.biteIndex)}; border-radius:4px; height:5px; width:{c.biteIndex * 10}%;"></div>
+						</div>
+						<span style="font-size:0.78rem; font-weight:600; color:{biteColor(c.biteIndex)};">{biteRating(c.biteIndex)}</span>
+					</div>
+					<span style="font-family:'JetBrains Mono',monospace; font-size:1.6rem; font-weight:700; color:{biteColor(c.biteIndex)}; line-height:1; flex-shrink:0;">{c.biteIndex}</span>
+				</div>
 			</div>
 		{/if}
 

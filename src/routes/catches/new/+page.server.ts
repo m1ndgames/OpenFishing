@@ -4,6 +4,7 @@ import { db } from '$lib/server/db';
 import { fishCatch, catchPhoto, lure } from '$lib/server/db/schema';
 import { saveUpload } from '$lib/server/uploads';
 import { asc } from 'drizzle-orm';
+import { fetchWeather } from '$lib/server/biteIndex';
 
 export const load: PageServerLoad = async () => {
 	const lures = await db
@@ -37,9 +38,12 @@ export const actions: Actions = {
 		if (!species) return fail(400, { error: 'speciesRequired' });
 		if (lat === null || lng === null || isNaN(lat) || isNaN(lng)) return fail(400, { error: 'locationRequired' });
 
+		const weather = await fetchWeather(lat, lng);
+		const biteIndex = weather?.biteIndex ?? null;
+
 		const [newCatch] = await db
 			.insert(fishCatch)
-			.values({ caughtAt, species, weightG, lengthCm, lat, lng, notes, lureId, catchAndRelease, presentation })
+			.values({ caughtAt, species, weightG, lengthCm, lat, lng, notes, lureId, catchAndRelease, presentation, biteIndex })
 			.returning();
 
 		const photoFiles = data.getAll('photos') as File[];

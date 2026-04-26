@@ -1,0 +1,1 @@
+ALTER TABLE `fish_catch` ADD `bite_index` real;
