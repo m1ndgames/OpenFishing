@@ -116,7 +116,8 @@
 				l.name.toLowerCase().includes(q) ||
 				(l.brand  ?? '').toLowerCase().includes(q) ||
 				(l.type   ?? '').toLowerCase().includes(q) ||
-				(l.color  ?? '').toLowerCase().includes(q)
+				(l.color  ?? '').toLowerCase().includes(q) ||
+				l.tags.some(tag => tag.name.toLowerCase().includes(q))
 			);
 		}
 		return true;
