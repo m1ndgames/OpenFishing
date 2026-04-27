@@ -72,6 +72,7 @@ A self-hosted web app to organize your fishing lures, mark fishing spots, and lo
 - English and German — auto-detected from browser, switchable via flag picker
 - Optional password authentication via `AUTH_PASSWORD` env var
 - Share links bypass authentication so individual records can be shared publicly without exposing the whole app
+- **Demo mode** via `DEMO_MODE` env var — read-only view, all writes blocked, localized banner and toast inform users
 
 ## Running with Docker
 
@@ -89,6 +90,7 @@ services:
       - UPLOAD_PATH=/app/uploads
       - BASE_URL=https://fishing.yourdomain.com
       - AUTH_PASSWORD=your_secure_password   # omit to disable auth
+      - DEMO_MODE=1                          # omit to allow writes
 ```
 
 Database migrations run automatically on startup. The `data` and `uploads` volumes are the only state — back those up and you're covered.

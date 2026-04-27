@@ -9,6 +9,8 @@ export default {
 	navAddSpot: 'Stelle',
 	navAddCatch: 'Fang',
 	settingsBackupRestore: 'Backup & Wiederherstellen',
+	demoBanner: 'Demo-Modus',
+	demoToast: 'Demo-Modus — Änderungen werden nicht gespeichert.',
 
 	// Spots
 	spotNameLabel: 'Name',

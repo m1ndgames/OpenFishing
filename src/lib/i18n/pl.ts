@@ -9,6 +9,8 @@ export default {
 	navAddSpot: 'Łowisko',
 	navAddCatch: 'Połów',
 	settingsBackupRestore: 'Kopia zapasowa i przywracanie',
+	demoBanner: 'Tryb demo',
+	demoToast: 'Tryb demo — zmiany nie zostaną zapisane.',
 
 	// Spots
 	spotNameLabel: 'Nazwa',

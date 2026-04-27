@@ -7,6 +7,16 @@ function sessionToken(password: string): string {
 }
 
 export const handle: Handle = async ({ event, resolve }) => {
+	// Demo mode: block all writes except the lang preference toggle
+	if (env.DEMO_MODE && event.request.method !== 'GET' && event.request.method !== 'HEAD') {
+		if (event.url.pathname !== '/api/lang') {
+			if (event.url.pathname.startsWith('/api/')) {
+				return Response.json({ error: 'Demo mode — write access is disabled' }, { status: 403 });
+			}
+			redirect(303, event.url.pathname);
+		}
+	}
+
 	const password = env.AUTH_PASSWORD;
 
 	// Auth disabled when no password is configured

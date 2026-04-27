@@ -174,4 +174,5 @@ Drizzle migrations run automatically on startup in production (`NODE_ENV=product
 | `UPLOAD_PATH` | `./uploads` | Directory for lure/spot/catch photos |
 | `BASE_URL` | `http://localhost:5173` | Public base URL — used to generate QR code links |
 | `AUTH_PASSWORD` | _(unset)_ | If set, enables password login. Leave unset for open access. |
+| `DEMO_MODE` | _(unset)_ | If set to any value, enables read-only demo mode. All writes are blocked server-side; the UI shows a banner and a toast on submit attempts. Language switching still works. |
 | `BODY_SIZE_LIMIT` | `104857600` | Max upload size in bytes (set in Dockerfile) |

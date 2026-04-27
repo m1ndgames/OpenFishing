@@ -1,5 +1,6 @@
 import type { LayoutServerLoad } from './$types';
 import { translations, defaultLang, SUPPORTED_LANGS, type Lang } from '$lib/i18n';
+import { env } from '$env/dynamic/private';
 
 export const load: LayoutServerLoad = async ({ cookies, request }) => {
 	const cookie = cookies.get('lang') ?? '';
@@ -13,5 +14,5 @@ export const load: LayoutServerLoad = async ({ cookies, request }) => {
 		lang = SUPPORTED_LANGS.includes(browserLang as Lang) ? (browserLang as Lang) : defaultLang;
 	}
 
-	return { t: translations[lang], lang };
+	return { t: translations[lang], lang, demoMode: !!env.DEMO_MODE };
 };

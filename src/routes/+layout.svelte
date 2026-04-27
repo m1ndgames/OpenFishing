@@ -2,10 +2,11 @@
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import { page } from '$app/stores';
+	import { onMount } from 'svelte';
 	import type { LayoutData } from './$types';
 
 	let { children, data }: { children: import('svelte').Snippet; data: LayoutData } = $props();
-	const { t, lang } = data;
+	const { t, lang, demoMode } = data;
 
 	const isLoginPage    = $derived($page.url.pathname === '/login');
 	const isSharePage    = $derived($page.url.pathname.startsWith('/share/'));
@@ -16,6 +17,30 @@
 	const settingsActive = $derived($page.url.pathname.startsWith('/settings') || $page.url.pathname === '/qr');
 
 	let showAddMenu = $state(false);
+
+	let demoToast = $state(false);
+	let demoToastTimer: ReturnType<typeof setTimeout>;
+
+	function showDemoMessage() {
+		demoToast = true;
+		clearTimeout(demoToastTimer);
+		demoToastTimer = setTimeout(() => { demoToast = false; }, 3500);
+	}
+
+	onMount(() => {
+		if (!demoMode) return;
+		const handler = (e: Event) => {
+			const form = e.target as HTMLFormElement;
+			// Allow the language switcher through
+			if ((form.getAttribute('action') ?? '').includes('/api/lang')) return;
+			e.preventDefault();
+			e.stopImmediatePropagation();
+			showDemoMessage();
+		};
+		// Capture phase — fires before use:enhance on the form element
+		document.addEventListener('submit', handler, true);
+		return () => document.removeEventListener('submit', handler, true);
+	});
 </script>
 
 <svelte:document onclick={(e) => {
@@ -37,6 +62,17 @@
 
 	<!-- Top accent stripe -->
 	<div class="h-px no-print" style="background: linear-gradient(90deg, transparent, #22d3ee 30%, #06b6d4 50%, #22d3ee 70%, transparent);"></div>
+
+	<!-- Demo mode banner -->
+	{#if demoMode}
+	<div class="no-print" style="background:rgba(245,158,11,0.08); border-bottom:1px solid rgba(245,158,11,0.2); padding:7px 16px; display:flex; align-items:center; justify-content:center; gap:8px;">
+		<svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="color:#f59e0b; flex-shrink:0;">
+			<rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/>
+			<path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+		</svg>
+		<span style="font-size:0.8rem; color:#fbbf24; font-weight:500; font-family:'DM Sans',sans-serif;">{t.demoBanner}</span>
+	</div>
+	{/if}
 
 	<!-- ── DESKTOP NAV (md+) ── -->
 	<header class="no-print hidden md:block" style="background-color:#0b1a2c; border-bottom:1px solid #172f4a; position:relative; z-index:1000;">
@@ -328,6 +364,17 @@
 			<span style="font-size:0.65rem; font-weight:600; letter-spacing:0.03em;">{t.navSettings}</span>
 		</a>
 	</nav>
+
+	<!-- Demo mode toast -->
+	{#if demoToast}
+		<div style="position:fixed; bottom:80px; left:50%; transform:translateX(-50%); z-index:9999; background:#0f2238; border:1px solid rgba(245,158,11,0.45); border-radius:12px; padding:13px 20px; display:flex; align-items:center; gap:10px; box-shadow:0 8px 32px rgba(0,0,0,0.5); pointer-events:none; white-space:nowrap;">
+			<svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="color:#f59e0b; flex-shrink:0;">
+				<rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/>
+				<path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+			</svg>
+			<span style="font-family:'DM Sans',sans-serif; font-size:0.875rem; font-weight:500; color:#fbbf24;">{t.demoToast}</span>
+		</div>
+	{/if}
 </div>
 {/if}
 
