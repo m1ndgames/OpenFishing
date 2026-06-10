@@ -2,13 +2,22 @@ import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { env } from '$env/dynamic/private';
 import { db } from '$lib/server/db';
-import { eq, like, and, desc } from 'drizzle-orm';
+import { eq, like, and, desc, gte, lte } from 'drizzle-orm';
 import { lure as lureTable, fishCatch as catchTable } from '$lib/server/db/schema';
 import { fetchWeather, type WeatherData } from '$lib/server/biteIndex';
 
 const MOON_PHASES = ['New moon', 'Waxing crescent', 'First quarter', 'Waxing gibbous', 'Full moon', 'Waning gibbous', 'Last quarter', 'Waning crescent'];
 
-const SYSTEM_PROMPT = `You are a fishing buddy AI integrated into OpenFishing, a personal fishing logbook app. You have access to the user's lures, catches, and spots via tools — call them whenever you need data to answer a question. Always use the available filter parameters to request only relevant data (e.g. filter by species when the user mentions a specific fish). Answer questions about their fishing data, give tackle recommendations, and provide practical fishing advice. Be concise and practical.`;
+const SYSTEM_PROMPT = `You are a fishing buddy AI integrated into OpenFishing, a personal fishing logbook app. You have access to the user's lures, catches, and spots via tools — call them whenever you need data to answer a question.
+
+When calling get_lures, always apply as many filters as possible to return only relevant results:
+- Filter by species when the user mentions a target fish.
+- Filter by waterType when the context makes it clear (river/sea/lake).
+- Use minLightConditions/maxLightConditions based on current light conditions from the context block: bright sunny day → minLightConditions 7, overcast → 4–6, dawn/dusk → 2–4, night → 0–2.
+- Filter by color or type when the user or conditions suggest it (e.g. natural colors on clear days, bright/UV colors in murky water or low light).
+- Never fetch all lures without any filter unless the user explicitly asks to see everything.
+
+Answer questions about their fishing data, give tackle recommendations, and provide practical fishing advice. Be concise and practical.`;
 
 function buildContextBlock(
 	datetime: string | undefined,
@@ -40,7 +49,7 @@ const TOOLS = [
 		type: 'function',
 		function: {
 			name: 'get_lures',
-			description: 'Fetch fishing lures from the database. Always filter when the user mentions a specific fish species, water type, or lure type — do not fetch everything when a filter applies.',
+			description: 'Fetch fishing lures from the database. Always filter when the user mentions a specific fish species, water type, or lure type — do not fetch everything when a filter applies. Returns up to 20 lures by default; check the returned total to decide if you need to paginate.',
 			parameters: {
 				type: 'object',
 				properties: {
@@ -57,9 +66,29 @@ const TOOLS = [
 						type: 'string',
 						description: 'Return only lures of this type, e.g. "wobbler", "swimbait", "jig", "spoon".'
 					},
+					color: {
+						type: 'string',
+						description: 'Return only lures whose color contains this value. Use the color name as the user wrote it — do NOT translate. E.g. "natural", "chartreuse", "white".'
+					},
+					minLightConditions: {
+						type: 'integer',
+						description: 'Return only lures with lightConditions >= this value (0=Night, 10=Clear/sunny). Use the current light context to filter: bright sunny day → 7, overcast → 4, dawn/dusk → 2, night → 0.'
+					},
+					maxLightConditions: {
+						type: 'integer',
+						description: 'Return only lures with lightConditions <= this value. Combine with minLightConditions to target a range.'
+					},
 					includeLost: {
 						type: 'boolean',
 						description: 'Whether to include lost lures. Defaults to false.'
+					},
+					limit: {
+						type: 'integer',
+						description: 'Maximum number of lures to return. Defaults to 20.'
+					},
+					offset: {
+						type: 'integer',
+						description: 'Number of lures to skip — use with limit to paginate through results if total exceeds limit.'
 					}
 				},
 				required: []
@@ -106,28 +135,38 @@ const TOOLS = [
 	}
 ];
 
-type LureArgs  = { species?: string; waterType?: string; type?: string; includeLost?: boolean };
+type LureArgs  = { species?: string; waterType?: string; type?: string; color?: string; minLightConditions?: number; maxLightConditions?: number; includeLost?: boolean; limit?: number; offset?: number };
 type CatchArgs = { species?: string; limit?: number };
 type SpotArgs  = { tag?: string };
 
 async function executeTool(name: string, args: Record<string, unknown>): Promise<string> {
 	switch (name) {
 		case 'get_lures': {
-			const { species, waterType, type: lureType, includeLost = false } = args as LureArgs;
+			const { species, waterType, type: lureType, color, minLightConditions, maxLightConditions, includeLost = false, limit = 20, offset = 0 } = args as LureArgs;
 
 			const filters = [];
 			if (!includeLost) filters.push(eq(lureTable.lost, false));
-			if (species)   filters.push(like(lureTable.species,   `%${species}%`));
-			if (waterType) filters.push(eq(lureTable.waterType,   waterType));
-			if (lureType)  filters.push(like(lureTable.type,      `%${lureType}%`));
+			if (species)             filters.push(like(lureTable.species,          `%${species}%`));
+			if (waterType)           filters.push(eq(lureTable.waterType,           waterType));
+			if (lureType)            filters.push(like(lureTable.type,              `%${lureType}%`));
+			if (color)               filters.push(like(lureTable.color,             `%${color}%`));
+			if (minLightConditions != null) filters.push(gte(lureTable.lightConditions, minLightConditions));
+			if (maxLightConditions != null) filters.push(lte(lureTable.lightConditions, maxLightConditions));
 
-			const lures = await db.query.lure.findMany({
-				where: filters.length ? and(...filters) : undefined,
-				with: { tags: true }
+			const whereClause = filters.length ? and(...filters) : undefined;
+			const [lures, allMatching] = await Promise.all([
+				db.query.lure.findMany({ where: whereClause, limit, offset, with: { tags: true } }),
+				db.query.lure.findMany({ where: whereClause, columns: { id: true } })
+			]);
+			const total = allMatching.length;
+			return JSON.stringify({
+				total,
+				offset,
+				results: lures.map(({ id: _, photoPath: _p, shareToken: _s, qrCoded: _q, lureNumber: _n, createdAt: _c, updatedAt: _u, ...l }) => ({
+					...l,
+					tags: l.tags.map((t) => t.name)
+				}))
 			});
-			return JSON.stringify(
-				lures.map(({ photoPath: _, ...l }) => ({ ...l, tags: l.tags.map((t) => t.name) }))
-			);
 		}
 
 		case 'get_catches': {
@@ -143,9 +182,9 @@ async function executeTool(name: string, args: Record<string, unknown>): Promise
 				with: { lure: true }
 			});
 			return JSON.stringify(
-				catches.map(({ lure, ...c }) => ({
+				catches.map(({ lure, id: _, shareToken: _s, createdAt: _c, updatedAt: _u, ...c }) => ({
 					...c,
-					lure: lure ? { id: lure.id, name: lure.name } : null
+					lure: lure ? { name: lure.name } : null
 				}))
 			);
 		}
@@ -157,7 +196,10 @@ async function executeTool(name: string, args: Record<string, unknown>): Promise
 				? spots.filter((s) => s.tags.some((t) => t.name.toLowerCase().includes(tag.toLowerCase())))
 				: spots;
 			return JSON.stringify(
-				filtered.map(({ ...s }) => ({ ...s, tags: s.tags.map((t) => t.name) }))
+				filtered.map(({ id: _, shareToken: _s, createdAt: _c, updatedAt: _u, ...s }) => ({
+					...s,
+					tags: s.tags.map((t) => t.name)
+				}))
 			);
 		}
 
@@ -187,10 +229,12 @@ export const POST: RequestHandler = async ({ request }) => {
 	for (let round = 0; round < 6; round++) {
 		let res: Response;
 		try {
+			const abort = AbortSignal.timeout(45_000);
 			res = await fetch(`${env.LITELLM_URL.replace(/\/$/, '')}/chat/completions`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ model: env.LITELLM_MODEL, messages: conversation, tools: TOOLS, tool_choice: 'auto' })
+				body: JSON.stringify({ model: env.LITELLM_MODEL, messages: conversation, tools: TOOLS, tool_choice: 'auto' }),
+				signal: abort
 			});
 		} catch (e) {
 			error(502, `LiteLLM unreachable: ${(e as Error).message}`);
