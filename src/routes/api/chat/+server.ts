@@ -46,7 +46,7 @@ const TOOLS = [
 				properties: {
 					species: {
 						type: 'string',
-						description: 'Return only lures suitable for this fish species (e.g. "bass", "pike", "perch"). Partial match — "bass" will match "Largemouth Bass".'
+						description: 'Return only lures suitable for this fish species. Use the species name exactly as the user wrote it — do NOT translate it to English. Partial match, so "Barsch" will match "Barsch", "Flussbarsch", etc.'
 					},
 					waterType: {
 						type: 'string',
@@ -76,7 +76,7 @@ const TOOLS = [
 				properties: {
 					species: {
 						type: 'string',
-						description: 'Return only catches of this fish species (e.g. "pike", "bass"). Partial match.'
+						description: 'Return only catches of this fish species. Use the species name exactly as the user wrote it — do NOT translate it to English. Partial match.'
 					},
 					limit: {
 						type: 'integer',
@@ -97,7 +97,7 @@ const TOOLS = [
 				properties: {
 					tag: {
 						type: 'string',
-						description: 'Return only spots that have a tag containing this value (e.g. "river", "lake", "Rhine").'
+						description: 'Return only spots that have a tag containing this value. Use the name exactly as the user wrote it — do NOT translate it to English (e.g. pass "Rhein" not "Rhine", "See" not "lake").'
 					}
 				},
 				required: []
