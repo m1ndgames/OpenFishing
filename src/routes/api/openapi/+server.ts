@@ -1,0 +1,199 @@
+import { json } from '@sveltejs/kit';
+import type { RequestHandler } from './$types';
+import { env } from '$env/dynamic/private';
+
+const spec = {
+	openapi: '3.0.3',
+	info: {
+		title: 'OpenFishing API',
+		version: '1.0.0',
+		description:
+			'Read-only REST API for OpenFishing. All endpoints require a `Bearer` token matching `AUTH_PASSWORD` when password auth is enabled.'
+	},
+	servers: [{ url: '/api/v1' }],
+	security: [{ bearerAuth: [] }],
+	components: {
+		securitySchemes: {
+			bearerAuth: {
+				type: 'http',
+				scheme: 'bearer',
+				description: 'The value of `AUTH_PASSWORD`'
+			}
+		},
+		schemas: {
+			Lure: {
+				type: 'object',
+				properties: {
+					id: { type: 'string', format: 'uuid' },
+					lureNumber: { type: 'integer', nullable: true },
+					name: { type: 'string' },
+					brand: { type: 'string', nullable: true },
+					type: { type: 'string', nullable: true },
+					color: { type: 'string', nullable: true },
+					weight: { type: 'number', nullable: true, description: 'Weight in grams' },
+					size: { type: 'string', nullable: true },
+					notes: { type: 'string', nullable: true },
+					species: { type: 'string', nullable: true, description: 'Space-separated species list' },
+					runningDepth: { type: 'string', nullable: true },
+					waterType: { type: 'string', nullable: true },
+					lightConditions: {
+						type: 'integer',
+						nullable: true,
+						minimum: 0,
+						maximum: 10,
+						description: '0 = Night, 10 = Clear'
+					},
+					amount: { type: 'integer' },
+					favourite: { type: 'boolean' },
+					qrCoded: { type: 'boolean' },
+					lost: { type: 'boolean' },
+					shareToken: { type: 'string', format: 'uuid', nullable: true },
+					createdAt: { type: 'string', format: 'date-time' },
+					updatedAt: { type: 'string', format: 'date-time' },
+					tags: { type: 'array', items: { type: 'string' } }
+				}
+			},
+			Spot: {
+				type: 'object',
+				properties: {
+					id: { type: 'string', format: 'uuid' },
+					name: { type: 'string' },
+					lat: { type: 'number' },
+					lng: { type: 'number' },
+					notes: { type: 'string', nullable: true },
+					shareToken: { type: 'string', format: 'uuid', nullable: true },
+					createdAt: { type: 'string', format: 'date-time' },
+					updatedAt: { type: 'string', format: 'date-time' },
+					tags: { type: 'array', items: { type: 'string' } }
+				}
+			},
+			Catch: {
+				type: 'object',
+				properties: {
+					id: { type: 'string', format: 'uuid' },
+					caughtAt: { type: 'string', format: 'date-time' },
+					species: { type: 'string', nullable: true },
+					weightG: { type: 'number', nullable: true, description: 'Weight in grams' },
+					lengthCm: { type: 'number', nullable: true, description: 'Length in centimetres' },
+					lat: { type: 'number', nullable: true },
+					lng: { type: 'number', nullable: true },
+					notes: { type: 'string', nullable: true },
+					catchAndRelease: { type: 'boolean' },
+					presentation: { type: 'string', nullable: true },
+					biteIndex: {
+						type: 'number',
+						nullable: true,
+						minimum: 0,
+						maximum: 10,
+						description: 'Bite index at time of catch (0–10)'
+					},
+					lureId: { type: 'string', format: 'uuid', nullable: true },
+					shareToken: { type: 'string', format: 'uuid', nullable: true },
+					createdAt: { type: 'string', format: 'date-time' },
+					updatedAt: { type: 'string', format: 'date-time' },
+					lure: {
+						nullable: true,
+						type: 'object',
+						properties: {
+							id: { type: 'string', format: 'uuid' },
+							name: { type: 'string' }
+						}
+					}
+				}
+			},
+			Error: {
+				type: 'object',
+				properties: {
+					error: { type: 'string' }
+				}
+			}
+		}
+	},
+	paths: {
+		'/lures': {
+			get: {
+				summary: 'List all lures',
+				operationId: 'listLures',
+				tags: ['Lures'],
+				responses: {
+					'200': {
+						description: 'Array of lures',
+						content: { 'application/json': { schema: { type: 'array', items: { $ref: '#/components/schemas/Lure' } } } }
+					},
+					'401': { description: 'Unauthorized', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } }
+				}
+			}
+		},
+		'/lures/{id}': {
+			get: {
+				summary: 'Get a lure by ID',
+				operationId: 'getLure',
+				tags: ['Lures'],
+				parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+				responses: {
+					'200': { description: 'Lure', content: { 'application/json': { schema: { $ref: '#/components/schemas/Lure' } } } },
+					'401': { description: 'Unauthorized', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+					'404': { description: 'Not found', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } }
+				}
+			}
+		},
+		'/spots': {
+			get: {
+				summary: 'List all spots',
+				operationId: 'listSpots',
+				tags: ['Spots'],
+				responses: {
+					'200': {
+						description: 'Array of spots',
+						content: { 'application/json': { schema: { type: 'array', items: { $ref: '#/components/schemas/Spot' } } } }
+					},
+					'401': { description: 'Unauthorized', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } }
+				}
+			}
+		},
+		'/spots/{id}': {
+			get: {
+				summary: 'Get a spot by ID',
+				operationId: 'getSpot',
+				tags: ['Spots'],
+				parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+				responses: {
+					'200': { description: 'Spot', content: { 'application/json': { schema: { $ref: '#/components/schemas/Spot' } } } },
+					'401': { description: 'Unauthorized', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+					'404': { description: 'Not found', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } }
+				}
+			}
+		},
+		'/catches': {
+			get: {
+				summary: 'List all catches',
+				operationId: 'listCatches',
+				tags: ['Catches'],
+				responses: {
+					'200': {
+						description: 'Array of catches',
+						content: { 'application/json': { schema: { type: 'array', items: { $ref: '#/components/schemas/Catch' } } } }
+					},
+					'401': { description: 'Unauthorized', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } }
+				}
+			}
+		},
+		'/catches/{id}': {
+			get: {
+				summary: 'Get a catch by ID',
+				operationId: 'getCatch',
+				tags: ['Catches'],
+				parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+				responses: {
+					'200': { description: 'Catch', content: { 'application/json': { schema: { $ref: '#/components/schemas/Catch' } } } },
+					'401': { description: 'Unauthorized', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+					'404': { description: 'Not found', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } }
+				}
+			}
+		}
+	}
+};
+
+export const GET: RequestHandler = async () => {
+	return json(spec);
+};

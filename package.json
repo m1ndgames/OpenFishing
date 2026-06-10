@@ -39,6 +39,7 @@
 		"cropperjs": "^1.6.2",
 		"leaflet": "^1.9.4",
 		"qrcode": "^1.5.4",
-		"sharp": "^0.34.5"
+		"sharp": "^0.34.5",
+		"swagger-ui-dist": "^5.32.6"
 	}
 }

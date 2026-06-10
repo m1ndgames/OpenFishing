@@ -71,6 +71,14 @@ npm run db:studio      # Open Drizzle Studio (DB GUI)
 | `/api/lures/[id]/share` | POST — creates share token, DELETE — revokes it |
 | `/api/spots/[id]/share` | POST — creates share token, DELETE — revokes it |
 | `/api/catches/[id]/share` | POST — creates share token, DELETE — revokes it |
+| `/api/openapi` | GET — serves the OpenAPI 3.0 spec as JSON (cookie auth) |
+| `/api/v1/lures` | GET — list all lures with tags; Bearer token auth |
+| `/api/v1/lures/[id]` | GET — single lure with tags; Bearer token auth |
+| `/api/v1/spots` | GET — list all spots with tags; Bearer token auth |
+| `/api/v1/spots/[id]` | GET — single spot with tags; Bearer token auth |
+| `/api/v1/catches` | GET — list all catches with lure `{ id, name }`; Bearer token auth |
+| `/api/v1/catches/[id]` | GET — single catch with lure `{ id, name }`; Bearer token auth |
+| `/api-docs` | Swagger UI for the REST API (cookie auth, SSR disabled) |
 | `/share/lures/[token]` | Public read-only lure view (no auth required) |
 | `/share/spots/[token]` | Public read-only spot view (no auth required) |
 | `/share/catches/[token]` | Public read-only catch view (no auth required) |
@@ -161,6 +169,16 @@ The new/edit lure forms load distinct existing values for `name`, `brand`, `type
 ### QR labels
 
 `/settings/qr` shows all lures where `qrCoded = false`, with a server-side generated SVG QR code per lure. The print view uses `@media print` CSS to render a compact grid of 12.5mm×12.5mm QR codes with bordered frames. Marking a lure as labeled uses a SvelteKit form action with `enhance` (no page reload).
+
+### REST API
+
+Read-only JSON API at `/api/v1/`. Auth handled in `src/hooks.server.ts` separately from the cookie-based session auth:
+
+- When `AUTH_PASSWORD` is set, `/api/v1/*` requires `Authorization: Bearer <password>`. Missing or wrong token → `401 { error: 'Unauthorized' }`. Never redirects to `/login`.
+- When `AUTH_PASSWORD` is unset, `/api/v1/*` is open.
+- `/api/openapi` serves the OpenAPI 3.0 spec (guarded by normal cookie auth so Swagger UI can fetch it in-browser).
+- `/api-docs` renders Swagger UI (`swagger-ui-dist` package, SSR disabled via `+page.ts`). The page is fully themed to match the app — CSS overrides live in `src/routes/api-docs/+page.svelte`.
+- Photo paths are excluded from all API responses. Tags are returned as `string[]`. Catches include `lure: { id, name } | null`.
 
 ### Migrations
 

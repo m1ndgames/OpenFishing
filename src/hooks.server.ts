@@ -27,6 +27,16 @@ export const handle: Handle = async ({ event, resolve }) => {
 	if (event.url.pathname.startsWith('/share/')) return resolve(event);
 	if (event.url.pathname.startsWith('/uploads/')) return resolve(event);
 
+	// API v1: authenticate via Bearer token, not session cookie
+	if (event.url.pathname.startsWith('/api/v1/')) {
+		const authHeader = event.request.headers.get('authorization');
+		const bearer = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+		if (bearer !== password) {
+			return Response.json({ error: 'Unauthorized' }, { status: 401 });
+		}
+		return resolve(event);
+	}
+
 	const token = event.cookies.get('of_session');
 	if (token !== sessionToken(password)) {
 		redirect(303, '/login');

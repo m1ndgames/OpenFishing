@@ -73,6 +73,38 @@ A self-hosted web app to organize your fishing lures, mark fishing spots, and lo
 - Optional password authentication via `AUTH_PASSWORD` env var
 - Share links bypass authentication so individual records can be shared publicly without exposing the whole app
 - **Demo mode** via `DEMO_MODE` env var — read-only view, all writes blocked, localized banner and toast inform users
+- **REST API** — read-only JSON endpoints for external integrations (see below)
+
+## REST API
+
+OpenFishing exposes a read-only REST API at `/api/v1/`. Interactive documentation is available at `/api-docs`.
+
+### Authentication
+
+When `AUTH_PASSWORD` is set the API requires a Bearer token on every request:
+
+```
+Authorization: Bearer <your_password>
+```
+
+When `AUTH_PASSWORD` is not set the endpoints are openly accessible.
+
+### Endpoints
+
+| Method | Path | Description |
+|---|---|---|
+| `GET` | `/api/v1/lures` | List all lures (includes tags) |
+| `GET` | `/api/v1/lures/{id}` | Get a single lure by ID |
+| `GET` | `/api/v1/spots` | List all spots (includes tags) |
+| `GET` | `/api/v1/spots/{id}` | Get a single spot by ID |
+| `GET` | `/api/v1/catches` | List all catches (includes linked lure name) |
+| `GET` | `/api/v1/catches/{id}` | Get a single catch by ID |
+
+### Example
+
+```bash
+curl -H "Authorization: Bearer yourpassword" https://fishing.yourdomain.com/api/v1/lures
+```
 
 ## Running with Docker
 
