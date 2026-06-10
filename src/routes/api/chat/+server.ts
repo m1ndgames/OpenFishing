@@ -187,7 +187,7 @@ export const POST: RequestHandler = async ({ request }) => {
 	for (let round = 0; round < 6; round++) {
 		let res: Response;
 		try {
-			res = await fetch(`${env.LITELLM_URL}/chat/completions`, {
+			res = await fetch(`${env.LITELLM_URL.replace(/\/$/, '')}/chat/completions`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ model: env.LITELLM_MODEL, messages: conversation, tools: TOOLS, tool_choice: 'auto' })
