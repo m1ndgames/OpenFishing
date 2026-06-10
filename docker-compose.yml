@@ -11,18 +11,18 @@ services:
       - UPLOAD_PATH=/app/uploads
       - BASE_URL=https://fishing.yourdomain.com
       - AUTH_PASSWORD=your_secure_password   # omit to disable auth
-      - DEMO_MODE=                           # set to to true, to enable read-only demo mode
-      - CHATBOT=                             # set to to true, to enable the AI chatbot
-      - LITELLM_URL=http://litellm:4000
-      - LITELLM_MODEL=claude-sonnet          # must match a model_name in litellm.config.yaml
-    depends_on:
-      - litellm
+    #  - DEMO_MODE=                           # set to to true, to enable read-only demo mode
+    #  - CHATBOT=                             # set to to true, to enable the AI chatbot
+    #  - LITELLM_URL=http://litellm:4000
+    #  - LITELLM_MODEL=claude-sonnet
+    #depends_on:
+    #  - litellm
 
-  litellm:
-    image: ghcr.io/berriai/litellm:main-latest
-    volumes:
-      - ./litellm.config.yaml:/app/config.yaml
-    command: ["--config", "/app/config.yaml", "--port", "4000", "--num_workers", "1"]
-    environment:
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
+#  litellm: # Optional
+#    image: ghcr.io/berriai/litellm:main-latest
+#    volumes:
+#      - ./litellm.config.yaml:/app/config.yaml
+#    command: ["--config", "/app/config.yaml", "--port", "4000", "--num_workers", "1"]
+#    environment:
+#      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+#      - OPENAI_API_KEY=${OPENAI_API_KEY}
