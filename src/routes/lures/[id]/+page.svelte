@@ -2,9 +2,14 @@
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
-	const { lure, qrSvg, t, lureCatches, authEnabled } = data;
+	let lure = $derived(data.lure);
+	let qrSvg = $derived(data.qrSvg);
+	let t = $derived(data.t);
+	let lureCatches = $derived(data.lureCatches);
+	let authEnabled = $derived(data.authEnabled);
 
 	let shareUrl = $state(data.shareUrl);
+	$effect(() => { shareUrl = data.shareUrl; });
 	let copied = $state(false);
 
 	async function createShare() {
@@ -29,16 +34,16 @@
 		return new Date(d).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' });
 	}
 
-	const waterTypeLabels: Record<string, string> = {
+	let waterTypeLabels = $derived<Record<string, string>>({
 		freshwater: t.waterType_freshwater,
 		saltwater: t.waterType_saltwater
-	};
+	});
 
-	const runningDepthLabels: Record<string, string> = {
+	let runningDepthLabels = $derived<Record<string, string>>({
 		shallow: t.runningDepth_shallow,
 		medium: t.runningDepth_medium,
 		deep: t.runningDepth_deep
-	};
+	});
 </script>
 
 <div style="max-width:580px;">

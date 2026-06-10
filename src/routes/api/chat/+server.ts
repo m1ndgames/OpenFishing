@@ -17,6 +17,8 @@ When calling get_lures, always apply as many filters as possible to return only 
 - Filter by color or type when the user or conditions suggest it (e.g. natural colors on clear days, bright/UV colors in murky water or low light).
 - Never fetch all lures without any filter unless the user explicitly asks to see everything.
 
+When mentioning a specific lure by name, always format it as a markdown link using its id: [Lure Name](/lures/ID). Never use plain text for lure names when you have the id available.
+
 Answer questions about their fishing data, give tackle recommendations, and provide practical fishing advice. Be concise and practical.`;
 
 function buildContextBlock(
@@ -162,7 +164,7 @@ async function executeTool(name: string, args: Record<string, unknown>): Promise
 			return JSON.stringify({
 				total,
 				offset,
-				results: lures.map(({ id: _, photoPath: _p, shareToken: _s, qrCoded: _q, lureNumber: _n, createdAt: _c, updatedAt: _u, ...l }) => ({
+				results: lures.map(({ photoPath: _p, shareToken: _s, qrCoded: _q, lureNumber: _n, createdAt: _c, updatedAt: _u, ...l }) => ({
 					...l,
 					tags: l.tags.map((t) => t.name)
 				}))
@@ -227,6 +229,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
 	// Tool call loop — cap at 6 rounds to prevent runaway requests
 	for (let round = 0; round < 6; round++) {
+		console.log(`[chat] round ${round} — sending ${JSON.stringify(conversation).length} bytes to LiteLLM`);
 		let res: Response;
 		try {
 			const abort = AbortSignal.timeout(45_000);
@@ -237,11 +240,14 @@ export const POST: RequestHandler = async ({ request }) => {
 				signal: abort
 			});
 		} catch (e) {
+			console.error(`[chat] round ${round} fetch error:`, (e as Error).message);
 			error(502, `LiteLLM unreachable: ${(e as Error).message}`);
 		}
 
+		console.log(`[chat] round ${round} — LiteLLM responded ${res.status}`);
 		if (!res.ok) {
-			const text = await res.text();
+			const text = await res.text().catch(() => '(unreadable body)');
+			console.error(`[chat] round ${round} — LiteLLM error body:`, text);
 			error(502, `LiteLLM error ${res.status}: ${text}`);
 		}
 

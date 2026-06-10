@@ -1,6 +1,21 @@
 <script lang="ts">
 	import { tick } from 'svelte';
+	import { goto } from '$app/navigation';
+	import { marked } from 'marked';
 	import type { Translations } from '$lib/i18n';
+
+	function renderMarkdown(text: string): string {
+		return marked.parse(text, { async: false }) as string;
+	}
+
+	function handleLinkClick(e: MouseEvent) {
+		const a = (e.target as HTMLElement).closest('a');
+		if (!a) return;
+		const href = a.getAttribute('href');
+		if (!href?.startsWith('/')) return;
+		e.preventDefault();
+		goto(href, { invalidateAll: true });
+	}
 
 	type Message = { role: 'user' | 'assistant'; content: string };
 
@@ -158,7 +173,7 @@
 	</div>
 
 	<!-- Messages -->
-	<div bind:this={messagesEl} style="
+	<div bind:this={messagesEl} onclick={handleLinkClick} style="
 		flex:1; overflow-y:auto; padding:14px 14px 8px;
 		display:flex; flex-direction:column; gap:10px;
 		scrollbar-width:thin; scrollbar-color:#243f5e transparent;
@@ -202,13 +217,19 @@
 					border-radius:{msg.role === 'user' ? '14px 14px 4px 14px' : '14px 14px 14px 4px'};
 					background:{msg.role === 'user' ? 'rgba(6,182,212,0.18)' : '#0d1f35'};
 					border:1px solid {msg.role === 'user' ? 'rgba(34,211,238,0.3)' : '#1d3855'};
-					color:{msg.role === 'user' ? '#c2dce8' : '#c2dce8'};
+					color:#c2dce8;
 					font-size:0.84rem;
 					font-family:'DM Sans',sans-serif;
 					line-height:1.55;
 					white-space:pre-wrap;
 					word-break:break-word;
-				">{msg.content}</div>
+				" class={msg.role === 'assistant' ? 'md-bubble' : ''}>
+					{#if msg.role === 'assistant'}
+						{@html renderMarkdown(msg.content)}
+					{:else}
+						{msg.content}
+					{/if}
+				</div>
 			</div>
 		{/each}
 
@@ -301,4 +322,15 @@
 			bottom: 24px !important;
 		}
 	}
+
+	:global(.md-bubble) { white-space: normal !important; }
+	:global(.md-bubble p) { margin: 0 0 0.4em; }
+	:global(.md-bubble p:last-child) { margin-bottom: 0; }
+	:global(.md-bubble h1, .md-bubble h2, .md-bubble h3) { font-size: 0.88rem; font-weight: 700; margin: 0.6em 0 0.2em; color: #22d3ee; }
+	:global(.md-bubble ul, .md-bubble ol) { margin: 0.3em 0; padding-left: 1.2em; }
+	:global(.md-bubble li) { margin-bottom: 0.2em; }
+	:global(.md-bubble strong) { color: #e2f0f8; font-weight: 600; }
+	:global(.md-bubble code) { background: rgba(34,211,238,0.1); border-radius: 3px; padding: 1px 4px; font-size: 0.8em; }
+	:global(.md-bubble a) { color: #22d3ee; text-decoration: underline; text-decoration-color: rgba(34,211,238,0.4); }
+	:global(.md-bubble a:hover) { text-decoration-color: #22d3ee; }
 </style>

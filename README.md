@@ -143,11 +143,11 @@ LiteLLM is internal-only and not exposed publicly. The chatbot is available on a
 
 | Tool | Filters | Description |
 |---|---|---|
-| `get_lures` | `species`, `waterType`, `type`, `includeLost` | Fetches lures with tags |
+| `get_lures` | `species`, `waterType`, `type`, `color`, `minLightConditions`, `maxLightConditions`, `includeLost`, `limit`, `offset` | Fetches lures with tags (max 20 per page) |
 | `get_catches` | `species`, `limit` | Fetches catches with linked lure, most recent first |
 | `get_spots` | `tag` | Fetches spots with tags |
 
-The AI uses filter parameters automatically — asking "which pike lures do I have?" will call `get_lures` with `species=pike` rather than fetching the full inventory.
+The AI uses filter parameters automatically and cross-references current conditions — e.g. on a bright sunny day it will filter lures by `minLightConditions: 7` and suggest natural-coloured patterns. Lure names in responses are clickable links that navigate directly to the lure detail page.
 
 ## Running with Docker
 
