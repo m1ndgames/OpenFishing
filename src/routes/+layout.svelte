@@ -4,9 +4,10 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import type { LayoutData } from './$types';
+	import Chatbot from '$lib/components/Chatbot.svelte';
 
 	let { children, data }: { children: import('svelte').Snippet; data: LayoutData } = $props();
-	const { t, lang, demoMode } = data;
+	const { t, lang, demoMode, chatbotEnabled } = data;
 
 	const isLoginPage    = $derived($page.url.pathname === '/login');
 	const isSharePage    = $derived($page.url.pathname.startsWith('/share/'));
@@ -364,6 +365,11 @@
 			<span style="font-size:0.65rem; font-weight:600; letter-spacing:0.03em;">{t.navSettings}</span>
 		</a>
 	</nav>
+
+	<!-- AI Chatbot -->
+	{#if chatbotEnabled}
+		<Chatbot {t} />
+	{/if}
 
 	<!-- Demo mode toast -->
 	{#if demoToast}

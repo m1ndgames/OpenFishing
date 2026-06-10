@@ -14,5 +14,5 @@ export const load: LayoutServerLoad = async ({ cookies, request }) => {
 		lang = SUPPORTED_LANGS.includes(browserLang as Lang) ? (browserLang as Lang) : defaultLang;
 	}
 
-	return { t: translations[lang], lang, demoMode: !!env.DEMO_MODE };
+	return { t: translations[lang], lang, demoMode: !!env.DEMO_MODE, chatbotEnabled: !!env.CHATBOT };
 };

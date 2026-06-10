@@ -244,4 +244,14 @@ export default {
 		'Creature Bait', 'Kikker', 'Rubbervissen', 'Insect', 'Kreeft', 'Soft Jerk', 'Tube', 'Twister / Grub',
 		'Spinnerbait', 'Lepel', 'Buzzbait', 'Chatterbait', 'Jig Spinner', 'Spinner'
 	],
+
+	// Chatbot
+	chatbotTitle: 'Visbuddy',
+	chatbotEmptyHint: 'Vraag me over je kunstaas, vangsten of plekken — of vraag vistips.',
+	chatbotSuggestion1: 'Welk kunstaas moet ik hier gebruiken?',
+	chatbotSuggestion2: 'Stel een plek voor',
+	chatbotSuggestion3: 'Wat is mijn beste vangst?',
+	chatbotPlaceholder: 'Stel een vraag…',
+	chatbotOpen: 'Visbuddy-chat openen',
+	chatbotClose: 'Chat sluiten',
 } as const;

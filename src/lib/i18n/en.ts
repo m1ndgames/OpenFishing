@@ -244,4 +244,14 @@ export default {
 		'Creature Bait', 'Frog', 'Rubber Fish', 'Insect', 'Crawfish', 'Soft Jerk', 'Tube', 'Twister / Grub',
 		'Spinnerbait', 'Spoon', 'Buzzbait', 'Chatterbait', 'Jig Spinner', 'Spinner'
 	],
+
+	// Chatbot
+	chatbotTitle: 'Fishing Buddy',
+	chatbotEmptyHint: 'Ask me about your lures, catches, or spots — or get fishing advice.',
+	chatbotSuggestion1: 'Which lure should I use here?',
+	chatbotSuggestion2: 'Suggest a spot',
+	chatbotSuggestion3: "What's my best catch?",
+	chatbotPlaceholder: 'Ask anything…',
+	chatbotOpen: 'Open fishing buddy chat',
+	chatbotClose: 'Close chat',
 } as const;

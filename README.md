@@ -74,6 +74,7 @@ A self-hosted web app to organize your fishing lures, mark fishing spots, and lo
 - Share links bypass authentication so individual records can be shared publicly without exposing the whole app
 - **Demo mode** via `DEMO_MODE` env var — read-only view, all writes blocked, localized banner and toast inform users
 - **REST API** — read-only JSON endpoints for external integrations (see below)
+- **AI chatbot** — floating fishing-buddy chat widget; queries your lures, catches, and spots via tool use (see below)
 
 ## REST API
 
@@ -105,6 +106,48 @@ When `AUTH_PASSWORD` is not set the endpoints are openly accessible.
 ```bash
 curl -H "Authorization: Bearer yourpassword" https://fishing.yourdomain.com/api/v1/lures
 ```
+
+## AI Chatbot
+
+A floating fishing-buddy widget powered by any LLM via [LiteLLM](https://github.com/BerriAI/litellm). It has access to your lures, catches, and spots via tool use and can answer questions about your data or give tackle advice.
+
+### Setup
+
+The chatbot requires a LiteLLM proxy sidecar. A ready-to-use `docker-compose.yml` and `litellm.config.yaml` are included in the repository.
+
+1. Copy `.env.example` to `.env` and fill in your API key(s):
+
+```
+ANTHROPIC_API_KEY=sk-ant-...   # for claude-sonnet
+# or
+OPENAI_API_KEY=sk-...          # for gpt-4o
+```
+
+2. Set the chatbot env vars (already present in `docker-compose.yml`):
+
+```
+CHATBOT=true
+LITELLM_URL=http://litellm:4000
+LITELLM_MODEL=claude-sonnet    # or gpt-4o — must match litellm.config.yaml
+```
+
+3. Start with Docker Compose:
+
+```bash
+docker compose up
+```
+
+LiteLLM is internal-only and not exposed publicly. The chatbot is available on all pages when enabled and works in demo mode (read-only queries only).
+
+### Tools available to the AI
+
+| Tool | Filters | Description |
+|---|---|---|
+| `get_lures` | `species`, `waterType`, `type`, `includeLost` | Fetches lures with tags |
+| `get_catches` | `species`, `limit` | Fetches catches with linked lure, most recent first |
+| `get_spots` | `tag` | Fetches spots with tags |
+
+The AI uses filter parameters automatically — asking "which pike lures do I have?" will call `get_lures` with `species=pike` rather than fetching the full inventory.
 
 ## Running with Docker
 

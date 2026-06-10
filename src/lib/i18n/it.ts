@@ -244,4 +244,14 @@ export default {
 		'Creature Bait', 'Rana', 'Pesce gomma', 'Insetto', 'Gambero', 'Soft Jerk', 'Tube', 'Twister / Grub',
 		'Spinnerbait', 'Cucchiaio', 'Buzzbait', 'Chatterbait', 'Jig Spinner', 'Spinner'
 	],
+
+	// Chatbot
+	chatbotTitle: 'Amico Pescatore',
+	chatbotEmptyHint: "Chiedimi delle tue esche, catture o spot — o chiedi consigli di pesca.",
+	chatbotSuggestion1: 'Quale esca usare qui?',
+	chatbotSuggestion2: 'Suggerisci uno spot',
+	chatbotSuggestion3: 'Qual è la mia miglior cattura?',
+	chatbotPlaceholder: 'Chiedi qualcosa…',
+	chatbotOpen: 'Apri la chat',
+	chatbotClose: 'Chiudi la chat',
 } as const;
