@@ -244,4 +244,14 @@ export default {
 		'Creature Bait', 'Żaba', 'Gumowa rybka', 'Owad', 'Rak', 'Soft Jerk', 'Tube', 'Twister / Grub',
 		'Spinnerbait', 'Łyżka', 'Buzzbait', 'Chatterbait', 'Jig Spinner', 'Spinner'
 	],
+
+	// Chatbot
+	chatbotTitle: 'Kumpel Wędkarz',
+	chatbotEmptyHint: 'Zapytaj o swoje przynęty, połowy lub miejsca — lub poproś o porady wędkarskie.',
+	chatbotSuggestion1: 'Której przynęty użyć tutaj?',
+	chatbotSuggestion2: 'Zaproponuj miejsce',
+	chatbotSuggestion3: 'Jaki był mój najlepszy połów?',
+	chatbotPlaceholder: 'Zadaj pytanie…',
+	chatbotOpen: 'Otwórz czat',
+	chatbotClose: 'Zamknij czat',
 } as const;

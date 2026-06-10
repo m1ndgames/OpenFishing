@@ -244,4 +244,14 @@ export default {
 		'Creature Bait', 'Grenouille', 'Poisson souple', 'Insecte', 'Écrevisse', 'Soft Jerk', 'Tube', 'Twister / Grub',
 		'Spinnerbait', 'Cuillère', 'Buzzbait', 'Chatterbait', 'Jig Spinner', 'Spinner'
 	],
+
+	// Chatbot
+	chatbotTitle: 'Ami Pêcheur',
+	chatbotEmptyHint: 'Posez-moi des questions sur vos leurres, prises ou spots — ou demandez des conseils de pêche.',
+	chatbotSuggestion1: 'Quel leurre utiliser ici ?',
+	chatbotSuggestion2: 'Suggérer un spot',
+	chatbotSuggestion3: 'Quelle est ma meilleure prise ?',
+	chatbotPlaceholder: 'Posez une question…',
+	chatbotOpen: 'Ouvrir le chat',
+	chatbotClose: 'Fermer le chat',
 } as const;

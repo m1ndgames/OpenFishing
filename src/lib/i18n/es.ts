@@ -244,4 +244,14 @@ export default {
 		'Creature Bait', 'Rana', 'Pez de goma', 'Insecto', 'Cangrejo', 'Soft Jerk', 'Tube', 'Twister / Grub',
 		'Spinnerbait', 'Cuchara', 'Buzzbait', 'Chatterbait', 'Jig Spinner', 'Spinner'
 	],
+
+	// Chatbot
+	chatbotTitle: 'Compañero Pescador',
+	chatbotEmptyHint: 'Pregúntame sobre tus señuelos, capturas o spots — o pide consejos de pesca.',
+	chatbotSuggestion1: '¿Qué señuelo debería usar aquí?',
+	chatbotSuggestion2: 'Sugerir un spot',
+	chatbotSuggestion3: '¿Cuál es mi mejor captura?',
+	chatbotPlaceholder: 'Pregunta lo que quieras…',
+	chatbotOpen: 'Abrir el chat',
+	chatbotClose: 'Cerrar el chat',
 } as const;

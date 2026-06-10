@@ -71,6 +71,7 @@ npm run db:studio      # Open Drizzle Studio (DB GUI)
 | `/api/lures/[id]/share` | POST — creates share token, DELETE — revokes it |
 | `/api/spots/[id]/share` | POST — creates share token, DELETE — revokes it |
 | `/api/catches/[id]/share` | POST — creates share token, DELETE — revokes it |
+| `/api/chat` | POST — chatbot endpoint; accepts `{ messages }`, runs tool-call loop, returns `{ reply }` |
 | `/api/openapi` | GET — serves the OpenAPI 3.0 spec as JSON (cookie auth) |
 | `/api/v1/lures` | GET — list all lures with tags; Bearer token auth |
 | `/api/v1/lures/[id]` | GET — single lure with tags; Bearer token auth |
@@ -170,6 +171,27 @@ The new/edit lure forms load distinct existing values for `name`, `brand`, `type
 
 `/settings/qr` shows all lures where `qrCoded = false`, with a server-side generated SVG QR code per lure. The print view uses `@media print` CSS to render a compact grid of 12.5mm×12.5mm QR codes with bordered frames. Marking a lure as labeled uses a SvelteKit form action with `enhance` (no page reload).
 
+### AI Chatbot
+
+Floating chat widget (`src/lib/components/Chatbot.svelte`) rendered in `+layout.svelte` when `chatbotEnabled` is true. Only visible on non-login, non-share pages (already excluded by the layout's `{#if isLoginPage || isSharePage}` guard). The component accepts `t: Translations` as a prop (passed from the layout) — all visible strings use i18n keys (`chatbotTitle`, `chatbotEmptyHint`, `chatbotSuggestion1/2/3`, `chatbotPlaceholder`, `chatbotOpen`, `chatbotClose`).
+
+**Backend** — `src/routes/api/chat/+server.ts`:
+- Accepts `POST { messages: [], context?: { lat?, lng?, datetime? } }` in OpenAI message format.
+- Injects a context block into the system prompt: current date/time, GPS coordinates, and weather data fetched via `fetchWeather` from `src/lib/server/biteIndex.ts` (same utility as spot pages). Weather includes temperature, humidity, pressure trend, moon phase, and bite index.
+- Prepends a system prompt, then runs a tool-call loop against LiteLLM (max 6 rounds) using `get_lures`, `get_catches`, `get_spots` tools — each queries the DB directly via Drizzle (same queries as the REST API v1 endpoints, not via the API).
+- Tools support filter parameters — LLM is instructed to use them to avoid fetching unnecessary data: `get_lures(species?, waterType?, type?, includeLost?)`, `get_catches(species?, limit?)`, `get_spots(tag?)`.
+- Returns `{ reply: string }` once the LLM responds without tool calls.
+- Exempted from demo-mode write-block in `hooks.server.ts` (read-only tools, so the chatbot works in demo mode).
+
+**Frontend context injection** — when the chat panel opens, the component requests browser geolocation (`navigator.geolocation.getCurrentPosition`). On each message send, `context: { datetime, lat?, lng? }` is included in the POST body. The server fetches weather if coordinates are available.
+
+**Env vars** — all three must be set for the chatbot to activate:
+- `CHATBOT` — any truthy value enables it; `chatbotEnabled` is surfaced to the layout via `+layout.server.ts`.
+- `LITELLM_URL` — base URL of the LiteLLM proxy (e.g. `http://litellm:4000`).
+- `LITELLM_MODEL` — model name matching an entry in `litellm.config.yaml`.
+
+**Infrastructure** — `docker-compose.yml` + `litellm.config.yaml` at repo root. LiteLLM runs as an internal sidecar with no public port. API keys (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`) are passed to the LiteLLM container via Docker Compose and read by LiteLLM using the `os.environ/KEY_NAME` syntax in the config file.
+
 ### REST API
 
 Read-only JSON API at `/api/v1/`. Auth handled in `src/hooks.server.ts` separately from the cookie-based session auth:
@@ -193,4 +215,7 @@ Drizzle migrations run automatically on startup in production (`NODE_ENV=product
 | `BASE_URL` | `http://localhost:5173` | Public base URL — used to generate QR code links |
 | `AUTH_PASSWORD` | _(unset)_ | If set, enables password login. Leave unset for open access. |
 | `DEMO_MODE` | _(unset)_ | If set to any value, enables read-only demo mode. All writes are blocked server-side; the UI shows a banner and a toast on submit attempts. Language switching still works. |
+| `CHATBOT` | _(unset)_ | If set to any truthy value, enables the AI chatbot widget. Requires `LITELLM_URL` and `LITELLM_MODEL`. |
+| `LITELLM_URL` | _(unset)_ | Base URL of the LiteLLM proxy (e.g. `http://litellm:4000`). |
+| `LITELLM_MODEL` | _(unset)_ | Model name to use — must match a `model_name` entry in `litellm.config.yaml`. |
 | `BODY_SIZE_LIMIT` | `104857600` | Max upload size in bytes (set in Dockerfile) |

@@ -244,4 +244,14 @@ export default {
 		'Creature Bait', 'Rã', 'Peixe de borracha', 'Inseto', 'Camarão', 'Soft Jerk', 'Tube', 'Twister / Grub',
 		'Spinnerbait', 'Colher', 'Buzzbait', 'Chatterbait', 'Jig Spinner', 'Spinner'
 	],
+
+	// Chatbot
+	chatbotTitle: 'Amigo Pescador',
+	chatbotEmptyHint: 'Pergunte-me sobre os seus iscas, capturas ou spots — ou peça conselhos de pesca.',
+	chatbotSuggestion1: 'Que isca devo usar aqui?',
+	chatbotSuggestion2: 'Sugerir um spot',
+	chatbotSuggestion3: 'Qual é a minha melhor captura?',
+	chatbotPlaceholder: 'Pergunte algo…',
+	chatbotOpen: 'Abrir o chat',
+	chatbotClose: 'Fechar o chat',
 } as const;

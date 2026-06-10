@@ -244,4 +244,14 @@ export default {
 		'Creature Bait', 'Frosch', 'Gummifisch', 'Insekt', 'Krebs', 'Softjerk', 'Tube', 'Twister / Grub',
 		'Spinnerbait', 'Blinker', 'Buzzbait', 'Chatterbait', 'Jig Spinner', 'Spinner', 'Spoon'
 	],
+
+	// Chatbot
+	chatbotTitle: 'Angelkumpel',
+	chatbotEmptyHint: 'Frag mich zu deinen Ködern, Fängen oder Spots – oder hol dir Angeltipps.',
+	chatbotSuggestion1: 'Welchen Köder sollte ich hier verwenden?',
+	chatbotSuggestion2: 'Spot vorschlagen',
+	chatbotSuggestion3: 'Was ist mein bester Fang?',
+	chatbotPlaceholder: 'Frag mich etwas…',
+	chatbotOpen: 'Angelkumpel-Chat öffnen',
+	chatbotClose: 'Chat schließen',
 } as const;

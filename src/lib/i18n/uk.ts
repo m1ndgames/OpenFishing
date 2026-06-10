@@ -244,4 +244,14 @@ export default {
 		'Creature Bait', 'Жаба', 'Гумова рибка', 'Комаха', 'Рак', 'Soft Jerk', 'Tube', 'Twister / Grub',
 		'Spinnerbait', 'Блешня', 'Buzzbait', 'Chatterbait', 'Jig Spinner', 'Spinner'
 	],
+
+	// Chatbot
+	chatbotTitle: 'Рибальський Помічник',
+	chatbotEmptyHint: 'Запитайте мене про ваші приманки, улови або місця — або отримайте поради з риболовлі.',
+	chatbotSuggestion1: 'Яку приманку використати тут?',
+	chatbotSuggestion2: 'Запропонувати місце',
+	chatbotSuggestion3: 'Який мій найкращий улов?',
+	chatbotPlaceholder: 'Запитайте щось…',
+	chatbotOpen: 'Відкрити чат',
+	chatbotClose: 'Закрити чат',
 } as const;
