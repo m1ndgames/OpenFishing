@@ -3,7 +3,7 @@
 	import type { ActionData, PageData } from './$types';
 
 	let { form, data }: { form: ActionData; data: PageData } = $props();
-	const { t, lures } = data;
+	const { t, lures, combos } = data;
 
 	let mapEl: HTMLElement;
 	let mapInstance: any = null;
@@ -247,6 +247,17 @@
 				<option value="">— {t.catchNoLure} —</option>
 				{#each lures as l}
 					<option value={l.id}>{lureName(l)}</option>
+				{/each}
+			</select>
+		</div>
+
+		<!-- Combo -->
+		<div>
+			<label style={labelStyle} for="combo_id">{t.catchComboLabel}</label>
+			<select id="combo_id" name="combo_id" style={selectStyle} onfocus={focusInput} onblur={blurInput}>
+				<option value="">— {t.catchNoCombo} —</option>
+				{#each combos as c}
+					<option value={c.id}>{c.name}{c.rod ? ` · ${c.rod.model}` : ''}{c.reel ? ` · ${c.reel.model}` : ''}</option>
 				{/each}
 			</select>
 		</div>

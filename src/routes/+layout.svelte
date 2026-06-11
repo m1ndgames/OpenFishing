@@ -15,6 +15,7 @@
 	const spotsActive    = $derived($page.url.pathname.startsWith('/spots'));
 	const catchesActive  = $derived($page.url.pathname.startsWith('/catches'));
 	const statsActive    = $derived($page.url.pathname.startsWith('/stats'));
+	const tackleActive   = $derived($page.url.pathname.startsWith('/tackle'));
 	const settingsActive = $derived($page.url.pathname.startsWith('/settings') || $page.url.pathname === '/qr');
 
 	let showAddMenu = $state(false);
@@ -96,6 +97,13 @@
 				onmouseenter={function(e){ if (!luresActive) { (e.currentTarget as HTMLElement).style.color='#c2dce8'; (e.currentTarget as HTMLElement).style.background='rgba(255,255,255,0.04)'; }}}
 				onmouseleave={function(e){ if (!luresActive) { (e.currentTarget as HTMLElement).style.color='#5d8fa8'; (e.currentTarget as HTMLElement).style.background=''; }}}
 			>{t.navLures}</a>
+
+			<a href="/tackle"
+				class="text-sm font-medium px-3 py-1.5 rounded-lg transition-all"
+				style={tackleActive ? 'color:#22d3ee; background:rgba(6,182,212,0.1); border:1px solid rgba(6,182,212,0.25);' : 'color:#5d8fa8; border:1px solid transparent;'}
+				onmouseenter={function(e){ if (!tackleActive) { (e.currentTarget as HTMLElement).style.color='#c2dce8'; (e.currentTarget as HTMLElement).style.background='rgba(255,255,255,0.04)'; }}}
+				onmouseleave={function(e){ if (!tackleActive) { (e.currentTarget as HTMLElement).style.color='#5d8fa8'; (e.currentTarget as HTMLElement).style.background=''; }}}
+			>{t.navTackle}</a>
 
 			<a href="/spots"
 				class="text-sm font-medium px-3 py-1.5 rounded-lg transition-all"
@@ -348,21 +356,31 @@
 
 		<!-- Stats -->
 		<a href="/stats" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; text-decoration:none; transition:color 0.15s; color:{statsActive ? '#22d3ee' : '#3d6a84'};">
-			<svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+			<svg width="20" height="20" viewBox="0 0 24 24" fill="none">
 				<rect x="3" y="12" width="4" height="9" rx="1" stroke="currentColor" stroke-width="1.6" fill={statsActive ? 'rgba(34,211,238,0.15)' : 'none'}/>
 				<rect x="10" y="7" width="4" height="14" rx="1" stroke="currentColor" stroke-width="1.6" fill={statsActive ? 'rgba(34,211,238,0.15)' : 'none'}/>
 				<rect x="17" y="3" width="4" height="18" rx="1" stroke="currentColor" stroke-width="1.6" fill={statsActive ? 'rgba(34,211,238,0.15)' : 'none'}/>
 			</svg>
-			<span style="font-size:0.65rem; font-weight:600; letter-spacing:0.03em;">{t.navStats}</span>
+			<span style="font-size:0.6rem; font-weight:600; letter-spacing:0.02em;">{t.navStats}</span>
+		</a>
+
+		<!-- Tackle -->
+		<a href="/tackle" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; text-decoration:none; transition:color 0.15s; color:{tackleActive ? '#22d3ee' : '#3d6a84'};">
+			<svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+				<path d="M3 21L20 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+				<circle cx="7.5" cy="16.5" r="3" stroke="currentColor" stroke-width="1.5" fill={tackleActive ? 'rgba(34,211,238,0.15)' : 'none'}/>
+				<circle cx="7.5" cy="16.5" r="1" fill="currentColor" opacity={tackleActive ? '1' : '0.5'}/>
+			</svg>
+			<span style="font-size:0.6rem; font-weight:600; letter-spacing:0.02em;">{t.navTackle}</span>
 		</a>
 
 		<!-- Settings -->
 		<a href="/settings" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; text-decoration:none; transition:color 0.15s; color:{settingsActive ? '#22d3ee' : '#3d6a84'};">
-			<svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+			<svg width="20" height="20" viewBox="0 0 24 24" fill="none">
 				<circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6" fill={settingsActive ? 'rgba(34,211,238,0.2)' : 'none'}/>
 				<path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
 			</svg>
-			<span style="font-size:0.65rem; font-weight:600; letter-spacing:0.03em;">{t.navSettings}</span>
+			<span style="font-size:0.6rem; font-weight:600; letter-spacing:0.02em;">{t.navSettings}</span>
 		</a>
 	</nav>
 

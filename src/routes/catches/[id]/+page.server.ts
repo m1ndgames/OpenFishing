@@ -22,7 +22,8 @@ export const load: PageServerLoad = async ({ params }) => {
 			where: eq(fishCatch.id, params.id),
 			with: {
 				photos: { orderBy: [asc(catchPhoto.sortOrder)] },
-				lure: true
+				lure: true,
+				combo: { with: { rod: true, reel: true } }
 			}
 		}),
 		db.select({ id: spot.id, name: spot.name, lat: spot.lat, lng: spot.lng }).from(spot)

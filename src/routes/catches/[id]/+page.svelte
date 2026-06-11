@@ -177,6 +177,21 @@
 			</div>
 		{/if}
 
+		<!-- Combo -->
+		{#if c.combo}
+			<div>
+				<p style="font-size:0.72rem; font-weight:500; color:#3d6a84; text-transform:uppercase; letter-spacing:0.06em; margin:0 0 8px;">{t.catchComboLabel}</p>
+				<a href="/tackle/combos/{c.combo.id}"
+					style="display:inline-flex; align-items:center; gap:6px; background:#0f2238; color:#8ab8cc; font-size:0.875rem; font-weight:500; padding:7px 12px; border-radius:8px; border:1px solid #243f5e; text-decoration:none; transition:all 0.15s; font-family:'DM Sans',sans-serif;"
+					onmouseenter={function(e){(e.currentTarget as HTMLElement).style.borderColor='rgba(6,182,212,0.4)'; (e.currentTarget as HTMLElement).style.color='#22d3ee';}}
+					onmouseleave={function(e){(e.currentTarget as HTMLElement).style.borderColor='#243f5e'; (e.currentTarget as HTMLElement).style.color='#8ab8cc';}}
+				>
+					<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M3 21L20 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="7.5" cy="16.5" r="2.5" stroke="currentColor" stroke-width="1.4"/></svg>
+					{c.combo.name}
+				</a>
+			</div>
+		{/if}
+
 		<!-- Lure + Spot cross-references -->
 		{#if c.lure || nearbySpot}
 			<div style="display:flex; flex-wrap:wrap; gap:8px;">

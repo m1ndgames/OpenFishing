@@ -1,17 +1,17 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
-import { fishCatch, catchPhoto, lure } from '$lib/server/db/schema';
+import { fishCatch, catchPhoto, lure, combo } from '$lib/server/db/schema';
 import { saveUpload } from '$lib/server/uploads';
-import { asc } from 'drizzle-orm';
+import { asc, desc } from 'drizzle-orm';
 import { fetchWeather } from '$lib/server/biteIndex';
 
 export const load: PageServerLoad = async () => {
-	const lures = await db
-		.select({ id: lure.id, lureNumber: lure.lureNumber, name: lure.name })
-		.from(lure)
-		.orderBy(asc(lure.lureNumber));
-	return { lures };
+	const [lures, combos] = await Promise.all([
+		db.select({ id: lure.id, lureNumber: lure.lureNumber, name: lure.name }).from(lure).orderBy(asc(lure.lureNumber)),
+		db.query.combo.findMany({ orderBy: [asc(combo.name)], with: { rod: true, reel: true } })
+	]);
+	return { lures, combos };
 };
 
 export const actions: Actions = {
@@ -26,6 +26,7 @@ export const actions: Actions = {
 		const lngRaw = (data.get('lng') as string)?.trim();
 		const notes = (data.get('notes') as string)?.trim() || null;
 		const lureId = (data.get('lure_id') as string)?.trim() || null;
+		const comboId = (data.get('combo_id') as string)?.trim() || null;
 		const catchAndRelease = data.get('catchAndRelease') === '1';
 		const presentation = (data.get('presentation') as string)?.trim() || null;
 
@@ -43,7 +44,7 @@ export const actions: Actions = {
 
 		const [newCatch] = await db
 			.insert(fishCatch)
-			.values({ caughtAt, species, weightG, lengthCm, lat, lng, notes, lureId, catchAndRelease, presentation, biteIndex })
+			.values({ caughtAt, species, weightG, lengthCm, lat, lng, notes, lureId, comboId, catchAndRelease, presentation, biteIndex })
 			.returning();
 
 		const photoFiles = data.getAll('photos') as File[];

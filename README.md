@@ -26,6 +26,12 @@ A self-hosted web app to organize your fishing lures, mark fishing spots, and lo
 
 ![Stats](screenshots/stats.png)
 
+### Tackle
+
+![Tackle Overview](screenshots/tackle-overview.png)
+
+![Reel Detail](screenshots/tackle-reel.png)
+
 ---
 
 ## Features
@@ -68,6 +74,13 @@ A self-hosted web app to organize your fishing lures, mark fishing spots, and lo
 - Monthly activity (last 12 months), time-of-day histogram, day-of-week breakdown
 - Top spots by catch count
 
+### Tackle
+- Manage rods, reels, fishing lines, and tackle combos
+- **Current line tracking** — log which line is spooled on each reel; current line shown prominently on the reel detail page
+- **Spool history** — full log of line changes per reel with date and notes
+- Link rods and reels into named combos; combos are selectable when logging a catch
+- Available via REST API (`/api/v1/rods`, `/api/v1/reels`, `/api/v1/lines`, `/api/v1/combos`) and chatbot tools
+
 ### General
 - English and German — auto-detected from browser, switchable via flag picker
 - Optional password authentication via `AUTH_PASSWORD` env var
@@ -100,6 +113,14 @@ When `AUTH_PASSWORD` is not set the endpoints are openly accessible.
 | `GET` | `/api/v1/spots/{id}` | Get a single spot by ID |
 | `GET` | `/api/v1/catches` | List all catches (includes linked lure name) |
 | `GET` | `/api/v1/catches/{id}` | Get a single catch by ID |
+| `GET` | `/api/v1/rods` | List all rods |
+| `GET` | `/api/v1/rods/{id}` | Get a single rod by ID |
+| `GET` | `/api/v1/reels` | List all reels (includes current line) |
+| `GET` | `/api/v1/reels/{id}` | Get a single reel by ID (includes current line) |
+| `GET` | `/api/v1/lines` | List all fishing lines |
+| `GET` | `/api/v1/lines/{id}` | Get a single fishing line by ID |
+| `GET` | `/api/v1/combos` | List all tackle combos (includes rod, reel, current line) |
+| `GET` | `/api/v1/combos/{id}` | Get a single combo by ID |
 
 ### Example
 
@@ -146,6 +167,10 @@ LiteLLM is internal-only and not exposed publicly. The chatbot is available on a
 | `get_lures` | `species`, `waterType`, `type`, `color`, `minLightConditions`, `maxLightConditions`, `includeLost`, `limit`, `offset` | Fetches lures with tags (max 20 per page) |
 | `get_catches` | `species`, `limit` | Fetches catches with linked lure, most recent first |
 | `get_spots` | `tag` | Fetches spots with tags |
+| `get_rods` | `type`, `brand` | Fetches rods |
+| `get_reels` | `brand` | Fetches reels with currently spooled line |
+| `get_lines` | `type`, `brand` | Fetches fishing lines |
+| `get_combos` | — | Fetches all combos with rod, reel, and current line |
 
 The AI uses filter parameters automatically and cross-references current conditions — e.g. on a bright sunny day it will filter lures by `minLightConditions: 7` and suggest natural-coloured patterns. Lure names in responses are clickable links that navigate directly to the lure detail page.
 
