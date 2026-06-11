@@ -1,25 +1,25 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
-import { fishCatch, catchPhoto, lure } from '$lib/server/db/schema';
+import { fishCatch, catchPhoto, lure, combo } from '$lib/server/db/schema';
 import { eq, asc } from 'drizzle-orm';
 import { saveUpload, deleteUpload } from '$lib/server/uploads';
 
 export const load: PageServerLoad = async ({ params }) => {
-	const [found, lures] = await Promise.all([
+	const [found, lures, combos] = await Promise.all([
 		db.query.fishCatch.findFirst({
 			where: eq(fishCatch.id, params.id),
 			with: {
 				photos: { orderBy: [asc(catchPhoto.sortOrder)] },
-				lure: true
+				lure: true,
+				combo: true
 			}
 		}),
-		db.select({ id: lure.id, lureNumber: lure.lureNumber, name: lure.name })
-			.from(lure)
-			.orderBy(asc(lure.lureNumber))
+		db.select({ id: lure.id, lureNumber: lure.lureNumber, name: lure.name }).from(lure).orderBy(asc(lure.lureNumber)),
+		db.query.combo.findMany({ orderBy: [asc(combo.name)], with: { rod: true, reel: true } })
 	]);
 	if (!found) error(404, 'Catch not found');
-	return { catch: found, lures };
+	return { catch: found, lures, combos };
 };
 
 export const actions: Actions = {
@@ -34,6 +34,7 @@ export const actions: Actions = {
 		const lngRaw = (data.get('lng') as string)?.trim();
 		const notes = (data.get('notes') as string)?.trim() || null;
 		const lureId = (data.get('lure_id') as string)?.trim() || null;
+		const comboId = (data.get('combo_id') as string)?.trim() || null;
 		const catchAndRelease = data.get('catchAndRelease') === '1';
 		const presentation = (data.get('presentation') as string)?.trim() || null;
 
@@ -77,7 +78,7 @@ export const actions: Actions = {
 
 		await db
 			.update(fishCatch)
-			.set({ caughtAt, species, weightG, lengthCm, lat, lng, notes, lureId, catchAndRelease, presentation, updatedAt: new Date() })
+			.set({ caughtAt, species, weightG, lengthCm, lat, lng, notes, lureId, comboId, catchAndRelease, presentation, updatedAt: new Date() })
 			.where(eq(fishCatch.id, params.id));
 
 		redirect(303, `/catches/${params.id}`);

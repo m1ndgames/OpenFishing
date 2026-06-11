@@ -101,6 +101,99 @@ const spec = {
 					}
 				}
 			},
+			Rod: {
+				type: 'object',
+				properties: {
+					id: { type: 'string', format: 'uuid' },
+					brand: { type: 'string', nullable: true },
+					model: { type: 'string' },
+					lengthM: { type: 'number', nullable: true, description: 'Length in metres' },
+					castingWeight: { type: 'string', nullable: true, description: 'Casting weight range, e.g. "7–28g"' },
+					type: { type: 'string', nullable: true },
+					notes: { type: 'string', nullable: true },
+					createdAt: { type: 'string', format: 'date-time' },
+					updatedAt: { type: 'string', format: 'date-time' }
+				}
+			},
+			Reel: {
+				type: 'object',
+				properties: {
+					id: { type: 'string', format: 'uuid' },
+					brand: { type: 'string', nullable: true },
+					model: { type: 'string' },
+					size: { type: 'string', nullable: true },
+					notes: { type: 'string', nullable: true },
+					createdAt: { type: 'string', format: 'date-time' },
+					updatedAt: { type: 'string', format: 'date-time' },
+					currentLine: {
+						nullable: true,
+						type: 'object',
+						properties: {
+							lineId: { type: 'string', format: 'uuid', nullable: true },
+							brand: { type: 'string', nullable: true },
+							model: { type: 'string', nullable: true },
+							type: { type: 'string', nullable: true },
+							spooledAt: { type: 'string', format: 'date-time' }
+						}
+					}
+				}
+			},
+			Line: {
+				type: 'object',
+				properties: {
+					id: { type: 'string', format: 'uuid' },
+					brand: { type: 'string', nullable: true },
+					model: { type: 'string' },
+					type: { type: 'string', nullable: true, description: 'e.g. Mono, Braid, Fluoro' },
+					diameterMm: { type: 'number', nullable: true, description: 'Diameter in millimetres' },
+					strengthKg: { type: 'number', nullable: true, description: 'Break strength in kg' },
+					notes: { type: 'string', nullable: true },
+					createdAt: { type: 'string', format: 'date-time' },
+					updatedAt: { type: 'string', format: 'date-time' }
+				}
+			},
+			Combo: {
+				type: 'object',
+				properties: {
+					id: { type: 'string', format: 'uuid' },
+					name: { type: 'string' },
+					terminalTackle: { type: 'string', nullable: true },
+					notes: { type: 'string', nullable: true },
+					createdAt: { type: 'string', format: 'date-time' },
+					updatedAt: { type: 'string', format: 'date-time' },
+					rod: {
+						nullable: true,
+						type: 'object',
+						properties: {
+							id: { type: 'string', format: 'uuid' },
+							brand: { type: 'string', nullable: true },
+							model: { type: 'string' },
+							type: { type: 'string', nullable: true }
+						}
+					},
+					reel: {
+						nullable: true,
+						type: 'object',
+						properties: {
+							id: { type: 'string', format: 'uuid' },
+							brand: { type: 'string', nullable: true },
+							model: { type: 'string' },
+							size: { type: 'string', nullable: true }
+						}
+					},
+					currentLine: {
+						nullable: true,
+						type: 'object',
+						properties: {
+							lineId: { type: 'string', format: 'uuid', nullable: true },
+							brand: { type: 'string', nullable: true },
+							model: { type: 'string', nullable: true },
+							type: { type: 'string', nullable: true },
+							spooledAt: { type: 'string', format: 'date-time' }
+						}
+					}
+				}
+			},
 			Error: {
 				type: 'object',
 				properties: {
@@ -186,6 +279,102 @@ const spec = {
 				parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
 				responses: {
 					'200': { description: 'Catch', content: { 'application/json': { schema: { $ref: '#/components/schemas/Catch' } } } },
+					'401': { description: 'Unauthorized', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+					'404': { description: 'Not found', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } }
+				}
+			}
+		},
+		'/rods': {
+			get: {
+				summary: 'List all rods',
+				operationId: 'listRods',
+				tags: ['Tackle'],
+				responses: {
+					'200': { description: 'Array of rods', content: { 'application/json': { schema: { type: 'array', items: { $ref: '#/components/schemas/Rod' } } } } },
+					'401': { description: 'Unauthorized', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } }
+				}
+			}
+		},
+		'/rods/{id}': {
+			get: {
+				summary: 'Get a rod by ID',
+				operationId: 'getRod',
+				tags: ['Tackle'],
+				parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+				responses: {
+					'200': { description: 'Rod', content: { 'application/json': { schema: { $ref: '#/components/schemas/Rod' } } } },
+					'401': { description: 'Unauthorized', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+					'404': { description: 'Not found', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } }
+				}
+			}
+		},
+		'/reels': {
+			get: {
+				summary: 'List all reels (includes current line)',
+				operationId: 'listReels',
+				tags: ['Tackle'],
+				responses: {
+					'200': { description: 'Array of reels', content: { 'application/json': { schema: { type: 'array', items: { $ref: '#/components/schemas/Reel' } } } } },
+					'401': { description: 'Unauthorized', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } }
+				}
+			}
+		},
+		'/reels/{id}': {
+			get: {
+				summary: 'Get a reel by ID (includes current line)',
+				operationId: 'getReel',
+				tags: ['Tackle'],
+				parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+				responses: {
+					'200': { description: 'Reel', content: { 'application/json': { schema: { $ref: '#/components/schemas/Reel' } } } },
+					'401': { description: 'Unauthorized', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+					'404': { description: 'Not found', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } }
+				}
+			}
+		},
+		'/lines': {
+			get: {
+				summary: 'List all fishing lines',
+				operationId: 'listLines',
+				tags: ['Tackle'],
+				responses: {
+					'200': { description: 'Array of lines', content: { 'application/json': { schema: { type: 'array', items: { $ref: '#/components/schemas/Line' } } } } },
+					'401': { description: 'Unauthorized', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } }
+				}
+			}
+		},
+		'/lines/{id}': {
+			get: {
+				summary: 'Get a fishing line by ID',
+				operationId: 'getLine',
+				tags: ['Tackle'],
+				parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+				responses: {
+					'200': { description: 'Line', content: { 'application/json': { schema: { $ref: '#/components/schemas/Line' } } } },
+					'401': { description: 'Unauthorized', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+					'404': { description: 'Not found', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } }
+				}
+			}
+		},
+		'/combos': {
+			get: {
+				summary: 'List all tackle combos (includes rod, reel, current line)',
+				operationId: 'listCombos',
+				tags: ['Tackle'],
+				responses: {
+					'200': { description: 'Array of combos', content: { 'application/json': { schema: { type: 'array', items: { $ref: '#/components/schemas/Combo' } } } } },
+					'401': { description: 'Unauthorized', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } }
+				}
+			}
+		},
+		'/combos/{id}': {
+			get: {
+				summary: 'Get a combo by ID',
+				operationId: 'getCombo',
+				tags: ['Tackle'],
+				parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+				responses: {
+					'200': { description: 'Combo', content: { 'application/json': { schema: { $ref: '#/components/schemas/Combo' } } } },
 					'401': { description: 'Unauthorized', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
 					'404': { description: 'Not found', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } }
 				}

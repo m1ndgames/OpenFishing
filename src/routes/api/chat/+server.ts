@@ -3,7 +3,7 @@ import type { RequestHandler } from './$types';
 import { env } from '$env/dynamic/private';
 import { db } from '$lib/server/db';
 import { eq, like, and, desc, gte, lte } from 'drizzle-orm';
-import { lure as lureTable, fishCatch as catchTable } from '$lib/server/db/schema';
+import { lure as lureTable, fishCatch as catchTable, rod as rodTable, reel as reelTable, fishingLine as lineTable, combo as comboTable, reelLineLog } from '$lib/server/db/schema';
 import { fetchWeather, type WeatherData } from '$lib/server/biteIndex';
 
 const MOON_PHASES = ['New moon', 'Waxing crescent', 'First quarter', 'Waxing gibbous', 'Full moon', 'Waning gibbous', 'Last quarter', 'Waning crescent'];
@@ -134,12 +134,86 @@ const TOOLS = [
 				required: []
 			}
 		}
+	},
+	{
+		type: 'function',
+		function: {
+			name: 'get_rods',
+			description: 'Fetch fishing rods from the database.',
+			parameters: {
+				type: 'object',
+				properties: {
+					type: {
+						type: 'string',
+						description: 'Filter by rod type, e.g. "Spinning", "Casting", "Feeder".'
+					},
+					brand: {
+						type: 'string',
+						description: 'Filter by brand name (partial match).'
+					}
+				},
+				required: []
+			}
+		}
+	},
+	{
+		type: 'function',
+		function: {
+			name: 'get_reels',
+			description: 'Fetch fishing reels from the database. Each reel includes the currently spooled line if one has been logged.',
+			parameters: {
+				type: 'object',
+				properties: {
+					brand: {
+						type: 'string',
+						description: 'Filter by brand name (partial match).'
+					}
+				},
+				required: []
+			}
+		}
+	},
+	{
+		type: 'function',
+		function: {
+			name: 'get_lines',
+			description: 'Fetch fishing lines from the database.',
+			parameters: {
+				type: 'object',
+				properties: {
+					type: {
+						type: 'string',
+						description: 'Filter by line type: "Mono", "Braid", or "Fluoro".'
+					},
+					brand: {
+						type: 'string',
+						description: 'Filter by brand name (partial match).'
+					}
+				},
+				required: []
+			}
+		}
+	},
+	{
+		type: 'function',
+		function: {
+			name: 'get_combos',
+			description: 'Fetch all tackle combos from the database. Each combo includes the linked rod, reel, and the currently spooled line on the reel.',
+			parameters: {
+				type: 'object',
+				properties: {},
+				required: []
+			}
+		}
 	}
 ];
 
 type LureArgs  = { species?: string; waterType?: string; type?: string; color?: string; minLightConditions?: number; maxLightConditions?: number; includeLost?: boolean; limit?: number; offset?: number };
 type CatchArgs = { species?: string; limit?: number };
 type SpotArgs  = { tag?: string };
+type RodArgs   = { type?: string; brand?: string };
+type ReelArgs  = { brand?: string };
+type LineArgs  = { type?: string; brand?: string };
 
 async function executeTool(name: string, args: Record<string, unknown>): Promise<string> {
 	switch (name) {
@@ -203,6 +277,80 @@ async function executeTool(name: string, args: Record<string, unknown>): Promise
 					tags: s.tags.map((t) => t.name)
 				}))
 			);
+		}
+
+		case 'get_rods': {
+			const { type: rodType, brand } = args as RodArgs;
+			const filters = [];
+			if (rodType) filters.push(like(rodTable.type, `%${rodType}%`));
+			if (brand)   filters.push(like(rodTable.brand, `%${brand}%`));
+			const rods = await db.select().from(rodTable).where(filters.length ? and(...filters) : undefined);
+			return JSON.stringify(rods.map(({ createdAt: _c, updatedAt: _u, ...r }) => r));
+		}
+
+		case 'get_reels': {
+			const { brand } = args as ReelArgs;
+			const filters = brand ? [like(reelTable.brand, `%${brand}%`)] : [];
+			const [reels, allLogs] = await Promise.all([
+				db.select().from(reelTable).where(filters.length ? and(...filters) : undefined),
+				db.query.reelLineLog.findMany({
+					with: { line: true },
+					orderBy: [desc(reelLineLog.spooledAt)]
+				})
+			]);
+			const currentByReel = new Map<string, typeof allLogs[number]>();
+			for (const log of allLogs) {
+				if (!currentByReel.has(log.reelId)) currentByReel.set(log.reelId, log);
+			}
+			return JSON.stringify(reels.map(({ createdAt: _c, updatedAt: _u, ...r }) => {
+				const log = currentByReel.get(r.id) ?? null;
+				return {
+					...r,
+					currentLine: log ? {
+						brand: log.line?.brand ?? null,
+						model: log.line?.model ?? null,
+						type: log.line?.type ?? null,
+						spooledAt: log.spooledAt
+					} : null
+				};
+			}));
+		}
+
+		case 'get_lines': {
+			const { type: lineType, brand } = args as LineArgs;
+			const filters = [];
+			if (lineType) filters.push(like(lineTable.type, `%${lineType}%`));
+			if (brand)    filters.push(like(lineTable.brand, `%${brand}%`));
+			const lines = await db.select().from(lineTable).where(filters.length ? and(...filters) : undefined);
+			return JSON.stringify(lines.map(({ createdAt: _c, updatedAt: _u, ...l }) => l));
+		}
+
+		case 'get_combos': {
+			const [combos, allLogs] = await Promise.all([
+				db.query.combo.findMany({ with: { rod: true, reel: true } }),
+				db.query.reelLineLog.findMany({
+					with: { line: true },
+					orderBy: [desc(reelLineLog.spooledAt)]
+				})
+			]);
+			const currentByReel = new Map<string, typeof allLogs[number]>();
+			for (const log of allLogs) {
+				if (!currentByReel.has(log.reelId)) currentByReel.set(log.reelId, log);
+			}
+			return JSON.stringify(combos.map(({ rod: r, reel: re, createdAt: _c, updatedAt: _u, ...c }) => {
+				const log = re ? (currentByReel.get(re.id) ?? null) : null;
+				return {
+					...c,
+					rod: r ? { brand: r.brand, model: r.model, type: r.type } : null,
+					reel: re ? { brand: re.brand, model: re.model, size: re.size } : null,
+					currentLine: log ? {
+						brand: log.line?.brand ?? null,
+						model: log.line?.model ?? null,
+						type: log.line?.type ?? null,
+						spooledAt: log.spooledAt
+					} : null
+				};
+			}));
 		}
 
 		default:

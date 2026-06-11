@@ -79,6 +79,14 @@ npm run db:studio      # Open Drizzle Studio (DB GUI)
 | `/api/v1/spots/[id]` | GET — single spot with tags; Bearer token auth |
 | `/api/v1/catches` | GET — list all catches with lure `{ id, name }`; Bearer token auth |
 | `/api/v1/catches/[id]` | GET — single catch with lure `{ id, name }`; Bearer token auth |
+| `/api/v1/rods` | GET — list all rods; Bearer token auth |
+| `/api/v1/rods/[id]` | GET — single rod; Bearer token auth |
+| `/api/v1/reels` | GET — list all reels with current line; Bearer token auth |
+| `/api/v1/reels/[id]` | GET — single reel with current line; Bearer token auth |
+| `/api/v1/lines` | GET — list all fishing lines; Bearer token auth |
+| `/api/v1/lines/[id]` | GET — single fishing line; Bearer token auth |
+| `/api/v1/combos` | GET — list all combos with rod/reel/current line; Bearer token auth |
+| `/api/v1/combos/[id]` | GET — single combo; Bearer token auth |
 | `/api-docs` | Swagger UI for the REST API (cookie auth, SSR disabled) |
 | `/share/lures/[token]` | Public read-only lure view (no auth required) |
 | `/share/spots/[token]` | Public read-only spot view (no auth required) |
@@ -92,8 +100,13 @@ npm run db:studio      # Open Drizzle Studio (DB GUI)
 - `spot` — id (UUID), name, lat, lng, notes, shareToken (nullable UUID), createdAt, updatedAt
 - `spotTag` — id, spotId (FK → spot, cascade delete), name
 - `spotPhoto` — id, spotId (FK → spot, cascade delete), filename, sortOrder
-- `fishCatch` — id (UUID), caughtAt, species, weightG, lengthCm, lat (nullable), lng (nullable), notes, catchAndRelease, presentation, biteIndex (nullable real), lureId (FK → lure, set null on delete), shareToken (nullable UUID), createdAt, updatedAt
+- `fishCatch` — id (UUID), caughtAt, species, weightG, lengthCm, lat (nullable), lng (nullable), notes, catchAndRelease, presentation, biteIndex (nullable real), lureId (FK → lure, set null on delete), comboId (FK → combo, set null on delete), shareToken (nullable UUID), createdAt, updatedAt
 - `catchPhoto` — id, catchId (FK → fishCatch, cascade delete), filename, sortOrder
+- `rod` — id (UUID), brand, model, lengthM, castingWeight, type, notes, createdAt, updatedAt
+- `reel` — id (UUID), brand, model, size, notes, createdAt, updatedAt
+- `fishingLine` — id (UUID), brand, model, type (Mono/Braid/Fluoro), diameterMm, strengthKg, notes, createdAt, updatedAt
+- `reelLineLog` — id, reelId (FK → reel, cascade delete), lineId (FK → fishingLine, set null on delete), spooledAt, notes, createdAt
+- `combo` — id (UUID), name, rodId (FK → rod, set null), reelId (FK → reel, set null), terminalTackle, notes, createdAt, updatedAt
 
 Tags are stored in separate tag tables (one row per tag). Species is stored as a space-separated string in `lure.species`. Both use the `TagInput` chip component at `src/lib/components/TagInput.svelte`. `TagInput` accepts a `suggest` prop (`string[]`) that wires a `<datalist>` for autocomplete.
 
@@ -179,7 +192,7 @@ Floating chat widget (`src/lib/components/Chatbot.svelte`) rendered in `+layout.
 - Accepts `POST { messages: [], context?: { lat?, lng?, datetime? } }` in OpenAI message format.
 - Injects a context block into the system prompt: current date/time, GPS coordinates, and weather data fetched via `fetchWeather` from `src/lib/server/biteIndex.ts` (same utility as spot pages). Weather includes temperature, humidity, pressure trend, moon phase, and bite index.
 - Prepends a system prompt, then runs a tool-call loop against LiteLLM (max 6 rounds) using `get_lures`, `get_catches`, `get_spots` tools — each queries the DB directly via Drizzle (same queries as the REST API v1 endpoints, not via the API).
-- Tools support filter parameters — LLM is instructed to use them to avoid fetching unnecessary data: `get_lures(species?, waterType?, type?, color?, minLightConditions?, maxLightConditions?, includeLost?, limit?, offset?)`, `get_catches(species?, limit?)`, `get_spots(tag?)`. `get_lures` defaults to 20 results and returns `{ total, offset, results[] }` so the LLM can paginate if needed.
+- Tools support filter parameters — LLM is instructed to use them to avoid fetching unnecessary data: `get_lures(species?, waterType?, type?, color?, minLightConditions?, maxLightConditions?, includeLost?, limit?, offset?)`, `get_catches(species?, limit?)`, `get_spots(tag?)`, `get_rods(type?, brand?)`, `get_reels(brand?)`, `get_lines(type?, brand?)`, `get_combos()`. `get_lures` defaults to 20 results and returns `{ total, offset, results[] }` so the LLM can paginate if needed.
 - Tool responses strip all fields irrelevant to the LLM (id excluded from catches/spots, shareToken, createdAt, updatedAt, photoPath, qrCoded, lureNumber omitted). `get_lures` keeps `id` so the LLM can produce clickable markdown links.
 - The system prompt explicitly instructs the LLM to: use filter params aggressively, map current light conditions to `minLightConditions`, use species/color/type in the user's original language (not translated), and format lure names as `[Name](/lures/ID)` markdown links.
 - Each LiteLLM fetch has a 45 s `AbortSignal.timeout`. Trailing slash in `LITELLM_URL` is stripped before appending `/chat/completions`.
