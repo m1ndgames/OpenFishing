@@ -26,6 +26,12 @@ A self-hosted web app to organize your fishing lures, mark fishing spots, and lo
 
 ![Stats](screenshots/stats.png)
 
+### Tackle
+
+![Tackle Overview](screenshots/tackle-overview.png)
+
+![Reel Detail](screenshots/tackle-reel.png)
+
 ---
 
 ## Features
@@ -67,6 +73,13 @@ A self-hosted web app to organize your fishing lures, mark fishing spots, and lo
 - Top retrieve styles
 - Monthly activity (last 12 months), time-of-day histogram, day-of-week breakdown
 - Top spots by catch count
+
+### Tackle
+- Manage rods, reels, fishing lines, and tackle combos
+- **Current line tracking** — log which line is spooled on each reel; current line shown prominently on the reel detail page
+- **Spool history** — full log of line changes per reel with date and notes
+- Link rods and reels into named combos; combos are selectable when logging a catch
+- Available via REST API (`/api/v1/rods`, `/api/v1/reels`, `/api/v1/lines`, `/api/v1/combos`) and chatbot tools
 
 ### General
 - English and German — auto-detected from browser, switchable via flag picker
