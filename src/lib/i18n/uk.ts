@@ -337,4 +337,7 @@ export default {
 	chatbotPlaceholder: 'Запитайте щось…',
 	chatbotOpen: 'Відкрити чат',
 	chatbotClose: 'Закрити чат',
+	chatbotHistory: 'Історія',
+	chatbotNewChat: 'Новий чат',
+	chatbotNoHistory: 'Немає попередніх розмов',
 } as const;

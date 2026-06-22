@@ -337,4 +337,7 @@ export default {
 	chatbotPlaceholder: 'Frag mich etwas…',
 	chatbotOpen: 'Angelkumpel-Chat öffnen',
 	chatbotClose: 'Chat schließen',
+	chatbotHistory: 'Verlauf',
+	chatbotNewChat: 'Neues Gespräch',
+	chatbotNoHistory: 'Keine früheren Gespräche',
 } as const;

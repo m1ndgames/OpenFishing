@@ -337,4 +337,7 @@ export default {
 	chatbotPlaceholder: 'Stel een vraag…',
 	chatbotOpen: 'Visbuddy-chat openen',
 	chatbotClose: 'Chat sluiten',
+	chatbotHistory: 'Geschiedenis',
+	chatbotNewChat: 'Nieuw gesprek',
+	chatbotNoHistory: 'Geen eerdere gesprekken',
 } as const;

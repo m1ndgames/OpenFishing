@@ -2,8 +2,8 @@ import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { env } from '$env/dynamic/private';
 import { db } from '$lib/server/db';
-import { eq, like, and, desc, gte, lte } from 'drizzle-orm';
-import { lure as lureTable, fishCatch as catchTable, rod as rodTable, reel as reelTable, fishingLine as lineTable, combo as comboTable, reelLineLog } from '$lib/server/db/schema';
+import { eq, like, and, desc, gte, lte, sql } from 'drizzle-orm';
+import { lure as lureTable, fishCatch as catchTable, rod as rodTable, reel as reelTable, fishingLine as lineTable, combo as comboTable, reelLineLog, chatMessage as chatMessageTable } from '$lib/server/db/schema';
 import { fetchWeather, type WeatherData } from '$lib/server/biteIndex';
 
 const MOON_PHASES = ['New moon', 'Waxing crescent', 'First quarter', 'Waxing gibbous', 'Full moon', 'Waning gibbous', 'Last quarter', 'Waning crescent'];
@@ -358,6 +358,23 @@ async function executeTool(name: string, args: Record<string, unknown>): Promise
 	}
 }
 
+export const GET: RequestHandler = async () => {
+	if (!env.CHATBOT) error(503, 'Chatbot not configured');
+
+	const sessions = await db
+		.select({
+			sessionId: chatMessageTable.sessionId,
+			firstMessage: sql<string>`MIN(CASE WHEN ${chatMessageTable.role} = 'user' THEN ${chatMessageTable.content} END)`,
+			lastAt: sql<number>`MAX(${chatMessageTable.createdAt})`,
+			count: sql<number>`COUNT(*)`
+		})
+		.from(chatMessageTable)
+		.groupBy(chatMessageTable.sessionId)
+		.orderBy(sql`MAX(${chatMessageTable.createdAt}) DESC`);
+
+	return json(sessions);
+};
+
 export const POST: RequestHandler = async ({ request }) => {
 	if (!env.CHATBOT || !env.LITELLM_URL || !env.LITELLM_MODEL) {
 		error(503, 'Chatbot not configured');
@@ -365,6 +382,8 @@ export const POST: RequestHandler = async ({ request }) => {
 
 	const body = await request.json().catch(() => null);
 	if (!body || !Array.isArray(body.messages)) error(400, 'messages array required');
+	const sessionId = typeof body.sessionId === 'string' ? body.sessionId : null;
+	const lastUserMessage = body.messages.findLast((m: { role: string }) => m.role === 'user') as { role: string; content: string } | undefined;
 
 	const ctx = body.context as { lat?: number; lng?: number; datetime?: string } | undefined;
 	const weather = (ctx?.lat != null && ctx?.lng != null) ? await fetchWeather(ctx.lat, ctx.lng) : null;
@@ -406,7 +425,18 @@ export const POST: RequestHandler = async ({ request }) => {
 		conversation.push(msg);
 
 		if (!msg.tool_calls?.length) {
-			return json({ reply: msg.content ?? '' });
+			const reply = msg.content ?? '';
+			if (!env.DEMO_MODE && sessionId && lastUserMessage) {
+				try {
+					await db.insert(chatMessageTable).values([
+						{ sessionId, role: 'user', content: lastUserMessage.content },
+						{ sessionId, role: 'assistant', content: reply }
+					]);
+				} catch (e) {
+					console.error('[chat] failed to save messages:', e);
+				}
+			}
+			return json({ reply });
 		}
 
 		// Execute all tool calls, then continue the loop
