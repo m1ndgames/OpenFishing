@@ -19,6 +19,9 @@
 	let defaultDatetime = $state('');
 	let catchAndRelease = $state(false);
 	let presentation = $state('');
+	let speciesValue = $state('');
+	let identifyLoading = $state(false);
+	let identifyResult = $state<{ species: string | null; confidence: number | null; note: string } | null>(null);
 
 	onMount(async () => {
 		const now = new Date();
@@ -100,6 +103,32 @@
 		URL.revokeObjectURL(photoPreviews[i]);
 		photoPreviews = photoPreviews.filter((_, idx) => idx !== i);
 		photoFiles = photoFiles.filter((_, idx) => idx !== i);
+		identifyResult = null;
+	}
+
+	async function identifyFish() {
+		if (photoFiles.length === 0 || identifyLoading) return;
+		identifyLoading = true;
+		identifyResult = null;
+		try {
+			const imageData = await new Promise<string>((resolve, reject) => {
+				const reader = new FileReader();
+				reader.onload = () => resolve(reader.result as string);
+				reader.onerror = reject;
+				reader.readAsDataURL(photoFiles[0]);
+			});
+			const res = await fetch('/api/identify-fish', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ imageData })
+			});
+			if (!res.ok) throw new Error(`Error ${res.status}`);
+			identifyResult = await res.json();
+		} catch {
+			identifyResult = { species: null, confidence: null, note: 'Something went wrong. Please try again.' };
+		} finally {
+			identifyLoading = false;
+		}
 	}
 
 	function handleSubmit(e: SubmitEvent) {
@@ -188,9 +217,51 @@
 		</div>
 
 		<div>
-			<label style={labelStyle} for="species">{t.catchSpeciesLabel} <span style="color:#f87171;">*</span></label>
-			<input id="species" name="species" type="text" placeholder="e.g. Pike, Perch, Trout"
-				style={inputStyle} onfocus={focusInput} onblur={blurInput} required />
+			<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+				<label style="font-size:0.78rem; font-weight:500; color:#5d8fa8; text-transform:uppercase; letter-spacing:0.06em; margin:0;" for="species">
+					{t.catchSpeciesLabel} <span style="color:#f87171;">*</span>
+				</label>
+				{#if photoFiles.length > 0}
+					<button type="button" onclick={identifyFish} disabled={identifyLoading}
+						style="display:flex; align-items:center; gap:5px; font-size:0.75rem; font-weight:500; color:{identifyLoading ? '#3d6a84' : '#22d3ee'}; background:none; border:none; cursor:{identifyLoading ? 'default' : 'pointer'}; padding:0; font-family:'DM Sans',sans-serif; transition:color 0.15s;"
+					>
+						{#if identifyLoading}
+							<svg width="12" height="12" viewBox="0 0 24 24" fill="none" style="animation:spin 1s linear infinite;flex-shrink:0;">
+								<circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" stroke-dasharray="28" stroke-dashoffset="10"/>
+							</svg>
+						{:else}
+							<svg width="12" height="12" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;">
+								<circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/>
+								<path d="M16.5 16.5 21 21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+								<path d="M8 11h6M11 8v6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+							</svg>
+						{/if}
+						{identifyLoading ? t.identifying : t.identifyFish}
+					</button>
+				{/if}
+			</div>
+			<input id="species" name="species" type="text" placeholder={t.speciesPlaceholder}
+				style={inputStyle} onfocus={focusInput} onblur={blurInput} required
+				bind:value={speciesValue} />
+			{#if identifyResult}
+				<div style="margin-top:8px; padding:10px 12px; background:#0d1f35; border:1px solid {identifyResult.species ? 'rgba(34,211,238,0.2)' : '#1d3855'}; border-radius:9px;">
+					{#if identifyResult.species}
+						<div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:4px;">
+							<span style="font-size:0.82rem; font-weight:600; color:#22d3ee; font-family:'DM Sans',sans-serif;">
+								{identifyResult.species}{identifyResult.confidence !== null ? ` · ${identifyResult.confidence}%` : ''}
+							</span>
+							<button type="button" onclick={() => { speciesValue = identifyResult!.species!; }}
+								style="font-size:0.72rem; font-weight:600; padding:3px 10px; border-radius:6px; background:rgba(34,211,238,0.12); border:1px solid rgba(34,211,238,0.3); color:#22d3ee; cursor:pointer; white-space:nowrap; font-family:'DM Sans',sans-serif;"
+							>{t.identifyUseSpecies}</button>
+						</div>
+					{:else}
+						<p style="font-size:0.8rem; font-weight:500; color:#5d8fa8; margin:0 0 4px; font-family:'DM Sans',sans-serif;">{t.identifyNoResult}</p>
+					{/if}
+					{#if identifyResult.note}
+						<p style="font-size:0.75rem; color:#3d6a84; margin:0; font-family:'DM Sans',sans-serif; line-height:1.4;">{identifyResult.note}</p>
+					{/if}
+				</div>
+			{/if}
 		</div>
 
 		<!-- Length + Weight -->
@@ -321,3 +392,9 @@
 		</div>
 	</form>
 </div>
+
+<style>
+	@keyframes spin {
+		to { transform: rotate(360deg); }
+	}
+</style>

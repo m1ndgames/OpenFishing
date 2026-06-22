@@ -8,7 +8,14 @@ import { fetchWeather, type WeatherData } from '$lib/server/biteIndex';
 
 const MOON_PHASES = ['New moon', 'Waxing crescent', 'First quarter', 'Waxing gibbous', 'Full moon', 'Waning gibbous', 'Last quarter', 'Waning crescent'];
 
-const SYSTEM_PROMPT = `You are a fishing buddy AI integrated into OpenFishing, a personal fishing logbook app. You have access to the user's lures, catches, and spots via tools — call them whenever you need data to answer a question.
+const LANG_NAMES: Record<string, string> = {
+	en: 'English', de: 'German', fr: 'French', es: 'Spanish',
+	it: 'Italian', nl: 'Dutch', pl: 'Polish', pt: 'Portuguese', uk: 'Ukrainian'
+};
+
+function buildSystemPrompt(lang: string): string {
+	const langName = LANG_NAMES[lang] ?? 'English';
+	return `You are a fishing buddy AI integrated into OpenFishing, a personal fishing logbook app. You have access to the user's lures, catches, and spots via tools — call them whenever you need data to answer a question.
 
 When calling get_lures, always apply as many filters as possible to return only relevant results:
 - Filter by species when the user mentions a target fish.
@@ -19,7 +26,10 @@ When calling get_lures, always apply as many filters as possible to return only 
 
 When mentioning a specific lure by name, always format it as a markdown link using its id: [Lure Name](/lures/ID). Never use plain text for lure names when you have the id available.
 
-Answer questions about their fishing data, give tackle recommendations, and provide practical fishing advice. Be concise and practical.`;
+Answer questions about their fishing data, give tackle recommendations, and provide practical fishing advice. Be concise and practical.
+
+Always respond in ${langName}. Use fish species names, lure types, and fishing terminology as commonly used in ${langName}.`;
+}
 
 function buildContextBlock(
 	datetime: string | undefined,
@@ -375,7 +385,7 @@ export const GET: RequestHandler = async () => {
 	return json(sessions);
 };
 
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, cookies }) => {
 	if (!env.CHATBOT || !env.LITELLM_URL || !env.LITELLM_MODEL) {
 		error(503, 'Chatbot not configured');
 	}
@@ -385,9 +395,10 @@ export const POST: RequestHandler = async ({ request }) => {
 	const sessionId = typeof body.sessionId === 'string' ? body.sessionId : null;
 	const lastUserMessage = body.messages.findLast((m: { role: string }) => m.role === 'user') as { role: string; content: string } | undefined;
 
+	const lang = cookies.get('lang') ?? 'en';
 	const ctx = body.context as { lat?: number; lng?: number; datetime?: string } | undefined;
 	const weather = (ctx?.lat != null && ctx?.lng != null) ? await fetchWeather(ctx.lat, ctx.lng) : null;
-	const systemContent = SYSTEM_PROMPT + buildContextBlock(ctx?.datetime, ctx?.lat, ctx?.lng, weather);
+	const systemContent = buildSystemPrompt(lang) + buildContextBlock(ctx?.datetime, ctx?.lat, ctx?.lng, weather);
 
 	const conversation: unknown[] = [
 		{ role: 'system', content: systemContent },

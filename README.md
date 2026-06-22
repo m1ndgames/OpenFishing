@@ -40,6 +40,7 @@ A self-hosted web app to organize your fishing lures, mark fishing spots, and lo
 - Add, edit, and delete lures with full metadata: name, brand, type, color, weight, size, running depth, water type, light conditions, fish species, notes
 - **Pack size / amount** field — great for softbait bags and multi-packs
 - Photo uploads per lure (file picker or camera capture)
+- **AI lure identification** — upload a photo and the AI detects brand, model, type, official color name, running depth, water type, light conditions (inferred from color/UV), and target species; results shown as a per-field checklist you can selectively apply
 - Tag support via chip input
 - Mark lures as **favourites** (heart icon)
 - Mark lures as **lost** — preserves all catch history without deleting the record, clears the QR label
@@ -62,6 +63,7 @@ A self-hosted web app to organize your fishing lures, mark fishing spots, and lo
 - Log catches with species, length, weight, date/time, retrieve style, notes, and photos
 - Place exact catch location on an interactive map (GPS auto-locate on mobile)
 - **Bite index recorded at catch time** — snapshot of conditions when the catch was logged, shown on the detail page
+- **AI fish identification** — upload a catch photo and the AI identifies the species with confidence percentage; one-click to fill the species field
 - Automatically linked to the nearest defined spot within 100m
 - Cross-references the lure used
 - **Share links** — generate a public read-only link per catch
@@ -82,7 +84,7 @@ A self-hosted web app to organize your fishing lures, mark fishing spots, and lo
 - Available via REST API (`/api/v1/rods`, `/api/v1/reels`, `/api/v1/lines`, `/api/v1/combos`) and chatbot tools
 
 ### General
-- English and German — auto-detected from browser, switchable via flag picker
+- 9 languages (EN, DE, FR, ES, IT, NL, PL, PT, UK) — auto-detected from browser, switchable via flag picker; AI responses (chatbot, fish/lure identification) follow the selected language
 - Optional password authentication via `AUTH_PASSWORD` env var
 - Share links bypass authentication so individual records can be shared publicly without exposing the whole app
 - **Demo mode** via `DEMO_MODE` env var — read-only view, all writes blocked, localized banner and toast inform users
@@ -149,7 +151,8 @@ OPENAI_API_KEY=sk-...          # for gpt-4o
 ```
 CHATBOT=true
 LITELLM_URL=http://litellm:4000
-LITELLM_MODEL=claude-sonnet    # or gpt-4o — must match litellm.config.yaml
+LITELLM_MODEL=claude-sonnet         # or gpt-4o — must match litellm.config.yaml
+LITELLM_VISION_MODEL=claude-sonnet  # optional: separate model for fish/lure photo ID; falls back to LITELLM_MODEL
 ```
 
 3. Start with Docker Compose:

@@ -340,4 +340,15 @@ export default {
 	chatbotHistory: 'Історія',
 	chatbotNewChat: 'Новий чат',
 	chatbotNoHistory: 'Немає попередніх розмов',
+
+	// Fish identification
+	identifyFish: 'Визначити за фото',
+	identifying: 'Визначення…',
+	identifyUseSpecies: 'Використати',
+	identifyNoResult: 'Не вдалося визначити рибу',
+
+	// Lure identification
+	identifyLure: 'Визначити за фото',
+	identifyApplySelected: 'Застосувати вибране',
+	identifyLureNoResult: 'Не вдалося визначити деталі приманки',
 } as const;

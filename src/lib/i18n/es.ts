@@ -340,4 +340,15 @@ export default {
 	chatbotHistory: 'Historial',
 	chatbotNewChat: 'Nuevo chat',
 	chatbotNoHistory: 'Sin conversaciones anteriores',
+
+	// Fish identification
+	identifyFish: 'Identificar desde foto',
+	identifying: 'Identificando…',
+	identifyUseSpecies: 'Usar esto',
+	identifyNoResult: 'No se pudo identificar el pez',
+
+	// Lure identification
+	identifyLure: 'Identificar desde foto',
+	identifyApplySelected: 'Aplicar selección',
+	identifyLureNoResult: 'No se pudieron detectar detalles del señuelo',
 } as const;
