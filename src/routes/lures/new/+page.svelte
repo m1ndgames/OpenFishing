@@ -15,6 +15,93 @@
 	let showCrop = $state(false);
 	let cropSrc = $state<string | null>(null);
 
+	// Controlled field values for identify-to-fill
+	let brandValue = $state('');
+	let nameValue = $state('');
+	let typeValue = $state('');
+	let colorValue = $state('');
+	let sizeValue = $state('');
+	let weightValue = $state('');
+	let runningDepthValue = $state('');
+	let waterTypeValue = $state('');
+	let speciesInitial = $state('');
+	let speciesKey = $state(0);
+
+	interface LureIdResult {
+		brand: string | null;
+		name: string | null;
+		type: string | null;
+		color: string | null;
+		weight: number | null;
+		size: number | null;
+		runningDepth: 'shallow' | 'medium' | 'deep' | null;
+		waterType: 'freshwater' | 'saltwater' | null;
+		lightConditions: number | null;
+		species: string[] | null;
+		notes: string;
+	}
+
+	let identifyLoading = $state(false);
+	let identifyResult = $state<LureIdResult | null>(null);
+	let identifySelected = $state<Record<string, boolean>>({});
+
+	async function identifyLure() {
+		const file = photoInput.files?.[0];
+		if (!file) return;
+		identifyLoading = true;
+		identifyResult = null;
+
+		const imageData = await new Promise<string>((resolve, reject) => {
+			const reader = new FileReader();
+			reader.onload = () => resolve(reader.result as string);
+			reader.onerror = reject;
+			reader.readAsDataURL(file);
+		});
+
+		try {
+			const res = await fetch('/api/identify-lure', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ imageData })
+			});
+			if (res.ok) {
+				const r: LureIdResult = await res.json();
+				identifyResult = r;
+				identifySelected = {
+					brand: r.brand !== null,
+					name: r.name !== null,
+					type: r.type !== null,
+					color: r.color !== null,
+					weight: r.weight !== null,
+					size: r.size !== null,
+					runningDepth: r.runningDepth !== null,
+					waterType: r.waterType !== null,
+					lightConditions: r.lightConditions !== null,
+					species: (r.species?.length ?? 0) > 0
+				};
+			}
+		} catch { /* silently ignore */ }
+		identifyLoading = false;
+	}
+
+	function applyIdentified() {
+		const r = identifyResult!;
+		if (identifySelected.brand && r.brand) brandValue = r.brand;
+		if (identifySelected.name && r.name) nameValue = r.name;
+		if (identifySelected.type && r.type) typeValue = r.type;
+		if (identifySelected.color && r.color) colorValue = r.color;
+		if (identifySelected.weight && r.weight !== null) weightValue = String(r.weight);
+		if (identifySelected.size && r.size !== null) sizeValue = String(r.size);
+		if (identifySelected.runningDepth && r.runningDepth) runningDepthValue = r.runningDepth;
+		if (identifySelected.waterType && r.waterType) waterTypeValue = r.waterType;
+		if (identifySelected.lightConditions && r.lightConditions !== null) lightValue = r.lightConditions;
+		if (identifySelected.species && (r.species?.length ?? 0) > 0) {
+			speciesInitial = r.species!.join(' ');
+			speciesKey++;
+		}
+		identifyResult = null;
+	}
+
 	function handleFile(file: File | null | undefined) {
 		photoError = false;
 		if (!file) return;
@@ -31,6 +118,7 @@
 		dt.items.add(file);
 		photoInput.files = dt.files;
 		previewUrl = URL.createObjectURL(file);
+		identifyResult = null;
 	}
 
 	function onCropCancel() {
@@ -45,6 +133,7 @@
 		photoInput.value = '';
 		uploadInput.value = '';
 		if (cameraInput) cameraInput.value = '';
+		identifyResult = null;
 	}
 
 	function handleSubmit(e: SubmitEvent) {
@@ -67,6 +156,10 @@
 		const el = e.target as HTMLElement;
 		el.style.borderColor = '#243f5e';
 		el.style.boxShadow = 'none';
+	}
+
+	function hasAnyResult(r: LureIdResult): boolean {
+		return !!(r.brand || r.name || r.type || r.color || r.weight !== null || r.size !== null || r.runningDepth || r.waterType || r.lightConditions !== null || (r.species?.length ?? 0) > 0);
 	}
 </script>
 
@@ -149,7 +242,136 @@
 					{t.takePhoto}
 				</button>
 			</div>
+
+			{#if previewUrl}
+				<button type="button" onclick={identifyLure} disabled={identifyLoading}
+					style="margin-top:8px; width:100%; display:flex; align-items:center; justify-content:center; gap:8px; padding:9px; background:rgba(6,182,212,0.08); border:1px solid rgba(6,182,212,0.25); border-radius:9px; color:#22d3ee; font-size:0.8rem; font-weight:500; cursor:pointer; transition:all 0.15s; font-family:'DM Sans',sans-serif; opacity:{identifyLoading ? '0.6' : '1'};"
+					onmouseenter={function(e){if (!identifyLoading) { (e.currentTarget as HTMLElement).style.background='rgba(6,182,212,0.15)'; (e.currentTarget as HTMLElement).style.borderColor='rgba(6,182,212,0.5)'; }}}
+					onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='rgba(6,182,212,0.08)'; (e.currentTarget as HTMLElement).style.borderColor='rgba(6,182,212,0.25)';}}
+				>
+					{#if identifyLoading}
+						<span class="id-spin">⟳</span> {t.identifying}
+					{:else}
+						<svg width="14" height="14" viewBox="0 0 15 15" fill="none" style="flex-shrink:0;">
+							<circle cx="7.5" cy="7.5" r="5.5" stroke="currentColor" stroke-width="1.3"/>
+							<path d="M7.5 5v3l2 1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+						</svg>
+						{t.identifyLure}
+					{/if}
+				</button>
+			{/if}
 		</div>
+
+		<!-- Identify result panel -->
+		{#if identifyResult}
+			<div style="background:#0d1f35; border:1px solid rgba(6,182,212,0.3); border-radius:12px; padding:16px; margin-top:-8px;">
+				<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+					<span style="font-size:0.75rem; font-weight:600; color:#22d3ee; text-transform:uppercase; letter-spacing:0.08em;">
+						<svg width="12" height="12" viewBox="0 0 15 15" fill="none" style="vertical-align:-1px; margin-right:4px;"><circle cx="7.5" cy="7.5" r="5.5" stroke="currentColor" stroke-width="1.3"/><path d="M7.5 5v3l2 1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+						Detected
+					</span>
+					<button type="button" onclick={() => identifyResult = null}
+						style="background:none; border:none; color:#3d6a84; cursor:pointer; font-size:1rem; line-height:1; padding:2px 4px;"
+						aria-label="Dismiss">✕</button>
+				</div>
+
+				{#if !hasAnyResult(identifyResult)}
+					<p style="font-size:0.82rem; color:#5d8fa8; margin:0 0 8px;">{t.identifyLureNoResult}</p>
+				{:else}
+					<div style="display:flex; flex-direction:column; gap:2px; margin-bottom:12px;">
+						{#if identifyResult.brand !== null}
+							<label style="display:flex; align-items:center; gap:10px; padding:6px 4px; border-radius:6px; cursor:pointer;">
+								<input type="checkbox" bind:checked={identifySelected.brand} style="accent-color:#06b6d4; width:14px; height:14px; flex-shrink:0;" />
+								<span style="font-size:0.75rem; color:#5d8fa8; text-transform:uppercase; letter-spacing:0.05em; min-width:90px;">{t.brand}</span>
+								<span style="font-size:0.875rem; color:#c2dce8; font-weight:500;">{identifyResult.brand}</span>
+							</label>
+						{/if}
+						{#if identifyResult.name !== null}
+							<label style="display:flex; align-items:center; gap:10px; padding:6px 4px; border-radius:6px; cursor:pointer;">
+								<input type="checkbox" bind:checked={identifySelected.name} style="accent-color:#06b6d4; width:14px; height:14px; flex-shrink:0;" />
+								<span style="font-size:0.75rem; color:#5d8fa8; text-transform:uppercase; letter-spacing:0.05em; min-width:90px;">{t.name}</span>
+								<span style="font-size:0.875rem; color:#c2dce8; font-weight:500;">{identifyResult.name}</span>
+							</label>
+						{/if}
+						{#if identifyResult.type !== null}
+							<label style="display:flex; align-items:center; gap:10px; padding:6px 4px; border-radius:6px; cursor:pointer;">
+								<input type="checkbox" bind:checked={identifySelected.type} style="accent-color:#06b6d4; width:14px; height:14px; flex-shrink:0;" />
+								<span style="font-size:0.75rem; color:#5d8fa8; text-transform:uppercase; letter-spacing:0.05em; min-width:90px;">{t.type}</span>
+								<span style="font-size:0.875rem; color:#c2dce8; font-weight:500;">{identifyResult.type}</span>
+							</label>
+						{/if}
+						{#if identifyResult.color !== null}
+							<label style="display:flex; align-items:center; gap:10px; padding:6px 4px; border-radius:6px; cursor:pointer;">
+								<input type="checkbox" bind:checked={identifySelected.color} style="accent-color:#06b6d4; width:14px; height:14px; flex-shrink:0;" />
+								<span style="font-size:0.75rem; color:#5d8fa8; text-transform:uppercase; letter-spacing:0.05em; min-width:90px;">{t.color}</span>
+								<span style="font-size:0.875rem; color:#c2dce8; font-weight:500;">{identifyResult.color}</span>
+							</label>
+						{/if}
+						{#if identifyResult.weight !== null}
+							<label style="display:flex; align-items:center; gap:10px; padding:6px 4px; border-radius:6px; cursor:pointer;">
+								<input type="checkbox" bind:checked={identifySelected.weight} style="accent-color:#06b6d4; width:14px; height:14px; flex-shrink:0;" />
+								<span style="font-size:0.75rem; color:#5d8fa8; text-transform:uppercase; letter-spacing:0.05em; min-width:90px;">{t.weightG}</span>
+								<span style="font-size:0.875rem; color:#c2dce8; font-weight:500;">{identifyResult.weight} g</span>
+							</label>
+						{/if}
+						{#if identifyResult.size !== null}
+							<label style="display:flex; align-items:center; gap:10px; padding:6px 4px; border-radius:6px; cursor:pointer;">
+								<input type="checkbox" bind:checked={identifySelected.size} style="accent-color:#06b6d4; width:14px; height:14px; flex-shrink:0;" />
+								<span style="font-size:0.75rem; color:#5d8fa8; text-transform:uppercase; letter-spacing:0.05em; min-width:90px;">{t.size}</span>
+								<span style="font-size:0.875rem; color:#c2dce8; font-weight:500;">{identifyResult.size} cm</span>
+							</label>
+						{/if}
+						{#if identifyResult.runningDepth !== null}
+							<label style="display:flex; align-items:center; gap:10px; padding:6px 4px; border-radius:6px; cursor:pointer;">
+								<input type="checkbox" bind:checked={identifySelected.runningDepth} style="accent-color:#06b6d4; width:14px; height:14px; flex-shrink:0;" />
+								<span style="font-size:0.75rem; color:#5d8fa8; text-transform:uppercase; letter-spacing:0.05em; min-width:90px;">{t.runningDepth}</span>
+								<span style="font-size:0.875rem; color:#c2dce8; font-weight:500;">{t[`runningDepth_${identifyResult.runningDepth}` as keyof typeof t]}</span>
+							</label>
+						{/if}
+						{#if identifyResult.waterType !== null}
+							<label style="display:flex; align-items:center; gap:10px; padding:6px 4px; border-radius:6px; cursor:pointer;">
+								<input type="checkbox" bind:checked={identifySelected.waterType} style="accent-color:#06b6d4; width:14px; height:14px; flex-shrink:0;" />
+								<span style="font-size:0.75rem; color:#5d8fa8; text-transform:uppercase; letter-spacing:0.05em; min-width:90px;">{t.waterType}</span>
+								<span style="font-size:0.875rem; color:#c2dce8; font-weight:500;">{t[`waterType_${identifyResult.waterType}` as keyof typeof t]}</span>
+							</label>
+						{/if}
+						{#if identifyResult.lightConditions !== null}
+							<label style="display:flex; align-items:center; gap:10px; padding:6px 4px; border-radius:6px; cursor:pointer;">
+								<input type="checkbox" bind:checked={identifySelected.lightConditions} style="accent-color:#06b6d4; width:14px; height:14px; flex-shrink:0;" />
+								<span style="font-size:0.75rem; color:#5d8fa8; text-transform:uppercase; letter-spacing:0.05em; min-width:90px;">{t.lightConditions}</span>
+								<span style="font-size:0.875rem; color:#c2dce8; font-weight:500;">{t[`lightConditions_${identifyResult.lightConditions}` as keyof typeof t]} ({identifyResult.lightConditions}/10)</span>
+							</label>
+						{/if}
+						{#if (identifyResult.species?.length ?? 0) > 0}
+							<label style="display:flex; align-items:center; gap:10px; padding:6px 4px; border-radius:6px; cursor:pointer;">
+								<input type="checkbox" bind:checked={identifySelected.species} style="accent-color:#06b6d4; width:14px; height:14px; flex-shrink:0;" />
+								<span style="font-size:0.75rem; color:#5d8fa8; text-transform:uppercase; letter-spacing:0.05em; min-width:90px;">{t.fishSpecies}</span>
+								<span style="font-size:0.875rem; color:#c2dce8; font-weight:500;">{identifyResult.species!.join(', ')}</span>
+							</label>
+						{/if}
+					</div>
+				{/if}
+
+				{#if identifyResult.notes}
+					<p style="font-size:0.75rem; color:#3d6a84; margin:0 0 10px; font-style:italic;">{identifyResult.notes}</p>
+				{/if}
+
+				{#if hasAnyResult(identifyResult)}
+					<div style="display:flex; gap:8px;">
+						<button type="button" onclick={applyIdentified}
+							style="flex:1; padding:8px 16px; background:#06b6d4; color:#030a12; font-size:0.8rem; font-weight:700; border:none; border-radius:8px; cursor:pointer; font-family:'DM Sans',sans-serif; transition:background 0.15s;"
+							onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='#22d3ee';}}
+							onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='#06b6d4';}}
+						>{t.identifyApplySelected}</button>
+						<button type="button" onclick={() => identifyResult = null}
+							style="padding:8px 16px; background:transparent; color:#5d8fa8; font-size:0.8rem; border:1px solid #243f5e; border-radius:8px; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.15s;"
+							onmouseenter={function(e){(e.currentTarget as HTMLElement).style.borderColor='#3d6a84'; (e.currentTarget as HTMLElement).style.color='#8ab8cc';}}
+							onmouseleave={function(e){(e.currentTarget as HTMLElement).style.borderColor='#243f5e'; (e.currentTarget as HTMLElement).style.color='#5d8fa8';}}
+						>{t.cancel}</button>
+					</div>
+				{/if}
+			</div>
+		{/if}
 
 		<!-- Divider -->
 		<div style="height:1px; background:#172f4a; margin:-4px 0;"></div>
@@ -159,11 +381,13 @@
 			<div>
 				<label style={labelStyle} for="brand">{t.brand}</label>
 				<input id="brand" name="brand" type="text" list="suggest-brands" placeholder="e.g. Rapala"
+					bind:value={brandValue}
 					style={inputStyle} onfocus={focusInput} onblur={blurInput} />
 			</div>
 			<div>
 				<label style={labelStyle} for="name">{t.name}</label>
 				<input id="name" name="name" type="text" list="suggest-names" placeholder="e.g. CD-7"
+					bind:value={nameValue}
 					style={inputStyle} onfocus={focusInput} onblur={blurInput} />
 			</div>
 		</div>
@@ -173,11 +397,13 @@
 			<div>
 				<label style={labelStyle} for="type">{t.type}</label>
 				<input id="type" name="type" type="text" list="suggest-types" placeholder="e.g. Crankbait"
+					bind:value={typeValue}
 					style={inputStyle} onfocus={focusInput} onblur={blurInput} />
 			</div>
 			<div>
 				<label style={labelStyle} for="color">{t.color}</label>
 				<input id="color" name="color" type="text" list="suggest-colors" placeholder="e.g. Fire Tiger"
+					bind:value={colorValue}
 					style={inputStyle} onfocus={focusInput} onblur={blurInput} />
 			</div>
 		</div>
@@ -187,11 +413,13 @@
 			<div>
 				<label style={labelStyle} for="size">{t.size} (cm)</label>
 				<input id="size" name="size" type="number" min="0" step="0.1"
+					bind:value={sizeValue}
 					style={inputStyle} onfocus={focusInput} onblur={blurInput} />
 			</div>
 			<div>
 				<label style={labelStyle} for="weight">{t.weightG}</label>
 				<input id="weight" name="weight" type="number" min="0" step="0.1" placeholder="e.g. 7"
+					bind:value={weightValue}
 					style={inputStyle} onfocus={focusInput} onblur={blurInput} />
 			</div>
 			<div>
@@ -209,7 +437,7 @@
 			</div>
 			<div>
 				<label style={labelStyle} for="running_depth">{t.runningDepth}</label>
-				<select id="running_depth" name="running_depth" style={selectStyle}
+				<select id="running_depth" name="running_depth" bind:value={runningDepthValue} style={selectStyle}
 					onfocus={focusInput} onblur={blurInput}>
 					<option value="">—</option>
 					<option value="shallow">{t.runningDepth_shallow}</option>
@@ -219,11 +447,11 @@
 			</div>
 		</div>
 
-		<!-- Water Type + Weather -->
+		<!-- Water Type + Light Conditions -->
 		<div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
 			<div>
 				<label style={labelStyle} for="water_type">{t.waterType}</label>
-				<select id="water_type" name="water_type" style={selectStyle}
+				<select id="water_type" name="water_type" bind:value={waterTypeValue} style={selectStyle}
 					onfocus={focusInput} onblur={blurInput}>
 					<option value="">—</option>
 					<option value="freshwater">{t.waterType_freshwater}</option>
@@ -261,7 +489,9 @@
 		<!-- Fish Species -->
 		<div>
 			<label style={labelStyle}>{t.fishSpecies}</label>
-			<TagInput name="species" suggest={data.suggestions.species} placeholder={t.speciesPlaceholder} />
+			{#key speciesKey}
+				<TagInput name="species" value={speciesInitial} suggest={data.suggestions.species} placeholder={t.speciesPlaceholder} />
+			{/key}
 		</div>
 
 		<!-- Notes -->
@@ -295,3 +525,14 @@
 {#if showCrop && cropSrc}
 	<CropModal src={cropSrc} onConfirm={onCropConfirm} onCancel={onCropCancel} />
 {/if}
+
+<style>
+	.id-spin {
+		display: inline-block;
+		animation: id-spin 1s linear infinite;
+	}
+	@keyframes id-spin {
+		from { transform: rotate(0deg); }
+		to { transform: rotate(360deg); }
+	}
+</style>

@@ -72,6 +72,8 @@ npm run db:studio      # Open Drizzle Studio (DB GUI)
 | `/api/spots/[id]/share` | POST — creates share token, DELETE — revokes it |
 | `/api/catches/[id]/share` | POST — creates share token, DELETE — revokes it |
 | `/api/chat` | POST — chatbot endpoint; accepts `{ messages }`, runs tool-call loop, returns `{ reply }` |
+| `/api/identify-fish` | POST — fish species identification; accepts `{ imageData }` (base64 data URL), returns `{ species, confidence, note }`; reads `lang` cookie for response language |
+| `/api/identify-lure` | POST — lure identification from photo; accepts `{ imageData }` (base64 data URL), returns detected fields (brand, name, type, color, weight, size, runningDepth, waterType, lightConditions, species[], notes); reads `lang` cookie |
 | `/api/openapi` | GET — serves the OpenAPI 3.0 spec as JSON (cookie auth) |
 | `/api/v1/lures` | GET — list all lures with tags; Bearer token auth |
 | `/api/v1/lures/[id]` | GET — single lure with tags; Bearer token auth |
@@ -130,11 +132,13 @@ The layout (`src/routes/+layout.svelte`) renders the full nav chrome for all rou
 - **Desktop**: Logo + section links + "Add" dropdown + language switcher
 - **Mobile**: Top bar (logo + Add dropdown + lang) + fixed bottom tab bar
 
-The language switcher is a `<select>` with flag emoji in the options (`🇬🇧 EN` / `🇩🇪 DE`), posting to `/api/lang`.
+The language switcher is a `<select>` with flag emoji options, posting to `/api/lang`. Supported languages: EN, DE, FR, ES, IT, NL, PL, PT, UK.
 
 ### i18n
 
-Translations live in `src/lib/i18n/en.ts` and `src/lib/i18n/de.ts`. The layout server (`src/routes/+layout.server.ts`) reads the `lang` cookie (falling back to `Accept-Language` header) and returns `{ t, lang }`, which SvelteKit merges into every page's `data` prop automatically.
+Translations live in `src/lib/i18n/{en,de,fr,es,it,nl,pl,pt,uk}.ts` (9 files). The layout server (`src/routes/+layout.server.ts`) reads the `lang` cookie (falling back to `Accept-Language` header) and returns `{ t, lang }`, which SvelteKit merges into every page's `data` prop automatically.
+
+When adding new UI strings, add keys to **all 9 language files**. The server-side AI endpoints (`/api/chat`, `/api/identify-fish`, `/api/identify-lure`) also read the `lang` cookie and inject a language instruction into their prompts so AI responses are in the user's language.
 
 ### File uploads
 
@@ -195,6 +199,7 @@ Floating chat widget (`src/lib/components/Chatbot.svelte`) rendered in `+layout.
 - Tools support filter parameters — LLM is instructed to use them to avoid fetching unnecessary data: `get_lures(species?, waterType?, type?, color?, minLightConditions?, maxLightConditions?, includeLost?, limit?, offset?)`, `get_catches(species?, limit?)`, `get_spots(tag?)`, `get_rods(type?, brand?)`, `get_reels(brand?)`, `get_lines(type?, brand?)`, `get_combos()`. `get_lures` defaults to 20 results and returns `{ total, offset, results[] }` so the LLM can paginate if needed.
 - Tool responses strip all fields irrelevant to the LLM (id excluded from catches/spots, shareToken, createdAt, updatedAt, photoPath, qrCoded, lureNumber omitted). `get_lures` keeps `id` so the LLM can produce clickable markdown links.
 - The system prompt explicitly instructs the LLM to: use filter params aggressively, map current light conditions to `minLightConditions`, use species/color/type in the user's original language (not translated), and format lure names as `[Name](/lures/ID)` markdown links.
+- Reads the `lang` cookie and calls `buildSystemPrompt(lang)` so the AI always responds in the user's app language (German, French, etc.).
 - Each LiteLLM fetch has a 45 s `AbortSignal.timeout`. Trailing slash in `LITELLM_URL` is stripped before appending `/chat/completions`.
 - Returns `{ reply: string }` once the LLM responds without tool calls.
 - Exempted from demo-mode write-block in `hooks.server.ts` (read-only tools, so the chatbot works in demo mode).
@@ -209,8 +214,25 @@ Floating chat widget (`src/lib/components/Chatbot.svelte`) rendered in `+layout.
 - `CHATBOT` — any truthy value enables it; `chatbotEnabled` is surfaced to the layout via `+layout.server.ts`.
 - `LITELLM_URL` — base URL of the LiteLLM proxy (e.g. `http://litellm:4000`).
 - `LITELLM_MODEL` — model name matching an entry in `litellm.config.yaml`.
+- `LITELLM_VISION_MODEL` — optional separate model for image recognition (falls back to `LITELLM_MODEL` if unset). Must support vision/image input.
 
 **Infrastructure** — `docker-compose.yml` + `litellm.config.yaml` at repo root. LiteLLM runs as an internal sidecar with no public port. API keys (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`) are passed to the LiteLLM container via Docker Compose and read by LiteLLM using the `os.environ/KEY_NAME` syntax in the config file.
+
+### Vision / Image Recognition
+
+Two server-side endpoints proxy image data to LiteLLM, keeping API keys off the client. The browser reads the uploaded file as a base64 data URL via `FileReader`, POSTs to the SvelteKit endpoint, which forwards it as an `image_url` content block. Both endpoints read the `lang` cookie and inject a language instruction so species names and notes are returned in the user's language.
+
+**`/api/identify-fish`** (`src/routes/api/identify-fish/+server.ts`):
+- Used on the catch form — an "Identify from photo" button appears once a photo is selected.
+- Returns `{ species: string|null, confidence: number|null, note: string }`.
+- Species is set to `null` if confidence < 40 (honest "no idea" rather than a bad guess).
+
+**`/api/identify-lure`** (`src/routes/api/identify-lure/+server.ts`):
+- Used on the lure add form — "Identify from photo" button appears after the photo is cropped.
+- Returns: `brand`, `name`, `type`, `color` (official manufacturer color name only, null if unknown), `weight`, `size`, `runningDepth` (null for weight/technique-driven lures like spinners/jigs), `waterType`, `lightConditions` (0–10 inferred from color/UV properties), `species[]`, `notes`.
+- Brand/name identification uses visual design characteristics (shape, hardware, lip profile) not just readable text — the prompt explicitly instructs the model to use its knowledge of well-known lure designs and never call a recognizable lure a "generic clone".
+- The result panel in `src/routes/lures/new/+page.svelte` shows each detected field as a checkbox row; the user selects which fields to apply then clicks "Apply selected". Species uses a `{#key speciesKey}` remount trick to inject values into the `TagInput` component.
+- Both endpoints are exempt from demo-mode write-block in `hooks.server.ts`.
 
 ### REST API
 
@@ -238,4 +260,5 @@ Drizzle migrations run automatically on startup in production (`NODE_ENV=product
 | `CHATBOT` | _(unset)_ | If set to any truthy value, enables the AI chatbot widget. Requires `LITELLM_URL` and `LITELLM_MODEL`. |
 | `LITELLM_URL` | _(unset)_ | Base URL of the LiteLLM proxy (e.g. `http://litellm:4000`). |
 | `LITELLM_MODEL` | _(unset)_ | Model name to use — must match a `model_name` entry in `litellm.config.yaml`. |
+| `LITELLM_VISION_MODEL` | _(unset)_ | Optional separate vision-capable model for fish/lure identification. Falls back to `LITELLM_MODEL` if unset. |
 | `BODY_SIZE_LIMIT` | `104857600` | Max upload size in bytes (set in Dockerfile) |

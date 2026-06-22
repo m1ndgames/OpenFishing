@@ -9,7 +9,7 @@ function sessionToken(password: string): string {
 export const handle: Handle = async ({ event, resolve }) => {
 	// Demo mode: block all writes except the lang preference toggle
 	if (env.DEMO_MODE && event.request.method !== 'GET' && event.request.method !== 'HEAD') {
-		if (event.url.pathname !== '/api/lang' && event.url.pathname !== '/api/chat') {
+		if (event.url.pathname !== '/api/lang' && event.url.pathname !== '/api/chat' && event.url.pathname !== '/api/identify-fish' && event.url.pathname !== '/api/identify-lure') {
 			if (event.url.pathname.startsWith('/api/')) {
 				return Response.json({ error: 'Demo mode — write access is disabled' }, { status: 403 });
 			}
