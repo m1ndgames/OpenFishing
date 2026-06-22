@@ -337,4 +337,7 @@ export default {
 	chatbotPlaceholder: 'Ask anything…',
 	chatbotOpen: 'Open fishing buddy chat',
 	chatbotClose: 'Close chat',
+	chatbotHistory: 'History',
+	chatbotNewChat: 'New chat',
+	chatbotNoHistory: 'No previous conversations',
 } as const;

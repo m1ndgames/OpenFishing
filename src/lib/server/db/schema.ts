@@ -137,6 +137,14 @@ export const catchPhoto = sqliteTable('catch_photo', {
 	sortOrder: integer('sort_order').notNull().default(0)
 });
 
+export const chatMessage = sqliteTable('chat_message', {
+	id: integer('id').primaryKey({ autoIncrement: true }),
+	sessionId: text('session_id').notNull(),
+	role: text('role').notNull(),
+	content: text('content').notNull(),
+	createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date())
+});
+
 // ── Relations ─────────────────────────────────────────────────────────────────
 
 export const lureRelations = relations(lure, ({ many }) => ({

@@ -337,4 +337,7 @@ export default {
 	chatbotPlaceholder: 'Posez une question…',
 	chatbotOpen: 'Ouvrir le chat',
 	chatbotClose: 'Fermer le chat',
+	chatbotHistory: 'Historique',
+	chatbotNewChat: 'Nouveau chat',
+	chatbotNoHistory: 'Aucune conversation précédente',
 } as const;
