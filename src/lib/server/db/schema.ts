@@ -145,6 +145,11 @@ export const chatMessage = sqliteTable('chat_message', {
 	createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date())
 });
 
+export const appSetting = sqliteTable('app_setting', {
+	key: text('key').primaryKey(),
+	value: text('value').notNull()
+});
+
 // ── Relations ─────────────────────────────────────────────────────────────────
 
 export const lureRelations = relations(lure, ({ many }) => ({

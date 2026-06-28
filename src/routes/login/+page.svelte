@@ -10,12 +10,12 @@
 	<title>OpenFishing — Login</title>
 </svelte:head>
 
-<div style="min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; background:#060f1a;">
+<div style="min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; background:var(--of-bg-base);">
 	<div style="width:100%; max-width:360px;">
 
 		<!-- Logo / title -->
 		<div style="text-align:center; margin-bottom:32px;">
-			<svg width="48" height="48" viewBox="0 0 64 64" fill="none" style="margin:0 auto 12px; display:block; color:#06b6d4;">
+			<svg width="48" height="48" viewBox="0 0 64 64" fill="none" style="margin:0 auto 12px; display:block; color:var(--of-accent-solid);">
 				<ellipse cx="36" cy="32" rx="18" ry="9" fill="currentColor" opacity="0.15"/>
 				<ellipse cx="36" cy="32" rx="14" ry="7" stroke="currentColor" stroke-width="1.8" fill="none"/>
 				<ellipse cx="31" cy="29" rx="5" ry="2.5" fill="currentColor" opacity="0.4"/>
@@ -25,21 +25,21 @@
 				<path d="M12 32 C7 32 5 39 9 43 C13 47 17 44 16 40" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/>
 				<path d="M52 32 L59 23 M52 32 L59 41" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
 			</svg>
-			<h1 style="font-family:'Carter One',sans-serif; font-size:1.6rem; color:#e0eaf8; margin:0 0 4px;">OpenFishing</h1>
-			<p style="font-size:0.875rem; color:#3d6a84; margin:0;">Enter your password to continue</p>
+			<h1 style="font-family:'Carter One',sans-serif; font-size:1.6rem; color:var(--of-text-bright); margin:0 0 4px;">OpenFishing</h1>
+			<p style="font-size:0.875rem; color:var(--of-text-4); margin:0;">Enter your password to continue</p>
 		</div>
 
 		<!-- Card -->
-		<form method="POST" style="background:#0b1a2c; border:1px solid #172f4a; border-radius:16px; padding:28px; display:flex; flex-direction:column; gap:20px;">
+		<form method="POST" style="background:var(--of-bg-surface); border:1px solid var(--of-border-subtle); border-radius:16px; padding:28px; display:flex; flex-direction:column; gap:20px;">
 
 			{#if form?.error}
-				<div style="background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); color:#f87171; font-size:0.875rem; padding:10px 14px; border-radius:9px;">
+				<div style="background:var(--of-danger-bg); border:1px solid var(--of-danger-border); color:var(--of-danger); font-size:0.875rem; padding:10px 14px; border-radius:9px;">
 					Incorrect password.
 				</div>
 			{/if}
 
 			<div>
-				<label for="password" style="display:block; font-size:0.78rem; font-weight:500; color:#5d8fa8; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.06em;">Password</label>
+				<label for="password" style="display:block; font-size:0.78rem; font-weight:500; color:var(--of-text-3); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.06em;">Password</label>
 				<div style="position:relative;">
 					<input
 						id="password"
@@ -47,14 +47,14 @@
 						type={showPassword ? 'text' : 'password'}
 						autofocus
 						autocomplete="current-password"
-						style="width:100%; padding:9px 40px 9px 12px; background:#0f2238; border:1px solid #243f5e; border-radius:9px; color:#c2dce8; font-size:0.875rem; outline:none; box-sizing:border-box; font-family:'DM Sans',sans-serif; transition:border-color 0.15s, box-shadow 0.15s;"
-						onfocus={function(e){(e.target as HTMLElement).style.borderColor='#06b6d4'; (e.target as HTMLElement).style.boxShadow='0 0 0 3px rgba(6,182,212,0.1)';}}
-						onblur={function(e){(e.target as HTMLElement).style.borderColor='#243f5e'; (e.target as HTMLElement).style.boxShadow='none';}}
+						style="width:100%; padding:9px 40px 9px 12px; background:var(--of-bg-elevated); border:1px solid var(--of-border); border-radius:9px; color:var(--of-text); font-size:0.875rem; outline:none; box-sizing:border-box; font-family:'DM Sans',sans-serif; transition:border-color 0.15s, box-shadow 0.15s;"
+						onfocus={function(e){(e.target as HTMLElement).style.borderColor='var(--of-accent-solid)'; (e.target as HTMLElement).style.boxShadow='0 0 0 3px var(--of-accent-glow)';}}
+						onblur={function(e){(e.target as HTMLElement).style.borderColor='var(--of-border)'; (e.target as HTMLElement).style.boxShadow='none';}}
 					/>
 					<button
 						type="button"
 						onclick={() => showPassword = !showPassword}
-						style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:#3d6a84; padding:2px; display:flex; align-items:center;"
+						style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:var(--of-text-4); padding:2px; display:flex; align-items:center;"
 						aria-label={showPassword ? 'Hide password' : 'Show password'}
 					>
 						{#if showPassword}
@@ -75,9 +75,9 @@
 
 			<button
 				type="submit"
-				style="background:#06b6d4; color:#030a12; font-size:0.875rem; font-weight:700; padding:11px; border-radius:9px; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; transition:background 0.15s;"
-				onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='#22d3ee';}}
-				onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='#06b6d4';}}
+				style="background:var(--of-accent-solid); color:var(--of-ink); font-size:0.875rem; font-weight:700; padding:11px; border-radius:9px; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; transition:background 0.15s;"
+				onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-accent)';}}
+				onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-accent-solid)';}}
 			>
 				Sign in
 			</button>

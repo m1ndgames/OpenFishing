@@ -1,4 +1,4 @@
-export default {
+﻿export default {
 	// Header
 	navLures: 'Esche',
 	add: 'Aggiungi',
@@ -359,4 +359,32 @@ export default {
 	catchExportFrom: 'Dal',
 	catchExportTo: 'Al',
 	catchExportBtn: 'Scarica CSV',
+
+	// Appearance settings
+	navAppearance: 'Aspetto',
+	settingsAppearance: 'Aspetto',
+	appearanceTitle: 'Aspetto',
+	appearanceColorMode: 'Modalità colore',
+	appearanceModeDark: 'Scuro',
+	appearanceModeLight: 'Chiaro',
+	appearanceModeSystem: 'Sistema',
+	appearanceSaved: 'Salvato',
+	appearanceTheme: 'Tema',
+	appearanceThemeOcean: 'Ocean',
+
+	// Backup e ripristino
+	backupSchemaHash: 'Hash schema',
+	backupExportTitle: 'Esporta backup',
+	backupExportDesc: 'Scarica tutti i richiami, spot, catture e foto come archivio ZIP.',
+	backupExportBtn: 'Esporta',
+	backupImportTitle: 'Importa backup',
+	backupImportDesc: 'Sostituisce tutti i dati e le foto esistenti con il contenuto del backup. La versione dello schema viene verificata automaticamente prima di apportare modifiche.',
+	backupImportSuccess: 'Importazione riuscita — {lures} richiami, {spots} spot, {catches} catture ripristinate.',
+	backupChooseFile: 'Scegli file',
+	backupNoFile: 'Nessun file scelto',
+	backupConfirmBefore: 'Capisco che questo',
+	backupConfirmBold: 'sostituirà permanentemente tutti i dati attuali',
+	backupConfirmAfter: 'con il contenuto di questo backup. Questa operazione non può essere annullata.',
+	backupImporting: 'Importazione…',
+	backupImportBtn: 'Importa e sostituisci',
 } as const;

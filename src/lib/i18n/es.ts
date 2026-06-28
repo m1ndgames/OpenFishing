@@ -1,4 +1,4 @@
-export default {
+﻿export default {
 	// Header
 	navLures: 'Señuelos',
 	add: 'Añadir',
@@ -359,4 +359,32 @@ export default {
 	catchExportFrom: 'Desde',
 	catchExportTo: 'Hasta',
 	catchExportBtn: 'Descargar CSV',
+
+	// Appearance settings
+	navAppearance: 'Apariencia',
+	settingsAppearance: 'Apariencia',
+	appearanceTitle: 'Apariencia',
+	appearanceColorMode: 'Modo de color',
+	appearanceModeDark: 'Oscuro',
+	appearanceModeLight: 'Claro',
+	appearanceModeSystem: 'Sistema',
+	appearanceSaved: 'Guardado',
+	appearanceTheme: 'Tema',
+	appearanceThemeOcean: 'Ocean',
+
+	// Copia de seguridad y restauración
+	backupSchemaHash: 'Hash de esquema',
+	backupExportTitle: 'Exportar copia de seguridad',
+	backupExportDesc: 'Descarga todos los señuelos, spots, capturas y fotos como un archivo ZIP.',
+	backupExportBtn: 'Exportar',
+	backupImportTitle: 'Importar copia de seguridad',
+	backupImportDesc: 'Reemplaza todos los datos y fotos existentes con el contenido de la copia de seguridad. La versión del esquema se verifica automáticamente antes de realizar cualquier cambio.',
+	backupImportSuccess: 'Importación exitosa — {lures} señuelos, {spots} spots, {catches} capturas restauradas.',
+	backupChooseFile: 'Elegir archivo',
+	backupNoFile: 'Ningún archivo elegido',
+	backupConfirmBefore: 'Entiendo que esto',
+	backupConfirmBold: 'reemplazará permanentemente todos los datos actuales',
+	backupConfirmAfter: 'con el contenido de esta copia de seguridad. Esto no se puede deshacer.',
+	backupImporting: 'Importando…',
+	backupImportBtn: 'Importar y reemplazar',
 } as const;

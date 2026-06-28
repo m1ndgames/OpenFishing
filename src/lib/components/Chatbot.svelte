@@ -144,7 +144,7 @@
 	}
 
 	function headerBtnStyle(active = false) {
-		return `width:30px;height:30px;border-radius:8px;flex-shrink:0;background:${active ? 'rgba(34,211,238,0.12)' : 'transparent'};border:1px solid ${active ? 'rgba(34,211,238,0.3)' : '#243f5e'};color:${active ? '#22d3ee' : '#5d8fa8'};cursor:pointer;display:flex;align-items:center;justify-content:center;`;
+		return `width:30px;height:30px;border-radius:8px;flex-shrink:0;background:${active ? 'var(--of-accent-bg-hover)' : 'transparent'};border:1px solid ${active ? 'var(--of-accent-border)' : 'var(--of-border)'};color:${active ? 'var(--of-accent)' : 'var(--of-text-3)'};cursor:pointer;display:flex;align-items:center;justify-content:center;`;
 	}
 </script>
 
@@ -168,21 +168,24 @@
 <div class="chat-panel">
 
 	<!-- Header -->
-	<div style="padding:14px 16px 13px;border-bottom:1px solid #243f5e;display:flex;align-items:center;gap:8px;background:#0f2238;flex-shrink:0;" class="chat-panel-header">
+	<div style="padding:14px 16px 13px;border-bottom:1px solid var(--of-border);display:flex;align-items:center;gap:8px;background:var(--of-bg-elevated);flex-shrink:0;" class="chat-panel-header">
 		{#if showHistory}
 			<button onclick={() => (showHistory = false)} aria-label="Back" style={headerBtnStyle()}>
 				<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
 			</button>
-			<span style="font-family:'Carter One',sans-serif;font-size:0.9rem;color:#c2dce8;">{t.chatbotHistory}</span>
+			<span style="font-family:'Carter One',sans-serif;font-size:0.9rem;color:var(--of-text);">{t.chatbotHistory}</span>
 		{:else}
-			<div style="width:32px;height:32px;border-radius:50%;background:rgba(34,211,238,0.12);border:1px solid rgba(34,211,238,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="color:#22d3ee;">
-					<path d="M4 20 Q8 16 12 14 Q16 12 20 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-					<circle cx="20" cy="8" r="2" fill="currentColor"/>
-					<path d="M20 8 L23 5 M20 8 L23 11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+			<div style="width:32px;height:32px;border-radius:50%;background:var(--of-accent-bg-hover);border:1px solid var(--of-accent-border);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+				<svg width="16" height="16" viewBox="0 0 48 48" fill="none" style="color:var(--of-accent);">
+					<g transform="translate(2,1)">
+						<circle cx="25" cy="11" r="5" stroke="currentColor" stroke-width="3.5"/>
+						<path d="M25 16 V30 C25 38.5 13.5 39.5 13.5 30 V25.5" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+						<path d="M13.5 27 L17.5 29.5" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>
+						<path d="M6 41 q4 -4 8 0 t8 0 t8 0 t8 0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+					</g>
 				</svg>
 			</div>
-			<span style="font-family:'Carter One',sans-serif;font-size:0.9rem;color:#c2dce8;">{t.chatbotTitle}</span>
+			<span style="font-family:'Carter One',sans-serif;font-size:0.9rem;color:var(--of-text);">{t.chatbotTitle}</span>
 		{/if}
 
 		<div style="flex:1;"></div>
@@ -203,11 +206,11 @@
 
 	{#if showHistory}
 		<!-- History list -->
-		<div style="flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:6px;scrollbar-width:thin;scrollbar-color:#243f5e transparent;">
+		<div style="flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:6px;scrollbar-width:thin;scrollbar-color:var(--of-border) transparent;">
 			{#if loadingHistory}
-				<div style="flex:1;display:flex;align-items:center;justify-content:center;color:#3d6a84;font-size:0.82rem;font-family:'DM Sans',sans-serif;">…</div>
+				<div style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--of-text-4);font-size:0.82rem;font-family:'DM Sans',sans-serif;">…</div>
 			{:else if sessions.length === 0}
-				<div style="flex:1;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;color:#3d6a84;font-size:0.82rem;font-family:'DM Sans',sans-serif;">{t.chatbotNoHistory}</div>
+				<div style="flex:1;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;color:var(--of-text-4);font-size:0.82rem;font-family:'DM Sans',sans-serif;">{t.chatbotNoHistory}</div>
 			{:else}
 				{#each sessions as session (session.sessionId)}
 					<div
@@ -215,16 +218,16 @@
 						tabindex="0"
 						onclick={() => loadSession(session.sessionId)}
 						onkeydown={(e) => e.key === 'Enter' && loadSession(session.sessionId)}
-						style="width:100%;text-align:left;padding:10px 12px;border-radius:10px;background:{session.sessionId === sessionId ? 'rgba(34,211,238,0.08)' : '#0d1f35'};border:1px solid {session.sessionId === sessionId ? 'rgba(34,211,238,0.3)' : '#1d3855'};cursor:pointer;display:flex;align-items:center;gap:10px;"
+						style="width:100%;text-align:left;padding:10px 12px;border-radius:10px;background:{session.sessionId === sessionId ? 'var(--of-accent-bg)' : 'var(--of-bg-overlay)'};border:1px solid {session.sessionId === sessionId ? 'var(--of-accent-border)' : 'var(--of-bg-hover)'};cursor:pointer;display:flex;align-items:center;gap:10px;"
 					>
 						<div style="flex:1;min-width:0;">
-							<div style="font-size:0.82rem;color:#c2dce8;font-family:'DM Sans',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4;">{truncate(session.firstMessage)}</div>
-							<div style="font-size:0.72rem;color:#3d6a84;font-family:'DM Sans',sans-serif;margin-top:3px;">{formatDate(session.lastAt)} · {session.count} msgs</div>
+							<div style="font-size:0.82rem;color:var(--of-text);font-family:'DM Sans',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4;">{truncate(session.firstMessage)}</div>
+							<div style="font-size:0.72rem;color:var(--of-text-4);font-family:'DM Sans',sans-serif;margin-top:3px;">{formatDate(session.lastAt)} · {session.count} msgs</div>
 						</div>
 						<button
 							onclick={(e) => deleteSession(session.sessionId, e)}
 							aria-label="Delete session"
-							style="width:26px;height:26px;border-radius:6px;flex-shrink:0;background:transparent;border:1px solid transparent;color:#3d6a84;cursor:pointer;display:flex;align-items:center;justify-content:center;"
+							style="width:26px;height:26px;border-radius:6px;flex-shrink:0;background:transparent;border:1px solid transparent;color:var(--of-text-4);cursor:pointer;display:flex;align-items:center;justify-content:center;"
 						>
 							<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
 						</button>
@@ -235,20 +238,23 @@
 
 	{:else}
 		<!-- Messages -->
-		<div bind:this={messagesEl} onclick={handleLinkClick} style="flex:1;overflow-y:auto;padding:14px 14px 8px;display:flex;flex-direction:column;gap:10px;scrollbar-width:thin;scrollbar-color:#243f5e transparent;">
+		<div bind:this={messagesEl} onclick={handleLinkClick} style="flex:1;overflow-y:auto;padding:14px 14px 8px;display:flex;flex-direction:column;gap:10px;scrollbar-width:thin;scrollbar-color:var(--of-border) transparent;">
 			{#if messages.length === 0}
 				<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:20px;">
-					<svg width="36" height="36" viewBox="0 0 24 24" fill="none" style="color:#243f5e;flex-shrink:0;">
-						<path d="M4 20 Q8 16 12 14 Q16 12 20 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-						<circle cx="20" cy="8" r="2" fill="currentColor"/>
-						<path d="M20 8 L23 5 M20 8 L23 11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+					<svg width="36" height="36" viewBox="0 0 48 48" fill="none" style="color:var(--of-border);flex-shrink:0;">
+						<g transform="translate(2,1)">
+							<circle cx="25" cy="11" r="5" stroke="currentColor" stroke-width="3.5"/>
+							<path d="M25 16 V30 C25 38.5 13.5 39.5 13.5 30 V25.5" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+							<path d="M13.5 27 L17.5 29.5" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>
+							<path d="M6 41 q4 -4 8 0 t8 0 t8 0 t8 0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+						</g>
 					</svg>
-					<p style="color:#3d6a84;font-size:0.82rem;font-family:'DM Sans',sans-serif;line-height:1.5;margin:0;">{t.chatbotEmptyHint}</p>
+					<p style="color:var(--of-text-4);font-size:0.82rem;font-family:'DM Sans',sans-serif;line-height:1.5;margin:0;">{t.chatbotEmptyHint}</p>
 					<div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:4px;">
 						{#each [t.chatbotSuggestion1, t.chatbotSuggestion2, t.chatbotSuggestion3] as suggestion}
 							<button
 								onclick={() => { input = suggestion; send(); }}
-								style="font-size:0.75rem;padding:5px 10px;border-radius:20px;background:rgba(34,211,238,0.06);border:1px solid rgba(34,211,238,0.2);color:#22d3ee;cursor:pointer;font-family:'DM Sans',sans-serif;"
+								style="font-size:0.75rem;padding:5px 10px;border-radius:20px;background:var(--of-accent-bg);border:1px solid var(--of-accent-bg-hover);color:var(--of-accent);cursor:pointer;font-family:'DM Sans',sans-serif;"
 							>{suggestion}</button>
 						{/each}
 					</div>
@@ -258,7 +264,7 @@
 			{#each messages as msg}
 				<div style="display:flex;{msg.role === 'user' ? 'justify-content:flex-end;' : 'justify-content:flex-start;'}">
 					<div
-						style="max-width:82%;padding:9px 13px;border-radius:{msg.role === 'user' ? '14px 14px 4px 14px' : '14px 14px 14px 4px'};background:{msg.role === 'user' ? 'rgba(6,182,212,0.18)' : '#0d1f35'};border:1px solid {msg.role === 'user' ? 'rgba(34,211,238,0.3)' : '#1d3855'};color:#c2dce8;font-size:0.84rem;font-family:'DM Sans',sans-serif;line-height:1.55;white-space:pre-wrap;word-break:break-word;"
+						style="max-width:82%;padding:9px 13px;border-radius:{msg.role === 'user' ? '14px 14px 4px 14px' : '14px 14px 14px 4px'};background:{msg.role === 'user' ? 'var(--of-accent-bg-hover)' : 'var(--of-bg-overlay)'};border:1px solid {msg.role === 'user' ? 'var(--of-accent-border)' : 'var(--of-bg-hover)'};color:var(--of-text);font-size:0.84rem;font-family:'DM Sans',sans-serif;line-height:1.55;white-space:pre-wrap;word-break:break-word;"
 						class={msg.role === 'assistant' ? 'md-bubble' : ''}
 					>
 						{#if msg.role === 'assistant'}
@@ -272,16 +278,16 @@
 
 			{#if loading}
 				<div style="display:flex;justify-content:flex-start;">
-					<div style="padding:10px 14px;border-radius:14px 14px 14px 4px;background:#0d1f35;border:1px solid #1d3855;display:flex;align-items:center;gap:5px;">
-						<span style="width:6px;height:6px;border-radius:50%;background:#3d6a84;animation:pulse 1.2s ease-in-out infinite;"></span>
-						<span style="width:6px;height:6px;border-radius:50%;background:#3d6a84;animation:pulse 1.2s ease-in-out 0.4s infinite;"></span>
-						<span style="width:6px;height:6px;border-radius:50%;background:#3d6a84;animation:pulse 1.2s ease-in-out 0.8s infinite;"></span>
+					<div style="padding:10px 14px;border-radius:14px 14px 14px 4px;background:var(--of-bg-overlay);border:1px solid var(--of-bg-hover);display:flex;align-items:center;gap:5px;">
+						<span style="width:6px;height:6px;border-radius:50%;background:var(--of-text-4);animation:pulse 1.2s ease-in-out infinite;"></span>
+						<span style="width:6px;height:6px;border-radius:50%;background:var(--of-text-4);animation:pulse 1.2s ease-in-out 0.4s infinite;"></span>
+						<span style="width:6px;height:6px;border-radius:50%;background:var(--of-text-4);animation:pulse 1.2s ease-in-out 0.8s infinite;"></span>
 					</div>
 				</div>
 			{/if}
 
 			{#if errorMsg}
-				<div style="padding:9px 13px;border-radius:10px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);color:#f87171;font-size:0.8rem;font-family:'DM Sans',sans-serif;">⚠ {errorMsg}</div>
+				<div style="padding:9px 13px;border-radius:10px;background:var(--of-danger-bg);border:1px solid var(--of-danger-border);color:var(--of-danger);font-size:0.8rem;font-family:'DM Sans',sans-serif;">⚠ {errorMsg}</div>
 			{/if}
 		</div>
 
@@ -293,9 +299,9 @@
 				placeholder={t.chatbotPlaceholder}
 				rows="1"
 				disabled={loading}
-				style="flex:1;resize:none;overflow:hidden;background:#0f2238;border:1px solid #243f5e;border-radius:10px;padding:9px 12px;color:#c2dce8;font-size:0.84rem;font-family:'DM Sans',sans-serif;outline:none;line-height:1.4;max-height:100px;overflow-y:auto;transition:border-color 0.15s;"
-				onfocus={function(e){(e.currentTarget as HTMLElement).style.borderColor='#06b6d4';}}
-				onblur={function(e){(e.currentTarget as HTMLElement).style.borderColor='#243f5e';}}
+				style="flex:1;resize:none;overflow:hidden;background:var(--of-bg-elevated);border:1px solid var(--of-border);border-radius:10px;padding:9px 12px;color:var(--of-text);font-size:0.84rem;font-family:'DM Sans',sans-serif;outline:none;line-height:1.4;max-height:100px;overflow-y:auto;transition:border-color 0.15s;"
+				onfocus={function(e){(e.currentTarget as HTMLElement).style.borderColor='var(--of-accent-solid)';}}
+				onblur={function(e){(e.currentTarget as HTMLElement).style.borderColor='var(--of-border)';}}
 				oninput={function(e){
 					const el = e.currentTarget as HTMLTextAreaElement;
 					el.style.height = 'auto';
@@ -306,7 +312,7 @@
 				onclick={send}
 				disabled={loading || !input.trim()}
 				aria-label="Send"
-				style="width:38px;height:38px;border-radius:10px;flex-shrink:0;background:{loading || !input.trim() ? '#0f2238' : '#06b6d4'};border:1px solid {loading || !input.trim() ? '#243f5e' : '#22d3ee'};color:{loading || !input.trim() ? '#3d6a84' : '#030a12'};display:flex;align-items:center;justify-content:center;cursor:{loading || !input.trim() ? 'default' : 'pointer'};transition:background 0.15s,border-color 0.15s,color 0.15s;"
+				style="width:38px;height:38px;border-radius:10px;flex-shrink:0;background:{loading || !input.trim() ? 'var(--of-bg-elevated)' : 'var(--of-accent-solid)'};border:1px solid {loading || !input.trim() ? 'var(--of-border)' : 'var(--of-accent)'};color:{loading || !input.trim() ? 'var(--of-text-4)' : 'var(--of-ink)'};display:flex;align-items:center;justify-content:center;cursor:{loading || !input.trim() ? 'default' : 'pointer'};transition:background 0.15s,border-color 0.15s,color 0.15s;"
 			>
 				<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M22 2 11 13M22 2 15 22 11 13 2 9l20-7z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg>
 			</button>
@@ -324,9 +330,9 @@
 		width: 52px;
 		height: 52px;
 		border-radius: 50%;
-		background: #06b6d4;
-		border: 1.5px solid #22d3ee;
-		color: #030a12;
+		background: var(--of-accent-solid);
+		border: 1.5px solid var(--of-accent);
+		color: var(--of-ink);
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -363,8 +369,8 @@
 		left: 0;
 		right: 0;
 		height: 85dvh;
-		background: #0b1a2c;
-		border: 1px solid #243f5e;
+		background: var(--of-bg-surface);
+		border: 1px solid var(--of-border);
 		border-bottom: none;
 		border-radius: 16px 16px 0 0;
 		display: flex;
@@ -389,7 +395,7 @@
 	.chat-input {
 		padding: 10px 12px;
 		padding-bottom: max(14px, calc(14px + env(safe-area-inset-bottom)));
-		border-top: 1px solid #1d3855;
+		border-top: 1px solid var(--of-bg-hover);
 		display: flex;
 		gap: 8px;
 		align-items: flex-end;
@@ -414,11 +420,11 @@
 	:global(.md-bubble) { white-space: normal !important; }
 	:global(.md-bubble p) { margin: 0 0 0.4em; }
 	:global(.md-bubble p:last-child) { margin-bottom: 0; }
-	:global(.md-bubble h1, .md-bubble h2, .md-bubble h3) { font-size: 0.88rem; font-weight: 700; margin: 0.6em 0 0.2em; color: #22d3ee; }
+	:global(.md-bubble h1, .md-bubble h2, .md-bubble h3) { font-size: 0.88rem; font-weight: 700; margin: 0.6em 0 0.2em; color: var(--of-accent); }
 	:global(.md-bubble ul, .md-bubble ol) { margin: 0.3em 0; padding-left: 1.2em; }
 	:global(.md-bubble li) { margin-bottom: 0.2em; }
-	:global(.md-bubble strong) { color: #e2f0f8; font-weight: 600; }
-	:global(.md-bubble code) { background: rgba(34, 211, 238, 0.1); border-radius: 3px; padding: 1px 4px; font-size: 0.8em; }
-	:global(.md-bubble a) { color: #22d3ee; text-decoration: underline; text-decoration-color: rgba(34, 211, 238, 0.4); }
-	:global(.md-bubble a:hover) { text-decoration-color: #22d3ee; }
+	:global(.md-bubble strong) { color: var(--of-text-bright); font-weight: 600; }
+	:global(.md-bubble code) { background: var(--of-accent-glow); border-radius: 3px; padding: 1px 4px; font-size: 0.8em; }
+	:global(.md-bubble a) { color: var(--of-accent); text-decoration: underline; text-decoration-color: var(--of-accent-bg-hover); }
+	:global(.md-bubble a:hover) { text-decoration-color: var(--of-accent); }
 </style>

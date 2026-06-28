@@ -1,4 +1,4 @@
-<script lang="ts">
+﻿<script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import type { ActionData, PageData } from './$types';
 
@@ -31,7 +31,7 @@
 		await import('leaflet/dist/leaflet.css');
 
 		const pinIcon = L.divIcon({
-			html: `<svg width="28" height="38" viewBox="0 0 28 38" fill="none"><path d="M14 0C6.268 0 0 6.268 0 14c0 10.5 14 24 14 24S28 24.5 28 14C28 6.268 21.732 0 14 0z" fill="#06b6d4"/><circle cx="14" cy="14" r="5" fill="#030a12"/></svg>`,
+			html: `<svg width="28" height="38" viewBox="0 0 28 38" fill="none"><path d="M14 0C6.268 0 0 6.268 0 14c0 10.5 14 24 14 24S28 24.5 28 14C28 6.268 21.732 0 14 0z" fill="var(--of-accent-solid)"/><circle cx="14" cy="14" r="5" fill="var(--of-ink)"/></svg>`,
 			className: '', iconSize: [28, 38], iconAnchor: [14, 38]
 		});
 
@@ -64,7 +64,7 @@
 		if (!navigator.geolocation) return;
 		const L = (await import('leaflet')).default;
 		const pinIcon = L.divIcon({
-			html: `<svg width="28" height="38" viewBox="0 0 28 38" fill="none"><path d="M14 0C6.268 0 0 6.268 0 14c0 10.5 14 24 14 24S28 24.5 28 14C28 6.268 21.732 0 14 0z" fill="#06b6d4"/><circle cx="14" cy="14" r="5" fill="#030a12"/></svg>`,
+			html: `<svg width="28" height="38" viewBox="0 0 28 38" fill="none"><path d="M14 0C6.268 0 0 6.268 0 14c0 10.5 14 24 14 24S28 24.5 28 14C28 6.268 21.732 0 14 0z" fill="var(--of-accent-solid)"/><circle cx="14" cy="14" r="5" fill="var(--of-ink)"/></svg>`,
 			className: '', iconSize: [28, 38], iconAnchor: [14, 38]
 		});
 		locating = true;
@@ -129,42 +129,42 @@
 
 	onDestroy(() => { mapInstance?.remove(); });
 
-	const inputStyle = "width:100%; padding:9px 12px; background:#0f2238; border:1px solid #243f5e; border-radius:9px; color:#c2dce8; font-size:0.875rem; outline:none; box-sizing:border-box; font-family:'DM Sans',sans-serif; transition:border-color 0.15s;";
-	const labelStyle = "display:block; font-size:0.78rem; font-weight:500; color:#5d8fa8; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.06em;";
-	const selectStyle = "width:100%; padding:9px 12px; background:#0f2238; border:1px solid #243f5e; border-radius:9px; color:#c2dce8; font-size:0.875rem; outline:none; box-sizing:border-box; font-family:'DM Sans',sans-serif; cursor:pointer;";
+	const inputStyle = "width:100%; padding:9px 12px; background:var(--of-bg-elevated); border:1px solid var(--of-border); border-radius:9px; color:var(--of-text); font-size:0.875rem; outline:none; box-sizing:border-box; font-family:'DM Sans',sans-serif; transition:border-color 0.15s;";
+	const labelStyle = "display:block; font-size:0.78rem; font-weight:500; color:var(--of-text-3); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.06em;";
+	const selectStyle = "width:100%; padding:9px 12px; background:var(--of-bg-elevated); border:1px solid var(--of-border); border-radius:9px; color:var(--of-text); font-size:0.875rem; outline:none; box-sizing:border-box; font-family:'DM Sans',sans-serif; cursor:pointer;";
 
 	function focusInput(e: FocusEvent) {
 		const el = e.target as HTMLElement;
-		el.style.borderColor = '#06b6d4';
-		el.style.boxShadow = '0 0 0 3px rgba(6,182,212,0.1)';
+		el.style.borderColor = 'var(--of-accent-solid)';
+		el.style.boxShadow = '0 0 0 3px var(--of-accent-glow)';
 	}
 	function blurInput(e: FocusEvent) {
 		const el = e.target as HTMLElement;
-		el.style.borderColor = '#243f5e';
+		el.style.borderColor = 'var(--of-border)';
 		el.style.boxShadow = 'none';
 	}
 </script>
 
 <div style="max-width:560px; margin:0 auto;">
 	<div style="margin-bottom:24px; display:flex; align-items:center; gap:12px;">
-		<a href="/catches/{c.id}" style="color:#3d6a84; font-size:0.875rem; text-decoration:none; display:flex; align-items:center; gap:4px; white-space:nowrap;"
-			onmouseenter={function(e){(e.currentTarget as HTMLElement).style.color='#22d3ee';}}
-			onmouseleave={function(e){(e.currentTarget as HTMLElement).style.color='#3d6a84';}}
+		<a href="/catches/{c.id}" style="color:var(--of-text-4); font-size:0.875rem; text-decoration:none; display:flex; align-items:center; gap:4px; white-space:nowrap;"
+			onmouseenter={function(e){(e.currentTarget as HTMLElement).style.color='var(--of-accent)';}}
+			onmouseleave={function(e){(e.currentTarget as HTMLElement).style.color='var(--of-text-4)';}}
 		>
 			<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
 			{t.back}
 		</a>
-		<h1 style="font-family:'Carter One',sans-serif; font-weight:800; font-size:1.5rem; color:#e0eaf8; margin:0;">{t.catchEditTitle}</h1>
+		<h1 style="font-family:'Carter One',sans-serif; font-weight:800; font-size:1.5rem; color:var(--of-text-bright); margin:0;">{t.catchEditTitle}</h1>
 	</div>
 
 	{#if form?.error}
-		<div style="margin-bottom:16px; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); color:#f87171; font-size:0.875rem; padding:12px 16px; border-radius:10px;">
+		<div style="margin-bottom:16px; background:var(--of-danger-bg); border:1px solid var(--of-danger-border); color:var(--of-danger); font-size:0.875rem; padding:12px 16px; border-radius:10px;">
 			{t[form.error as keyof typeof t] ?? form.error}
 		</div>
 	{/if}
 
 	<form method="POST" action="?/update" enctype="multipart/form-data" onsubmit={handleSubmit}
-		style="background:#0b1a2c; border:1px solid #172f4a; border-radius:16px; padding:24px; display:flex; flex-direction:column; gap:20px;">
+		style="background:var(--of-bg-surface); border:1px solid var(--of-border-subtle); border-radius:16px; padding:24px; display:flex; flex-direction:column; gap:20px;">
 
 		<input bind:this={photoInput} type="file" name="new_photos" accept="image/*" multiple class="hidden" onchange={handlePhotoChange} />
 		<input type="hidden" name="lat" value={lat ?? ''} />
@@ -181,26 +181,26 @@
 				<div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
 					{#each c.photos as photo}
 						{@const removing = removedPhotoIds.includes(photo.id)}
-						<div style="position:relative; width:88px; height:66px; border-radius:8px; overflow:hidden; border:1px solid {removing ? 'rgba(239,68,68,0.5)' : '#243f5e'}; opacity:{removing ? 0.4 : 1}; transition:opacity 0.15s;">
+						<div style="position:relative; width:88px; height:66px; border-radius:8px; overflow:hidden; border:1px solid {removing ? 'var(--of-danger-border)' : 'var(--of-border)'}; opacity:{removing ? 0.4 : 1}; transition:opacity 0.15s;">
 							<img src="/uploads/{photo.filename}" alt="" style="width:100%; height:100%; object-fit:cover;" />
 							<button type="button" onclick={() => toggleRemoveExisting(photo.id)}
-								style="position:absolute; top:3px; right:3px; background:{removing ? 'rgba(239,68,68,0.8)' : 'rgba(0,0,0,0.6)'}; border:none; color:#EDF5FA; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:0.65rem; line-height:1;">✕</button>
+								style="position:absolute; top:3px; right:3px; background:{removing ? 'rgba(239,68,68,0.8)' : 'rgba(0,0,0,0.6)'}; border:none; color:var(--of-text-bright); border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:0.65rem; line-height:1;">✕</button>
 						</div>
 					{/each}
 					{#each photoPreviews as src, i}
-						<div style="position:relative; width:88px; height:66px; border-radius:8px; overflow:hidden; border:1px solid rgba(6,182,212,0.3);">
+						<div style="position:relative; width:88px; height:66px; border-radius:8px; overflow:hidden; border:1px solid var(--of-accent-border);">
 							<img {src} alt="" style="width:100%; height:100%; object-fit:cover;" />
 							<button type="button" onclick={() => removeNewPhoto(i)}
-								style="position:absolute; top:3px; right:3px; background:rgba(0,0,0,0.6); border:none; color:#EDF5FA; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:0.65rem; line-height:1;">✕</button>
+								style="position:absolute; top:3px; right:3px; background:rgba(0,0,0,0.6); border:none; color:var(--of-text-bright); border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:0.65rem; line-height:1;">✕</button>
 						</div>
 					{/each}
 				</div>
 			{/if}
 
 			<button type="button" onclick={() => photoInput.click()}
-				style="display:flex; align-items:center; gap:8px; padding:10px 14px; background:#0f2238; border:1px dashed #243f5e; border-radius:9px; color:#5d8fa8; font-size:0.8rem; font-weight:500; cursor:pointer; transition:all 0.15s; font-family:'DM Sans',sans-serif; width:100%; justify-content:center;"
-				onmouseenter={function(e){(e.currentTarget as HTMLElement).style.borderColor='#06b6d4'; (e.currentTarget as HTMLElement).style.color='#22d3ee';}}
-				onmouseleave={function(e){(e.currentTarget as HTMLElement).style.borderColor='#243f5e'; (e.currentTarget as HTMLElement).style.color='#5d8fa8';}}
+				style="display:flex; align-items:center; gap:8px; padding:10px 14px; background:var(--of-bg-elevated); border:1px dashed var(--of-border); border-radius:9px; color:var(--of-text-3); font-size:0.8rem; font-weight:500; cursor:pointer; transition:all 0.15s; font-family:'DM Sans',sans-serif; width:100%; justify-content:center;"
+				onmouseenter={function(e){(e.currentTarget as HTMLElement).style.borderColor='var(--of-accent-solid)'; (e.currentTarget as HTMLElement).style.color='var(--of-accent)';}}
+				onmouseleave={function(e){(e.currentTarget as HTMLElement).style.borderColor='var(--of-border)'; (e.currentTarget as HTMLElement).style.color='var(--of-text-3)';}}
 			>
 				<svg width="14" height="14" viewBox="0 0 15 15" fill="none">
 					<path d="M7.5 1.5v9M4 7l3.5 3.5L11 7M2 12.5h11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
@@ -209,7 +209,7 @@
 			</button>
 		</div>
 
-		<div style="height:1px; background:#172f4a; margin:-4px 0;"></div>
+		<div style="height:1px; background:var(--of-border-subtle); margin:-4px 0;"></div>
 
 		<!-- Date & Species -->
 		<div>
@@ -219,7 +219,7 @@
 		</div>
 
 		<div>
-			<label style={labelStyle} for="species">{t.catchSpeciesLabel} <span style="color:#f87171;">*</span></label>
+			<label style={labelStyle} for="species">{t.catchSpeciesLabel} <span style="color:var(--of-danger);">*</span></label>
 			<input id="species" name="species" type="text" value={c.species ?? ''}
 				style={inputStyle} onfocus={focusInput} onblur={blurInput} required />
 		</div>
@@ -241,9 +241,9 @@
 		<!-- Location map -->
 		<div>
 			<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
-				<p style="{labelStyle}{locationError ? 'color:#f87171;' : ''}">{t.spotLocationLabel} <span style="color:#f87171;">*</span></p>
+				<p style="{labelStyle}{locationError ? 'color:var(--of-danger);' : ''}">{t.spotLocationLabel} <span style="color:var(--of-danger);">*</span></p>
 				<button type="button" onclick={handleLocateClick}
-					style="display:flex; align-items:center; gap:6px; font-size:0.75rem; font-weight:600; color:{locating ? '#5d8fa8' : '#22d3ee'}; background:none; border:none; cursor:pointer; padding:0; font-family:'DM Sans',sans-serif;"
+					style="display:flex; align-items:center; gap:6px; font-size:0.75rem; font-weight:600; color:{locating ? 'var(--of-text-3)' : 'var(--of-accent)'}; background:none; border:none; cursor:pointer; padding:0; font-family:'DM Sans',sans-serif;"
 					disabled={locating}
 				>
 					<svg width="13" height="13" viewBox="0 0 24 24" fill="none">
@@ -255,19 +255,19 @@
 			</div>
 
 			{#if locationError}
-				<p style="font-size:0.8rem; color:#f87171; margin:0 0 8px;">{t.spotLocationRequired}</p>
+				<p style="font-size:0.8rem; color:var(--of-danger); margin:0 0 8px;">{t.spotLocationRequired}</p>
 			{/if}
 
-			<div style="border-radius:10px; overflow:hidden; border:2px solid {locationError ? 'rgba(239,68,68,0.5)' : lat !== null ? 'rgba(6,182,212,0.3)' : '#243f5e'};">
+			<div style="border-radius:10px; overflow:hidden; border:2px solid {locationError ? 'var(--of-danger-border)' : lat !== null ? 'var(--of-accent-border)' : 'var(--of-border)'};">
 				<div bind:this={mapEl} style="height:260px;"></div>
 			</div>
 
 			{#if lat !== null}
-				<p style="font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:#5d8fa8; margin:6px 0 0; text-align:right;">
+				<p style="font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:var(--of-text-3); margin:6px 0 0; text-align:right;">
 					{lat.toFixed(6)}, {lng?.toFixed(6)}
 				</p>
 			{:else}
-				<p style="font-size:0.78rem; color:#3d6a84; margin:6px 0 0; text-align:center;">{t.spotClickToPlace}</p>
+				<p style="font-size:0.78rem; color:var(--of-text-4); margin:6px 0 0; text-align:center;">{t.spotClickToPlace}</p>
 			{/if}
 		</div>
 
@@ -302,8 +302,8 @@
 					<button type="button" onclick={() => presentation = presentation === style ? '' : style}
 						style="padding:6px 13px; border-radius:20px; font-size:0.8rem; font-weight:500; border:1px solid; cursor:pointer; transition:all 0.15s; font-family:'DM Sans',sans-serif;
 							{presentation === style
-								? 'background:rgba(6,182,212,0.14); border-color:rgba(6,182,212,0.5); color:#22d3ee;'
-								: 'background:#0f2238; border-color:#243f5e; color:#5d8fa8;'}"
+								? 'background:rgba(6,182,212,0.14); border-color:var(--of-accent-border); color:var(--of-accent);'
+								: 'background:var(--of-bg-elevated); border-color:var(--of-border); color:var(--of-text-3);'}"
 					>{style}</button>
 				{/each}
 			</div>
@@ -325,8 +325,8 @@
 				onclick={() => catchAndRelease = !catchAndRelease}
 				style="display:inline-flex; align-items:center; gap:8px; padding:9px 18px; border-radius:9px; border:1px solid; cursor:pointer; font-size:0.875rem; font-weight:600; font-family:'DM Sans',sans-serif; transition:all 0.15s;
 					{catchAndRelease
-						? 'background:rgba(6,182,212,0.12); border-color:rgba(6,182,212,0.5); color:#22d3ee;'
-						: 'background:#0f2238; border-color:#243f5e; color:#5d8fa8;'}"
+						? 'background:var(--of-accent-bg-hover); border-color:var(--of-accent-border); color:var(--of-accent);'
+						: 'background:var(--of-bg-elevated); border-color:var(--of-border); color:var(--of-text-3);'}"
 			>
 				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;">
 					<path d="M12 3C7 3 3 7 3 12s4 9 9 9 9-4 9-9-4-9-9-9z" stroke="currentColor" stroke-width="1.5"/>
@@ -338,16 +338,16 @@
 		</div>
 
 		<!-- Save / Cancel -->
-		<div style="display:flex; justify-content:space-between; gap:10px; padding-top:16px; border-top:1px solid #172f4a; margin-top:8px;">
+		<div style="display:flex; justify-content:space-between; gap:10px; padding-top:16px; border-top:1px solid var(--of-border-subtle); margin-top:8px;">
 			<button type="submit"
-				style="background:#06b6d4; color:#030a12; font-size:0.875rem; font-weight:700; padding:10px 24px; border-radius:9px; border:none; cursor:pointer; transition:background 0.15s; font-family:'DM Sans',sans-serif;"
-				onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='#22d3ee';}}
-				onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='#06b6d4';}}
+				style="background:var(--of-accent-solid); color:var(--of-ink); font-size:0.875rem; font-weight:700; padding:10px 24px; border-radius:9px; border:none; cursor:pointer; transition:background 0.15s; font-family:'DM Sans',sans-serif;"
+				onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-accent)';}}
+				onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-accent-solid)';}}
 			>{t.catchSaveChanges}</button>
 			<a href="/catches/{c.id}"
-				style="display:inline-flex; align-items:center; background:#0f2238; color:#8ab8cc; font-size:0.875rem; font-weight:500; padding:10px 20px; border-radius:9px; border:1px solid #243f5e; text-decoration:none; transition:all 0.15s; font-family:'DM Sans',sans-serif;"
-				onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='#132841'; (e.currentTarget as HTMLElement).style.color='#c2dce8';}}
-				onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='#0f2238'; (e.currentTarget as HTMLElement).style.color='#8ab8cc';}}
+				style="display:inline-flex; align-items:center; background:var(--of-bg-elevated); color:var(--of-text-2); font-size:0.875rem; font-weight:500; padding:10px 20px; border-radius:9px; border:1px solid var(--of-border); text-decoration:none; transition:all 0.15s; font-family:'DM Sans',sans-serif;"
+				onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-bg-hover)'; (e.currentTarget as HTMLElement).style.color='var(--of-text)';}}
+				onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-bg-elevated)'; (e.currentTarget as HTMLElement).style.color='var(--of-text-2)';}}
 			>{t.cancel}</a>
 		</div>
 	</form>
@@ -356,9 +356,9 @@
 	<form method="POST" action="?/delete" style="margin-top:12px;"
 		onsubmit={(e) => { if (!confirm(t.catchDeleteConfirm)) e.preventDefault(); }}>
 		<button type="submit"
-			style="width:100%; background:rgba(239,68,68,0.06); color:#f87171; font-size:0.875rem; font-weight:500; padding:10px 20px; border-radius:9px; border:1px solid rgba(239,68,68,0.2); cursor:pointer; transition:all 0.15s; font-family:'DM Sans',sans-serif;"
-			onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='rgba(239,68,68,0.12)'; (e.currentTarget as HTMLElement).style.borderColor='rgba(239,68,68,0.35)';}}
-			onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='rgba(239,68,68,0.06)'; (e.currentTarget as HTMLElement).style.borderColor='rgba(239,68,68,0.2)';}}
+			style="width:100%; background:var(--of-danger-bg); color:var(--of-danger); font-size:0.875rem; font-weight:500; padding:10px 20px; border-radius:9px; border:1px solid var(--of-danger-bg); cursor:pointer; transition:all 0.15s; font-family:'DM Sans',sans-serif;"
+			onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='rgba(239,68,68,0.12)'; (e.currentTarget as HTMLElement).style.borderColor='var(--of-danger-border)';}}
+			onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-danger-bg)'; (e.currentTarget as HTMLElement).style.borderColor='var(--of-danger-bg)';}}
 		>
 			{t.catchDelete}
 		</button>

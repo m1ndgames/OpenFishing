@@ -1,6 +1,9 @@
 import type { LayoutServerLoad } from './$types';
 import { translations, defaultLang, SUPPORTED_LANGS, type Lang } from '$lib/i18n';
 import { env } from '$env/dynamic/private';
+import { db } from '$lib/server/db';
+import { appSetting } from '$lib/server/db/schema';
+import { inArray } from 'drizzle-orm';
 
 export const load: LayoutServerLoad = async ({ cookies, request }) => {
 	const cookie = cookies.get('lang') ?? '';
@@ -14,5 +17,12 @@ export const load: LayoutServerLoad = async ({ cookies, request }) => {
 		lang = SUPPORTED_LANGS.includes(browserLang as Lang) ? (browserLang as Lang) : defaultLang;
 	}
 
-	return { t: translations[lang], lang, demoMode: !!env.DEMO_MODE, chatbotEnabled: !!env.CHATBOT };
+	const settings = await db.select().from(appSetting).where(
+		inArray(appSetting.key, ['colorMode', 'themeName'])
+	);
+	const settingMap = Object.fromEntries(settings.map(s => [s.key, s.value]));
+	const colorMode = (settingMap.colorMode ?? 'dark') as 'dark' | 'light' | 'system';
+	const themeName = settingMap.themeName ?? 'ocean';
+
+	return { t: translations[lang], lang, demoMode: !!env.DEMO_MODE, chatbotEnabled: !!env.CHATBOT, colorMode, themeName };
 };

@@ -104,6 +104,7 @@ Tests live in `e2e/*.test.ts`. Config: `playwright.config.ts`.
 | `/catches/[id]` | Catch detail view (map, photos, lure + spot links) |
 | `/catches/[id]/edit` | Edit / delete catch |
 | `/settings/qr` | Print QR labels for unlabeled lures |
+| `/settings/appearance` | Color mode (Dark / Light / System) + theme picker; persisted via `appSetting` table |
 | `/uploads/[filename]` | Serve uploaded photos from `UPLOAD_PATH` |
 | `/api/lang` | POST — sets `lang` cookie for i18n |
 | `/api/lures/[id]/favourite` | POST — toggles favourite state, returns `{ favourite: bool }` |
@@ -148,6 +149,7 @@ Tests live in `e2e/*.test.ts`. Config: `playwright.config.ts`.
 - `fishingLine` — id (UUID), brand, model, type (Mono/Braid/Fluoro), diameterMm, strengthKg, notes, createdAt, updatedAt
 - `reelLineLog` — id, reelId (FK → reel, cascade delete), lineId (FK → fishingLine, set null on delete), spooledAt, notes, createdAt
 - `combo` — id (UUID), name, rodId (FK → rod, set null), reelId (FK → reel, set null), terminalTackle, notes, createdAt, updatedAt
+- `appSetting` — key (text PK), value (text) — key/value store for app preferences; currently stores `colorMode` (dark/light/system) and `themeName` (e.g. `ocean`)
 
 Tags are stored in separate tag tables (one row per tag). Species is stored as a space-separated string in `lure.species`. Both use the `TagInput` chip component at `src/lib/components/TagInput.svelte`. `TagInput` accepts a `suggest` prop (`string[]`) that wires a `<datalist>` for autocomplete.
 
@@ -168,8 +170,10 @@ This approach avoids storing a redundant FK while still supporting the "no spot 
 ### Navigation
 
 The layout (`src/routes/+layout.svelte`) renders the full nav chrome for all routes **except** `/login` and `/share/*`, which are detected via `$page.url.pathname` and render `{@render children()}` directly (share pages include their own minimal OpenFishing header). The nav has:
-- **Desktop**: Logo + section links + "Add" dropdown + language switcher
+- **Desktop**: SVG wordmark logo (`src/lib/assets/openfishing-logo.svg`) + section links (Lures | Tackle | Spots | Catches | Stats | Settings) + "Add" dropdown + language switcher
 - **Mobile**: Top bar (logo + Add dropdown + lang) + fixed bottom tab bar
+
+The share pages and chatbot use the hook icon (`src/lib/assets/favicon.svg`) which also serves as the browser favicon.
 
 The language switcher is a `<select>` with flag emoji options, posting to `/api/lang`. Supported languages: EN, DE, FR, ES, IT, NL, PL, PT, UK.
 
@@ -197,9 +201,19 @@ Filter selects (lures overview, catches page) must use the same visual style as 
 
 Filter bars use `flex-wrap:wrap` (not `overflow-x:auto`) so they reflow to multiple rows on mobile instead of scrolling horizontally.
 
+### Themes & appearance
+
+Color mode and theme are stored in the `appSetting` table as simple key/value rows. The layout server reads them on every request and sets `data-mode` (`dark`/`light`/`system`) on `<html>` and `data-theme` on `<body>`. CSS token blocks in `src/routes/layout.css` use `[data-mode="light"]` selectors to switch the full design-token set; a `@media (prefers-color-scheme: light)` block handles `data-mode="system"`.
+
+Theme definitions live in `src/lib/themes.ts` as a `THEMES: ThemeDefinition[]` array. Currently only `ocean` exists. Each theme has id, labelKey, and preview swatch colors. The `/settings/appearance` page renders a picker grid using these definitions.
+
+Custom CSS token `--of-badge-num-text`: cyan (`var(--of-accent-hover)`) in dark mode, white (`#ffffff`) in light mode — used for lure-number badge text on photo cards so it reads well on both light and dark photos.
+
 ### Filtering & pagination
 
 The overview page (`/`) loads all lures once from the server and filters client-side using Svelte 5 `$derived`. Filters use an include/exclude chip model (`ChipFilter = Record<string, 'include' | 'exclude'>`): clicking once includes (cyan), again excludes (red strikethrough), again clears. Active filters: type, running depth, light conditions, fish species, size range (min/max), weight range (min/max), favourites toggle, has-catch toggle. The filter panel is toggled via a pill button that turns cyan when filters are active. Pagination default is 12 per page. Do not move filtering to the server.
+
+The lure grid uses `grid-auto-rows: minmax(295px, auto)` so all cards in a row share a consistent minimum height regardless of content. A wrapper div carries a derived `min-height` that accounts for the current page size, preventing the pagination bar from jumping when the last page has fewer cards. Cards are flex-column; a `flex:1` spacer pins the tag row to the card bottom. Tags on cards are capped at 2 visible; additional tags show a `+N` overflow chip.
 
 ### Favourites
 
