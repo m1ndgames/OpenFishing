@@ -18,9 +18,9 @@
 		"db:studio": "drizzle-kit studio"
 	},
 	"devDependencies": {
-		"@sveltejs/adapter-node": "^5.5.4",
+		"@sveltejs/adapter-node": "^5.5.7",
 		"@sveltejs/kit": "^2.57.0",
-		"@sveltejs/vite-plugin-svelte": "^7.0.0",
+		"@sveltejs/vite-plugin-svelte": "^7.1.2",
 		"@tailwindcss/vite": "^4.3.1",
 		"@types/better-sqlite3": "^7.6.13",
 		"@types/node": "^22",
@@ -28,7 +28,7 @@
 		"drizzle-kit": "^0.31.10",
 		"drizzle-orm": "^0.45.2",
 		"svelte": "^5.55.2",
-		"svelte-check": "^4.4.6",
+		"svelte-check": "^4.7.1",
 		"tailwindcss": "^4.2.2",
 		"typescript": "^6.0.2",
 		"vite": "^8.0.7",
