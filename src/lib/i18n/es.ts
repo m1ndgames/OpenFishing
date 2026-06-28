@@ -351,4 +351,12 @@ export default {
 	identifyLure: 'Identificar desde foto',
 	identifyApplySelected: 'Aplicar selección',
 	identifyLureNoResult: 'No se pudieron detectar detalles del señuelo',
+
+	// Exportar capturas
+	navCatchExport: 'Exportar',
+	catchExportTitle: 'Exportar capturas',
+	catchExportDesc: 'Descarga una lista de capturas filtrada por fecha en formato CSV.',
+	catchExportFrom: 'Desde',
+	catchExportTo: 'Hasta',
+	catchExportBtn: 'Descargar CSV',
 } as const;

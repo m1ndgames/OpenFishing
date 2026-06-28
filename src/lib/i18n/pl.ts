@@ -351,4 +351,12 @@ export default {
 	identifyLure: 'Rozpoznaj ze zdjęcia',
 	identifyApplySelected: 'Zastosuj wybrane',
 	identifyLureNoResult: 'Nie można wykryć szczegółów przynęty',
+
+	// Eksport połowów
+	navCatchExport: 'Eksport',
+	catchExportTitle: 'Eksportuj połowy',
+	catchExportDesc: 'Pobierz przefiltrowaną listę połowów jako plik CSV.',
+	catchExportFrom: 'Od',
+	catchExportTo: 'Do',
+	catchExportBtn: 'Pobierz CSV',
 } as const;

@@ -27,11 +27,50 @@ npm run build          # Build for production
 npm run preview        # Preview production build
 npm run check          # Svelte type-check
 
+npm run test           # Run all Vitest unit tests
+npm run test:coverage  # Run unit tests with v8 coverage (text + JSON + HTML)
+npm run test:e2e       # Run Playwright E2E tests (auto-starts dev server on port 5174)
+npm run test:e2e:ui    # Run E2E tests with Playwright UI
+
 npm run db:push        # Push schema changes to SQLite (dev, use --force in CI)
 npm run db:generate    # Generate migration files
 npm run db:migrate     # Run migrations
 npm run db:studio      # Open Drizzle Studio (DB GUI)
 ```
+
+## Testing
+
+### Mandatory rules
+
+- **All new code requires tests.** Server route handlers → unit test in `src/routes/__tests__/`. New pages → E2E smoke test. New API endpoints → both unit and E2E.
+- **Run `npm run test` and `npm run check` after every change** before reporting done. Fix all failures before finishing.
+- **Coverage target: ≥ 70%.** Verified with `npm run test:coverage`. Reported to Codecov via CI on push to `main`.
+
+### Unit tests (Vitest)
+
+Tests live in `src/**/__tests__/*.test.ts`, discovered by the `src/**/*.test.ts` glob in `vitest.config.ts`.
+
+**Mocking conventions** — follow the patterns in existing test files rather than inventing new ones:
+
+- **`$lib/server/db`** — always mocked with `vi.mock('$lib/server/db', () => ({ db: { query: {...}, select, update, insert, delete }, client: mockClient }))`. Build chainable query stubs with a local `makeChain(result)` helper (see any existing test for the shape).
+- **`$env/dynamic/private`** — aliased to `src/__mocks__/env.ts` in `vitest.config.ts`. Import it and mutate `env` directly in tests: `mockEnv.env.AUTH_PASSWORD = 'secret'`. Reset in `beforeEach`.
+- **`@sveltejs/kit` helpers** — mock `redirect` to `throw { status, location }`, `fail` to return `{ status, data }`, `error` to `throw { status, message }`, `json` to return a real `Response`.
+- **Constructor mocks** (e.g., AdmZip) — use `vi.hoisted()` so the instance is created before module imports are resolved.
+- **Module import order** — all `vi.mock(...)` calls must appear before `await import(...)` statements; Vitest hoists mocks automatically, but top-level awaited imports run after hoisting.
+
+**Translation completeness** — `src/lib/i18n/__tests__/translations.test.ts` asserts all 9 language files have exactly the same keys as English. Always run this after adding i18n keys.
+
+### E2E tests (Playwright)
+
+Tests live in `e2e/*.test.ts`. Config: `playwright.config.ts`.
+
+- Runs on **port 5174** via `npm run dev:e2e`, with a dedicated SQLite DB at `e2e/test.db` and uploads at `e2e/uploads/`.
+- `e2e/global-setup.ts` seeds the DB before the test suite runs: 3 lures, 2 spots, 2 catches, rod/reel/line/combo.
+- Fixed UUIDs for seeded entities are exported from `e2e/fixtures.ts` (`LURE_IDS`, `SPOT_IDS`, `CATCH_IDS`).
+- `fullyParallel: false` — tests run sequentially to avoid DB state conflicts.
+- Use the `request` fixture for raw API tests (status, headers, body bytes), `page` fixture for UI tests.
+- Call `await page.waitForLoadState('networkidle')` before interactions that need HMR or async Svelte state to settle (especially map and geolocation tests).
+- Auth, demo mode, and chatbot are all disabled in the E2E environment (`AUTH_PASSWORD=''`, `DEMO_MODE=''`, `CHATBOT=''`).
 
 ## Schema changes — mandatory workflow
 

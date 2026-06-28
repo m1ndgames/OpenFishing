@@ -351,4 +351,12 @@ export default {
 	identifyLure: 'Identifica dalla foto',
 	identifyApplySelected: 'Applica selezionati',
 	identifyLureNoResult: 'Impossibile rilevare i dettagli dell\'esca',
+
+	// Esportazione catture
+	navCatchExport: 'Esporta',
+	catchExportTitle: 'Esporta catture',
+	catchExportDesc: 'Scarica un elenco di catture filtrato per data in formato CSV.',
+	catchExportFrom: 'Dal',
+	catchExportTo: 'Al',
+	catchExportBtn: 'Scarica CSV',
 } as const;

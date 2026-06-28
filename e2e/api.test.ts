@@ -87,6 +87,57 @@ test.describe('REST API v1 — no auth', () => {
 	});
 });
 
+test.describe('Catch CSV export API', () => {
+	test('GET /api/catches/export returns 200 with text/csv content-type', async ({ request }) => {
+		const res = await request.get('/api/catches/export');
+		expect(res.status()).toBe(200);
+		expect(res.headers()['content-type']).toContain('text/csv');
+	});
+
+	test('response starts with UTF-8 BOM bytes', async ({ request }) => {
+		const res = await request.get('/api/catches/export');
+		const buf = new Uint8Array(await res.body());
+		expect(buf[0]).toBe(0xEF);
+		expect(buf[1]).toBe(0xBB);
+		expect(buf[2]).toBe(0xBF);
+	});
+
+	test('response includes CSV header row', async ({ request }) => {
+		const res = await request.get('/api/catches/export');
+		const text = await res.text();
+		const firstLine = text.replace(/^﻿/, '').split('\r\n')[0];
+		expect(firstLine).toContain('Date');
+		expect(firstLine).toContain('Species');
+		expect(firstLine).toContain('Weight (g)');
+		expect(firstLine).toContain('Catch & Release');
+		expect(firstLine).toContain('Lure');
+	});
+
+	test('seeded catches appear in default (current-year) export', async ({ request }) => {
+		const res = await request.get('/api/catches/export');
+		const text = await res.text();
+		// Seeded catches (Pike, Perch) inserted with caughtAt = now, so they're in current year
+		expect(text).toContain('Pike');
+		expect(text).toContain('Silver Spinner');
+	});
+
+	test('date range filter excludes catches outside range', async ({ request }) => {
+		const res = await request.get('/api/catches/export?from=2000-01-01&to=2000-12-31');
+		const text = await res.text();
+		// TextDecoder strips the BOM, text starts with 'Date'
+		const lines = text.split('\r\n').filter(Boolean);
+		// Only the header row — no catches from year 2000
+		expect(lines).toHaveLength(1);
+	});
+
+	test('Content-Disposition header triggers download with .csv filename', async ({ request }) => {
+		const res = await request.get('/api/catches/export');
+		const disposition = res.headers()['content-disposition'] ?? '';
+		expect(disposition).toContain('attachment');
+		expect(disposition).toContain('.csv');
+	});
+});
+
 test.describe('Lang API', () => {
 	test('POST /api/lang sets lang cookie', async ({ page }) => {
 		// /api/lang does a 303 redirect — Set-Cookie is on the redirect response.

@@ -351,4 +351,12 @@ export default {
 	identifyLure: 'Identifier depuis la photo',
 	identifyApplySelected: 'Appliquer la sélection',
 	identifyLureNoResult: 'Impossible de détecter les détails du leurre',
+
+	// Export des prises
+	navCatchExport: 'Export',
+	catchExportTitle: 'Exporter les prises',
+	catchExportDesc: 'Téléchargez une liste de prises filtrée par date au format CSV.',
+	catchExportFrom: 'Du',
+	catchExportTo: 'Au',
+	catchExportBtn: 'Télécharger CSV',
 } as const;

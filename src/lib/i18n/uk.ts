@@ -351,4 +351,12 @@ export default {
 	identifyLure: 'Визначити за фото',
 	identifyApplySelected: 'Застосувати вибране',
 	identifyLureNoResult: 'Не вдалося визначити деталі приманки',
+
+	// Експорт уловів
+	navCatchExport: 'Експорт',
+	catchExportTitle: 'Експортувати улови',
+	catchExportDesc: 'Завантажте відфільтрований список уловів у форматі CSV.',
+	catchExportFrom: 'Від',
+	catchExportTo: 'До',
+	catchExportBtn: 'Завантажити CSV',
 } as const;
