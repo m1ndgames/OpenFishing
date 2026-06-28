@@ -35,6 +35,7 @@ vite.config.ts.timestamp-*
 .playwright-mcp/
 playwright-report/
 test-results/
+coverage/
 e2e/uploads/
 e2e/fixtures/
 *.png

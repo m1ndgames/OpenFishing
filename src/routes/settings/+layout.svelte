@@ -6,6 +6,7 @@
 	const { t } = data;
 
 	const qrActive      = $derived($page.url.pathname === '/settings/qr');
+	const exportActive  = $derived($page.url.pathname === '/settings/export');
 	const backupActive  = $derived($page.url.pathname === '/settings' || $page.url.pathname === '/settings/');
 </script>
 
@@ -20,6 +21,10 @@
 			style="font-size:0.8rem; font-weight:600; padding:7px 14px; border-radius:8px; text-decoration:none; transition:all 0.15s; letter-spacing:0.02em;
 				{qrActive ? 'color:#030a12; background:#06b6d4;' : 'color:#5d8fa8; background:transparent;'}"
 		>{t.navQrCodes}</a>
+		<a href="/settings/export"
+			style="font-size:0.8rem; font-weight:600; padding:7px 14px; border-radius:8px; text-decoration:none; transition:all 0.15s; letter-spacing:0.02em;
+				{exportActive ? 'color:#030a12; background:#06b6d4;' : 'color:#5d8fa8; background:transparent;'}"
+		>{t.navCatchExport}</a>
 	</nav>
 
 	{@render children()}

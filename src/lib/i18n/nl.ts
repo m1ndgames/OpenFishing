@@ -351,4 +351,12 @@ export default {
 	identifyLure: 'Identificeer uit foto',
 	identifyApplySelected: 'Selectie toepassen',
 	identifyLureNoResult: 'Kon kunstaasdetails niet detecteren',
+
+	// Vangst exporteren
+	navCatchExport: 'Exporteren',
+	catchExportTitle: 'Vangsten exporteren',
+	catchExportDesc: 'Download een gefilterde lijst met vangsten als CSV-bestand.',
+	catchExportFrom: 'Van',
+	catchExportTo: 'Tot',
+	catchExportBtn: 'CSV downloaden',
 } as const;

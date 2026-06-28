@@ -351,4 +351,12 @@ export default {
 	identifyLure: 'Aus Foto erkennen',
 	identifyApplySelected: 'Auswahl übernehmen',
 	identifyLureNoResult: 'Köderdetails konnten nicht erkannt werden',
+
+	// Fangexport
+	navCatchExport: 'Export',
+	catchExportTitle: 'Fangstatistik exportieren',
+	catchExportDesc: 'Lädt eine gefilterte Fangliste als CSV-Datei herunter.',
+	catchExportFrom: 'Von',
+	catchExportTo: 'Bis',
+	catchExportBtn: 'CSV herunterladen',
 } as const;

@@ -351,4 +351,12 @@ export default {
 	identifyLure: 'Identify from photo',
 	identifyApplySelected: 'Apply selected',
 	identifyLureNoResult: 'Could not detect lure details',
+
+	// Catch export
+	navCatchExport: 'Export',
+	catchExportTitle: 'Catch Export',
+	catchExportDesc: 'Download a date-filtered list of catches as a CSV file.',
+	catchExportFrom: 'From',
+	catchExportTo: 'To',
+	catchExportBtn: 'Download CSV',
 } as const;

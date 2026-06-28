@@ -351,4 +351,12 @@ export default {
 	identifyLure: 'Identificar pela foto',
 	identifyApplySelected: 'Aplicar seleção',
 	identifyLureNoResult: 'Não foi possível detetar detalhes da isca',
+
+	// Exportar capturas
+	navCatchExport: 'Exportar',
+	catchExportTitle: 'Exportar capturas',
+	catchExportDesc: 'Descarregue uma lista de capturas filtrada por data em formato CSV.',
+	catchExportFrom: 'De',
+	catchExportTo: 'Até',
+	catchExportBtn: 'Descarregar CSV',
 } as const;

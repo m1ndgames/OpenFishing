@@ -37,6 +37,23 @@ test.describe('Navigation', () => {
 		await page.goto('/settings');
 		await expect(page).toHaveURL('/settings');
 	});
+
+	test('settings export page loads', async ({ page }) => {
+		await page.goto('/settings/export');
+		await expect(page).toHaveURL('/settings/export');
+	});
+
+	test('settings sub-nav shows Export tab', async ({ page }) => {
+		await page.goto('/settings/export');
+		await expect(page.getByRole('link', { name: /export/i }).first()).toBeVisible();
+	});
+
+	test('export page has date inputs and download link', async ({ page }) => {
+		await page.goto('/settings/export');
+		await expect(page.locator('input[type="date"]').first()).toBeVisible();
+		await expect(page.locator('input[type="date"]').nth(1)).toBeVisible();
+		await expect(page.getByRole('link', { name: /csv/i })).toBeVisible();
+	});
 });
 
 test.describe('Share pages', () => {
