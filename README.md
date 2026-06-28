@@ -1,5 +1,12 @@
 # OpenFishing
 
+[![CI](https://github.com/m1ndgames/OpenFishing/actions/workflows/ci.yml/badge.svg)](https://github.com/m1ndgames/OpenFishing/actions/workflows/ci.yml)
+[![Docker](https://github.com/m1ndgames/OpenFishing/actions/workflows/docker.yml/badge.svg)](https://github.com/m1ndgames/OpenFishing/actions/workflows/docker.yml)
+[![CodeQL](https://github.com/m1ndgames/OpenFishing/actions/workflows/codeql.yml/badge.svg)](https://github.com/m1ndgames/OpenFishing/actions/workflows/codeql.yml)
+[![codecov](https://codecov.io/gh/m1ndgames/OpenFishing/graph/badge.svg)](https://codecov.io/gh/m1ndgames/OpenFishing)
+[![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE.md)
+[![Docker Image](https://img.shields.io/badge/docker-ghcr.io%2Fm1ndgames%2Fopenfishing-blue?logo=docker)](https://github.com/m1ndgames/OpenFishing/pkgs/container/openfishing)
+
 A self-hosted web app to organize your fishing lures, mark fishing spots, and log your catches.
 
 ## Screenshots

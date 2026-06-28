@@ -26,8 +26,15 @@ jobs:
       - name: Type check
         run: npm run check
 
-      - name: Test
-        run: npm test
+      - name: Test with coverage
+        run: npm run test:coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/coverage-final.json
+          fail_ci_if_error: true
 
       - name: Build
         run: npm run build
