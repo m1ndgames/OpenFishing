@@ -43,7 +43,7 @@
 		"leaflet": "^1.9.4",
 		"marked": "^18.0.5",
 		"qrcode": "^1.5.4",
-		"sharp": "^0.34.5",
+		"sharp": "^0.35.2",
 		"swagger-ui-dist": "^5.32.6"
 	}
 }
