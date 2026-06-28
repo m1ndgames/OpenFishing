@@ -33,6 +33,10 @@ vite.config.ts.timestamp-*
 
 # Local / test artifacts
 .playwright-mcp/
+playwright-report/
+test-results/
+e2e/uploads/
+e2e/fixtures/
 *.png
 *.jpg.tmp
 
