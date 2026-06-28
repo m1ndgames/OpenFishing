@@ -35,7 +35,7 @@
 		"@types/adm-zip": "^0.5.8",
 		"@types/leaflet": "^1.9.21",
 		"adm-zip": "^0.5.17",
-		"better-sqlite3": "^12.8.0",
+		"better-sqlite3": "^12.11.1",
 		"cropperjs": "^1.6.2",
 		"leaflet": "^1.9.4",
 		"marked": "^18.0.5",
