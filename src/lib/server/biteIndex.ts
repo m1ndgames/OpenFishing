@@ -1,6 +1,6 @@
-type LightingKey = 'night' | 'dawn' | 'morning' | 'day' | 'golden' | 'dusk';
+export type LightingKey = 'night' | 'dawn' | 'morning' | 'day' | 'golden' | 'dusk';
 
-function getMoonPhaseIndex(date: Date): number {
+export function getMoonPhaseIndex(date: Date): number {
 	const reference = new Date('2000-01-06T18:14:00Z').getTime();
 	const lunarCycleDays = 29.53058867;
 	const elapsed = (date.getTime() - reference) / 86_400_000;
@@ -8,7 +8,7 @@ function getMoonPhaseIndex(date: Date): number {
 	return Math.floor(((phase / lunarCycleDays) + 1 / 16) * 8) % 8;
 }
 
-function getLightingKey(now: Date, sunriseStr: string, sunsetStr: string): LightingKey {
+export function getLightingKey(now: Date, sunriseStr: string, sunsetStr: string): LightingKey {
 	if (!sunriseStr || !sunsetStr) return 'day';
 	const nowMs = now.getTime();
 	const riseMs = new Date(sunriseStr).getTime();
@@ -34,6 +34,18 @@ export type WeatherData = {
 	biteIndex: number;
 	biteScores: { pressure: number; light: number; temp: number };
 };
+
+export function computeBiteScores(pressureDelta: number, lightingKey: LightingKey, tempDelta: number) {
+	const pressure = pressureDelta < -1.5 ? 10 : pressureDelta <= 1.5 ? 7 : 2;
+	const light =
+		lightingKey === 'dawn' || lightingKey === 'dusk' ? 10
+		: lightingKey === 'golden' ? 8
+		: lightingKey === 'night' || lightingKey === 'morning' ? 6
+		: 2;
+	const temp = tempDelta >= 3 ? 2 : 10;
+	const biteIndex = Math.round((pressure * 0.5 + light * 0.3 + temp * 0.2) * 10) / 10;
+	return { pressure, light, temp, biteIndex };
+}
 
 export async function fetchWeather(lat: number, lng: number): Promise<WeatherData | null> {
 	try {
@@ -72,13 +84,8 @@ export async function fetchWeather(lat: number, lng: number): Promise<WeatherDat
 
 		const lightingKey = getLightingKey(now, json.daily?.sunrise?.[0] ?? '', json.daily?.sunset?.[0] ?? '');
 
-		const pScore = pressureDelta < -1.5 ? 10 : pressureDelta <= 1.5 ? 7 : 2;
-		const lScore = (lightingKey === 'dawn' || lightingKey === 'dusk') ? 10
-		             : lightingKey === 'golden'  ? 8
-		             : (lightingKey === 'night' || lightingKey === 'morning') ? 6
-		             : 2;
-		const tScore = tempDelta >= 3 ? 2 : 10;
-		const biteIndex = Math.round((pScore * 0.5 + lScore * 0.3 + tScore * 0.2) * 10) / 10;
+		const { pressure: pScore, light: lScore, temp: tScore, biteIndex } =
+			computeBiteScores(pressureDelta, lightingKey, tempDelta);
 
 		return {
 			temperature:    json.current?.temperature_2m ?? null,
