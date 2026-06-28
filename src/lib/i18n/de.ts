@@ -359,4 +359,32 @@ export default {
 	catchExportFrom: 'Von',
 	catchExportTo: 'Bis',
 	catchExportBtn: 'CSV herunterladen',
+
+	// Erscheinungsbild
+	navAppearance: 'Erscheinungsbild',
+	settingsAppearance: 'Erscheinungsbild',
+	appearanceTitle: 'Erscheinungsbild',
+	appearanceColorMode: 'Farbmodus',
+	appearanceModeDark: 'Dunkel',
+	appearanceModeLight: 'Hell',
+	appearanceModeSystem: 'System',
+	appearanceSaved: 'Gespeichert',
+	appearanceTheme: 'Theme',
+	appearanceThemeOcean: 'Ocean',
+
+	// Sicherung & Wiederherstellung
+	backupSchemaHash: 'Schema-Hash',
+	backupExportTitle: 'Backup exportieren',
+	backupExportDesc: 'Lädt alle Köder, Spots, Fänge und Fotos als ZIP-Archiv herunter.',
+	backupExportBtn: 'Exportieren',
+	backupImportTitle: 'Backup importieren',
+	backupImportDesc: 'Ersetzt alle vorhandenen Daten und Fotos durch den Backup-Inhalt. Die Schema-Version wird automatisch überprüft, bevor etwas geändert wird.',
+	backupImportSuccess: 'Import erfolgreich — {lures} Köder, {spots} Spots, {catches} Fänge wiederhergestellt.',
+	backupChooseFile: 'Datei wählen',
+	backupNoFile: 'Keine Datei gewählt',
+	backupConfirmBefore: 'Ich verstehe, dass dies',
+	backupConfirmBold: 'alle aktuellen Daten dauerhaft ersetzen',
+	backupConfirmAfter: 'wird. Dies kann nicht rückgängig gemacht werden.',
+	backupImporting: 'Importiere…',
+	backupImportBtn: 'Importieren & Ersetzen',
 } as const;

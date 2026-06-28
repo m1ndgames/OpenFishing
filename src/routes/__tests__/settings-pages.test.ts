@@ -30,6 +30,7 @@ vi.mock('adm-zip', () => ({ default: mockAdmZipConstructor }));
 
 const mockSelect = vi.fn();
 const mockUpdate = vi.fn();
+const mockInsert = vi.fn();
 const mockLureFindMany = vi.fn();
 
 function makeSelectChain(result: any[] = []) {
@@ -52,6 +53,14 @@ function makeUpdateChain() {
 	return self;
 }
 
+function makeInsertChain() {
+	const self: any = {
+		values: vi.fn(() => self),
+		onConflictDoUpdate: vi.fn(() => Promise.resolve()),
+	};
+	return self;
+}
+
 const mockClient = {
 	transaction: vi.fn((fn: any) => fn),
 	prepare: vi.fn().mockReturnValue({ run: vi.fn() }),
@@ -61,6 +70,7 @@ vi.mock('$lib/server/db', () => ({
 	db: {
 		select: mockSelect,
 		update: mockUpdate,
+		insert: mockInsert,
 		query: { lure: { findMany: mockLureFindMany } },
 	},
 	client: mockClient,
@@ -70,6 +80,7 @@ const mockEnv = await import('../../__mocks__/env');
 
 const { load: qrLoad, actions: qrActions } = await import('../settings/qr/+page.server');
 const { load: settingsLoad, actions: settingsActions } = await import('../settings/+page.server');
+const { load: appearanceLoad, actions: appearanceActions } = await import('../settings/appearance/+page.server');
 
 // ─── settings/qr ─────────────────────────────────────────────────────────────
 
@@ -139,6 +150,83 @@ describe('settings load', () => {
 		expect(result.spotCount).toBe(3);
 		expect(result.catchCount).toBe(2);
 		expect(result.schemaHash).toBe('abc123def456');
+	});
+});
+
+// ─── appearance load + action ─────────────────────────────────────────────────
+
+describe('settings/appearance load', () => {
+	it('returns defaults when no settings in DB', async () => {
+		mockSelect.mockReturnValue(makeSelectChain([]));
+		const result = await appearanceLoad();
+		expect(result.colorMode).toBe('dark');
+		expect(result.themeName).toBe('ocean');
+	});
+
+	it('returns stored colorMode and themeName from DB', async () => {
+		mockSelect.mockReturnValue(makeSelectChain([
+			{ key: 'colorMode', value: 'light' },
+			{ key: 'themeName', value: 'ocean' },
+		]));
+		const result = await appearanceLoad();
+		expect(result.colorMode).toBe('light');
+		expect(result.themeName).toBe('ocean');
+	});
+});
+
+describe('settings/appearance setMode action', () => {
+	beforeEach(() => {
+		mockInsert.mockClear();
+		mockInsert.mockReturnValue(makeInsertChain());
+	});
+
+	it('saves valid mode to DB and sets cookie', async () => {
+		const fd = new FormData();
+		fd.append('colorMode', 'light');
+		const mockCookieSet = vi.fn();
+		await appearanceActions.setMode({
+			request: { formData: () => Promise.resolve(fd) },
+			cookies: { set: mockCookieSet },
+		} as any);
+		expect(mockInsert).toHaveBeenCalled();
+		expect(mockCookieSet).toHaveBeenCalledWith('of_colormode', 'light', expect.any(Object));
+	});
+
+	it('ignores invalid mode values', async () => {
+		const fd = new FormData();
+		fd.append('colorMode', 'invalid');
+		const mockCookieSet = vi.fn();
+		await appearanceActions.setMode({
+			request: { formData: () => Promise.resolve(fd) },
+			cookies: { set: mockCookieSet },
+		} as any);
+		expect(mockInsert).not.toHaveBeenCalled();
+		expect(mockCookieSet).not.toHaveBeenCalled();
+	});
+});
+
+describe('settings/appearance setTheme action', () => {
+	beforeEach(() => {
+		mockInsert.mockClear();
+		mockInsert.mockReturnValue(makeInsertChain());
+	});
+
+	it('saves valid theme to DB', async () => {
+		const fd = new FormData();
+		fd.append('themeName', 'ocean');
+		await appearanceActions.setTheme({
+			request: { formData: () => Promise.resolve(fd) },
+		} as any);
+		expect(mockInsert).toHaveBeenCalled();
+	});
+
+	it('ignores unknown theme ids', async () => {
+		const fd = new FormData();
+		fd.append('themeName', 'rainbow');
+		await appearanceActions.setTheme({
+			request: { formData: () => Promise.resolve(fd) },
+		} as any);
+		expect(mockInsert).not.toHaveBeenCalled();
 	});
 });
 

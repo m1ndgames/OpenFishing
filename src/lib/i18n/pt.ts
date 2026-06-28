@@ -1,4 +1,4 @@
-export default {
+﻿export default {
 	// Header
 	navLures: 'Iscas',
 	add: 'Adicionar',
@@ -359,4 +359,32 @@ export default {
 	catchExportFrom: 'De',
 	catchExportTo: 'Até',
 	catchExportBtn: 'Descarregar CSV',
+
+	// Appearance settings
+	navAppearance: 'Aparência',
+	settingsAppearance: 'Aparência',
+	appearanceTitle: 'Aparência',
+	appearanceColorMode: 'Modo de cor',
+	appearanceModeDark: 'Escuro',
+	appearanceModeLight: 'Claro',
+	appearanceModeSystem: 'Sistema',
+	appearanceSaved: 'Salvo',
+	appearanceTheme: 'Tema',
+	appearanceThemeOcean: 'Ocean',
+
+	// Cópia de segurança e restauro
+	backupSchemaHash: 'Hash do esquema',
+	backupExportTitle: 'Exportar cópia de segurança',
+	backupExportDesc: 'Descarrega todos os isco, spots, capturas e fotos como um arquivo ZIP.',
+	backupExportBtn: 'Exportar',
+	backupImportTitle: 'Importar cópia de segurança',
+	backupImportDesc: 'Substitui todos os dados e fotos existentes pelo conteúdo da cópia de segurança. A versão do esquema é verificada automaticamente antes de qualquer alteração.',
+	backupImportSuccess: 'Importação bem-sucedida — {lures} isco, {spots} spots, {catches} capturas restauradas.',
+	backupChooseFile: 'Escolher ficheiro',
+	backupNoFile: 'Nenhum ficheiro escolhido',
+	backupConfirmBefore: 'Compreendo que isto irá',
+	backupConfirmBold: 'substituir permanentemente todos os dados atuais',
+	backupConfirmAfter: 'pelo conteúdo desta cópia de segurança. Esta ação não pode ser desfeita.',
+	backupImporting: 'A importar…',
+	backupImportBtn: 'Importar e substituir',
 } as const;

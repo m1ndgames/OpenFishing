@@ -1,4 +1,4 @@
-export default {
+﻿export default {
 	// Header
 	navLures: 'Aasbox',
 	add: 'Toevoegen',
@@ -359,4 +359,32 @@ export default {
 	catchExportFrom: 'Van',
 	catchExportTo: 'Tot',
 	catchExportBtn: 'CSV downloaden',
+
+	// Appearance settings
+	navAppearance: 'Uiterlijk',
+	settingsAppearance: 'Uiterlijk',
+	appearanceTitle: 'Uiterlijk',
+	appearanceColorMode: 'Kleurmodus',
+	appearanceModeDark: 'Donker',
+	appearanceModeLight: 'Licht',
+	appearanceModeSystem: 'Systeem',
+	appearanceSaved: 'Opgeslagen',
+	appearanceTheme: 'Thema',
+	appearanceThemeOcean: 'Ocean',
+
+	// Back-up en herstel
+	backupSchemaHash: 'Schema-hash',
+	backupExportTitle: 'Back-up exporteren',
+	backupExportDesc: 'Downloadt alle kunstaas, spots, vangsten en foto\'s als ZIP-archief.',
+	backupExportBtn: 'Exporteren',
+	backupImportTitle: 'Back-up importeren',
+	backupImportDesc: 'Vervangt alle bestaande gegevens en foto\'s door de inhoud van de back-up. De schemaversie wordt automatisch geverifieerd voordat er iets wordt gewijzigd.',
+	backupImportSuccess: 'Import geslaagd — {lures} kunstaas, {spots} spots, {catches} vangsten hersteld.',
+	backupChooseFile: 'Bestand kiezen',
+	backupNoFile: 'Geen bestand gekozen',
+	backupConfirmBefore: 'Ik begrijp dat dit',
+	backupConfirmBold: 'alle huidige gegevens permanent vervangt',
+	backupConfirmAfter: 'door de inhoud van deze back-up. Dit kan niet ongedaan worden gemaakt.',
+	backupImporting: 'Importeren…',
+	backupImportBtn: 'Importeren & vervangen',
 } as const;

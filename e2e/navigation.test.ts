@@ -43,6 +43,26 @@ test.describe('Navigation', () => {
 		await expect(page).toHaveURL('/settings/export');
 	});
 
+	test('appearance settings page loads', async ({ page }) => {
+		await page.goto('/settings/appearance');
+		await expect(page).toHaveURL('/settings/appearance');
+		await expect(page.getByRole('radio', { name: /dark/i })).toBeAttached();
+		await expect(page.getByRole('radio', { name: /light/i })).toBeAttached();
+		await expect(page.getByRole('radio', { name: /system/i })).toBeAttached();
+	});
+
+	test('appearance mode toggle saves and persists selection', async ({ page }) => {
+		await page.goto('/settings/appearance');
+		await page.waitForLoadState('networkidle');
+		const lightLabel = page.locator('label').filter({ hasText: /light/i });
+		await lightLabel.click();
+		await page.waitForLoadState('networkidle');
+		await page.reload();
+		await page.waitForLoadState('networkidle');
+		const htmlEl = page.locator('html');
+		await expect(htmlEl).toHaveAttribute('data-mode', 'light');
+	});
+
 	test('settings sub-nav shows Export tab', async ({ page }) => {
 		await page.goto('/settings/export');
 		await expect(page.getByRole('link', { name: /export/i }).first()).toBeVisible();

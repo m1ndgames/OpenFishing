@@ -359,4 +359,32 @@ export default {
 	catchExportFrom: 'From',
 	catchExportTo: 'To',
 	catchExportBtn: 'Download CSV',
+
+	// Appearance settings
+	navAppearance: 'Appearance',
+	settingsAppearance: 'Appearance',
+	appearanceTitle: 'Appearance',
+	appearanceColorMode: 'Color mode',
+	appearanceModeDark: 'Dark',
+	appearanceModeLight: 'Light',
+	appearanceModeSystem: 'System',
+	appearanceSaved: 'Saved',
+	appearanceTheme: 'Theme',
+	appearanceThemeOcean: 'Ocean',
+
+	// Backup & Restore
+	backupSchemaHash: 'Schema hash',
+	backupExportTitle: 'Export backup',
+	backupExportDesc: 'Downloads all lures, spots, catches and photos as a ZIP archive.',
+	backupExportBtn: 'Export',
+	backupImportTitle: 'Import backup',
+	backupImportDesc: 'Replaces all existing data and photos with the backup contents. Schema version is verified automatically before anything is changed.',
+	backupImportSuccess: 'Import successful — {lures} lures, {spots} spots, {catches} catches restored.',
+	backupChooseFile: 'Choose file',
+	backupNoFile: 'No file chosen',
+	backupConfirmBefore: 'I understand this will',
+	backupConfirmBold: 'permanently replace all current data',
+	backupConfirmAfter: 'with the contents of this backup. This cannot be undone.',
+	backupImporting: 'Importing…',
+	backupImportBtn: 'Import & Replace',
 } as const;

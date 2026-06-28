@@ -1,4 +1,4 @@
-export default {
+﻿export default {
 	// Header
 	navLures: 'Przynęty',
 	add: 'Dodaj',
@@ -359,4 +359,32 @@ export default {
 	catchExportFrom: 'Od',
 	catchExportTo: 'Do',
 	catchExportBtn: 'Pobierz CSV',
+
+	// Appearance settings
+	navAppearance: 'Wygląd',
+	settingsAppearance: 'Wygląd',
+	appearanceTitle: 'Wygląd',
+	appearanceColorMode: 'Tryb koloru',
+	appearanceModeDark: 'Ciemny',
+	appearanceModeLight: 'Jasny',
+	appearanceModeSystem: 'System',
+	appearanceSaved: 'Zapisano',
+	appearanceTheme: 'Motyw',
+	appearanceThemeOcean: 'Ocean',
+
+	// Kopia zapasowa i przywracanie
+	backupSchemaHash: 'Hash schematu',
+	backupExportTitle: 'Eksportuj kopię zapasową',
+	backupExportDesc: 'Pobiera wszystkie przynęty, miejsca, połowy i zdjęcia jako archiwum ZIP.',
+	backupExportBtn: 'Eksportuj',
+	backupImportTitle: 'Importuj kopię zapasową',
+	backupImportDesc: 'Zastępuje wszystkie istniejące dane i zdjęcia zawartością kopii zapasowej. Wersja schematu jest automatycznie weryfikowana przed wprowadzeniem jakichkolwiek zmian.',
+	backupImportSuccess: 'Import zakończony sukcesem — przywrócono {lures} przynęt, {spots} miejsc, {catches} połowów.',
+	backupChooseFile: 'Wybierz plik',
+	backupNoFile: 'Nie wybrano pliku',
+	backupConfirmBefore: 'Rozumiem, że to',
+	backupConfirmBold: 'trwale zastąpi wszystkie bieżące dane',
+	backupConfirmAfter: 'zawartością tej kopii zapasowej. Nie można tego cofnąć.',
+	backupImporting: 'Importowanie…',
+	backupImportBtn: 'Importuj i zastąp',
 } as const;

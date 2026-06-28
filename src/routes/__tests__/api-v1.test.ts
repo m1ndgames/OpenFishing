@@ -175,6 +175,7 @@ describe('layout server load', () => {
 	beforeEach(() => {
 		mockEnv.env.DEMO_MODE = undefined;
 		mockEnv.env.CHATBOT = undefined;
+		mockSelect.mockReturnValue(makeChain([]));
 	});
 
 	it('defaults to English when no lang cookie', async () => {

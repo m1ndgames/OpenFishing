@@ -29,7 +29,7 @@
 		L = (await import('leaflet')).default;
 
 		const pinIcon = L.divIcon({
-			html: `<svg width="28" height="38" viewBox="0 0 28 38" fill="none"><path d="M14 0C6.268 0 0 6.268 0 14c0 10.5 14 24 14 24S28 24.5 28 14C28 6.268 21.732 0 14 0z" fill="#06b6d4"/><circle cx="14" cy="14" r="5" fill="#030a12"/></svg>`,
+			html: `<svg width="28" height="38" viewBox="0 0 28 38" fill="none"><path d="M14 0C6.268 0 0 6.268 0 14c0 10.5 14 24 14 24S28 24.5 28 14C28 6.268 21.732 0 14 0z" fill="var(--of-accent-solid)"/><circle cx="14" cy="14" r="5" fill="var(--of-ink)"/></svg>`,
 			className: '', iconSize: [28, 38], iconAnchor: [14, 38]
 		});
 
@@ -100,7 +100,7 @@
 			} else {
 				L.circleMarker([c.lat, c.lng], {
 					radius: 6,
-					fillColor: '#22d3ee',
+					fillColor: 'var(--of-accent)',
 					fillOpacity: 0.85,
 					color: '#fff',
 					weight: 1.5
@@ -113,23 +113,23 @@
 	});
 
 	const pillBtn = (active: boolean) =>
-		`font-size:0.8rem; padding:6px 14px; border-radius:8px; cursor:pointer; outline:none; font-family:'DM Sans',sans-serif; font-weight:500; border:1px solid; transition:all 0.15s; ${active ? 'background:rgba(6,182,212,0.15); border-color:rgba(6,182,212,0.5); color:#22d3ee;' : 'background:#0f2238; border-color:#243f5e; color:#8ab8cc;'}`;
+		`font-size:0.8rem; padding:6px 14px; border-radius:8px; cursor:pointer; outline:none; font-family:'DM Sans',sans-serif; font-weight:500; border:1px solid; transition:all 0.15s; ${active ? 'background:var(--of-accent-bg-hover); border-color:var(--of-accent-border); color:var(--of-accent);' : 'background:var(--of-bg-elevated); border-color:var(--of-border); color:var(--of-text-2);'}`;
 </script>
 
 <div>
 	{#if !hasData}
 		<!-- Empty state -->
 		<div style="text-align:center; padding:80px 24px;">
-			<div style="display:inline-flex; align-items:center; justify-content:center; width:80px; height:80px; border-radius:50%; background:#0b1a2c; border:1px solid #172f4a; margin-bottom:20px;">
-				<svg width="36" height="36" viewBox="0 0 24 24" fill="none" style="color:#2d5270;">
-					<path d="M12 2C8.69 2 6 4.69 6 8c0 4.5 6 12 6 12s6-7.5 6-12c0-3.31-2.69-6-6-6z" stroke="currentColor" stroke-width="1.5" fill="rgba(6,182,212,0.06)"/>
+			<div style="display:inline-flex; align-items:center; justify-content:center; width:80px; height:80px; border-radius:50%; background:var(--of-bg-surface); border:1px solid var(--of-border-subtle); margin-bottom:20px;">
+				<svg width="36" height="36" viewBox="0 0 24 24" fill="none" style="color:var(--of-border-strong);">
+					<path d="M12 2C8.69 2 6 4.69 6 8c0 4.5 6 12 6 12s6-7.5 6-12c0-3.31-2.69-6-6-6z" stroke="currentColor" stroke-width="1.5" style="fill:var(--of-accent-bg)"/>
 					<circle cx="12" cy="8" r="2.5" stroke="currentColor" stroke-width="1.5"/>
 				</svg>
 			</div>
-			<p style="font-family:'Carter One',sans-serif; font-size:1.1rem; color:#8ab8cc; margin:0 0 8px;">{t.spotNoSpots}</p>
-			<p style="font-size:0.875rem; color:#3d6a84; margin:0 0 24px;">{t.spotNoSpotsHint}</p>
+			<p style="font-family:'Carter One',sans-serif; font-size:1.1rem; color:var(--of-text-2); margin:0 0 8px;">{t.spotNoSpots}</p>
+			<p style="font-size:0.875rem; color:var(--of-text-4); margin:0 0 24px;">{t.spotNoSpotsHint}</p>
 			<a href="/spots/new"
-				style="display:inline-flex; align-items:center; gap:7px; background:#06b6d4; color:#030a12; font-size:0.875rem; font-weight:700; padding:10px 22px; border-radius:9px; text-decoration:none; font-family:'DM Sans',sans-serif;"
+				style="display:inline-flex; align-items:center; gap:7px; background:var(--of-accent-solid); color:var(--of-ink); font-size:0.875rem; font-weight:700; padding:10px 22px; border-radius:9px; text-decoration:none; font-family:'DM Sans',sans-serif;"
 			>
 				<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
 				{t.addSpot}
@@ -138,10 +138,10 @@
 
 	{:else}
 		<!-- Map card -->
-		<div style="background:#0b1a2c; border:1px solid #172f4a; border-radius:14px; overflow:hidden; margin-bottom:16px;">
+		<div style="background:var(--of-bg-surface); border:1px solid var(--of-border-subtle); border-radius:14px; overflow:hidden; margin-bottom:16px;">
 
 			<!-- Controls -->
-			<div style="padding:10px 14px; display:flex; align-items:center; gap:8px; border-bottom:1px solid #172f4a;">
+			<div style="padding:10px 14px; display:flex; align-items:center; gap:8px; border-bottom:1px solid var(--of-border-subtle);">
 				<button
 					type="button"
 					onclick={() => showSpots = !showSpots}
@@ -174,21 +174,21 @@
 
 		<!-- Spots table -->
 		{#if spots.length > 0}
-			<div style="background:#0b1a2c; border:1px solid #172f4a; border-radius:14px; padding:20px;">
+			<div style="background:var(--of-bg-surface); border:1px solid var(--of-border-subtle); border-radius:14px; padding:20px;">
 				<div style="overflow-x:auto;">
 					<table style="width:100%; border-collapse:collapse; font-size:0.82rem;">
 						<thead>
-							<tr style="border-bottom:1px solid #172f4a;">
-								<th style="text-align:left; font-size:0.68rem; font-weight:500; color:#3d6a84; text-transform:uppercase; letter-spacing:0.06em; padding:0 12px 8px 0;"></th>
-								<th style="text-align:left; font-size:0.68rem; font-weight:500; color:#3d6a84; text-transform:uppercase; letter-spacing:0.06em; padding:0 12px 8px 0;">{t.spotNameLabel}</th>
-								<th style="text-align:left; font-size:0.68rem; font-weight:500; color:#3d6a84; text-transform:uppercase; letter-spacing:0.06em; padding:0 0 8px 0;">{t.spotTagsLabel}</th>
+							<tr style="border-bottom:1px solid var(--of-border-subtle);">
+								<th style="text-align:left; font-size:0.68rem; font-weight:500; color:var(--of-text-4); text-transform:uppercase; letter-spacing:0.06em; padding:0 12px 8px 0;"></th>
+								<th style="text-align:left; font-size:0.68rem; font-weight:500; color:var(--of-text-4); text-transform:uppercase; letter-spacing:0.06em; padding:0 12px 8px 0;">{t.spotNameLabel}</th>
+								<th style="text-align:left; font-size:0.68rem; font-weight:500; color:var(--of-text-4); text-transform:uppercase; letter-spacing:0.06em; padding:0 0 8px 0;">{t.spotTagsLabel}</th>
 							</tr>
 						</thead>
 						<tbody>
 							{#each spots as s}
-								<tr style="border-bottom:1px solid #0f2238; cursor:pointer;"
+								<tr style="border-bottom:1px solid var(--of-bg-elevated); cursor:pointer;"
 									onclick={() => window.location.href = `/spots/${s.id}`}
-									onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='rgba(6,182,212,0.04)';}}
+									onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-accent-bg)';}}
 									onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='';}}
 								>
 									<!-- Thumbnail -->
@@ -198,21 +198,21 @@
 												<img src="/uploads/{s.photos[0].filename}" alt="" style="width:100%; height:100%; object-fit:cover;" />
 											</div>
 										{:else}
-											<div style="width:36px; height:28px; border-radius:5px; background:#0d1f35; display:flex; align-items:center; justify-content:center;">
-												<svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="color:#1d3d5c;"><path d="M12 2C8.69 2 6 4.69 6 8c0 4.5 6 12 6 12s6-7.5 6-12c0-3.31-2.69-6-6-6z" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="8" r="2" stroke="currentColor" stroke-width="1.4"/></svg>
+											<div style="width:36px; height:28px; border-radius:5px; background:var(--of-bg-overlay); display:flex; align-items:center; justify-content:center;">
+												<svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="color:var(--of-border-subtle);"><path d="M12 2C8.69 2 6 4.69 6 8c0 4.5 6 12 6 12s6-7.5 6-12c0-3.31-2.69-6-6-6z" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="8" r="2" stroke="currentColor" stroke-width="1.4"/></svg>
 											</div>
 										{/if}
 									</td>
-									<td style="padding:8px 12px 8px 0; font-weight:600; color:#c2dce8; white-space:nowrap;">{s.name}</td>
+									<td style="padding:8px 12px 8px 0; font-weight:600; color:var(--of-text); white-space:nowrap;">{s.name}</td>
 									<td style="padding:8px 0 8px 0;">
 										{#if s.tags.length > 0}
 											<div style="display:flex; flex-wrap:wrap; gap:4px;">
 												{#each s.tags as tag}
-													<span style="font-size:0.68rem; font-weight:600; color:#5d8fa8; background:rgba(93,143,168,0.1); border:1px solid rgba(93,143,168,0.2); padding:2px 7px; border-radius:20px;">{tag.name}</span>
+													<span style="font-size:0.68rem; font-weight:600; color:var(--of-text-3); background:rgba(93,143,168,0.1); border:1px solid rgba(93,143,168,0.2); padding:2px 7px; border-radius:20px;">{tag.name}</span>
 												{/each}
 											</div>
 										{:else}
-											<span style="color:#3d6a84;">—</span>
+											<span style="color:var(--of-text-4);">—</span>
 										{/if}
 									</td>
 								</tr>

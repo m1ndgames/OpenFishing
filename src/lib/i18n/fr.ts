@@ -1,4 +1,4 @@
-export default {
+﻿export default {
 	// Header
 	navLures: 'Leurres',
 	add: 'Ajouter',
@@ -359,4 +359,32 @@ export default {
 	catchExportFrom: 'Du',
 	catchExportTo: 'Au',
 	catchExportBtn: 'Télécharger CSV',
+
+	// Appearance settings
+	navAppearance: 'Apparence',
+	settingsAppearance: 'Apparence',
+	appearanceTitle: 'Apparence',
+	appearanceColorMode: 'Mode couleur',
+	appearanceModeDark: 'Sombre',
+	appearanceModeLight: 'Clair',
+	appearanceModeSystem: 'Système',
+	appearanceSaved: 'Enregistré',
+	appearanceTheme: 'Thème',
+	appearanceThemeOcean: 'Ocean',
+
+	// Sauvegarde & Restauration
+	backupSchemaHash: 'Hash du schéma',
+	backupExportTitle: 'Exporter la sauvegarde',
+	backupExportDesc: 'Télécharge tous les leurres, spots, prises et photos sous forme d\'archive ZIP.',
+	backupExportBtn: 'Exporter',
+	backupImportTitle: 'Importer une sauvegarde',
+	backupImportDesc: 'Remplace toutes les données et photos existantes par le contenu de la sauvegarde. La version du schéma est vérifiée automatiquement avant toute modification.',
+	backupImportSuccess: 'Import réussi — {lures} leurres, {spots} spots, {catches} prises restaurées.',
+	backupChooseFile: 'Choisir un fichier',
+	backupNoFile: 'Aucun fichier choisi',
+	backupConfirmBefore: 'Je comprends que cela va',
+	backupConfirmBold: 'remplacer définitivement toutes les données actuelles',
+	backupConfirmAfter: 'par le contenu de cette sauvegarde. Cette action est irréversible.',
+	backupImporting: 'Importation…',
+	backupImportBtn: 'Importer & Remplacer',
 } as const;

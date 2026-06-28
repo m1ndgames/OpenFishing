@@ -47,11 +47,11 @@
 </script>
 
 <div style="max-width:580px;">
-	<div style="background:#0b1a2c; border:1px solid #172f4a; border-radius:16px; overflow:hidden;">
+	<div style="background:var(--of-bg-surface); border:1px solid var(--of-border-subtle); border-radius:16px; overflow:hidden;">
 
 		<!-- Photo -->
 		{#if lure.photoPath}
-			<div style="aspect-ratio:4/3; background:#0d1f35; position:relative;">
+			<div style="aspect-ratio:4/3; background:var(--of-bg-overlay); position:relative;">
 				<img src="/uploads/{lure.photoPath}" alt={lure.name}
 					style="width:100%; height:100%; object-fit:cover; display:block;" />
 				<!-- gradient overlay at bottom -->
@@ -66,90 +66,90 @@
 				<div style="position:relative; width:64px; height:64px; background:#e8f0f7; border-radius:10px; padding:4px; box-shadow:0 2px 8px rgba(0,0,0,0.3);">
 					{@html qrSvg}
 					{#if !lure.qrCoded}
-						<div style="position:absolute; bottom:2px; right:2px; width:18px; height:18px; background:#f59e0b; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 1px 3px rgba(0,0,0,0.4);">
+						<div style="position:absolute; bottom:2px; right:2px; width:18px; height:18px; background:var(--of-warning-solid); border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 1px 3px rgba(0,0,0,0.4);">
 							<svg width="8" height="8" viewBox="0 0 10 10" fill="none">
-								<path d="M5 2.5v3" stroke="#EDF5FA" stroke-width="1.5" stroke-linecap="round"/>
-								<circle cx="5" cy="7.5" r="0.9" fill="#EDF5FA"/>
+								<path d="M5 2.5v3" stroke="var(--of-text-bright)" stroke-width="1.5" stroke-linecap="round"/>
+								<circle cx="5" cy="7.5" r="0.9" fill="var(--of-text-bright)"/>
 							</svg>
 						</div>
 					{/if}
 				</div>
 				{#if lure.lureNumber}
-					<span style="font-family:'JetBrains Mono',monospace; font-size:0.68rem; color:#7dd3fc; letter-spacing:0.05em;">#{String(lure.lureNumber).padStart(4, '0')}</span>
+					<span style="font-family:'JetBrains Mono',monospace; font-size:0.68rem; color:var(--of-accent-hover); letter-spacing:0.05em;">#{String(lure.lureNumber).padStart(4, '0')}</span>
 				{/if}
 			</div>
 
 			<!-- Lure name -->
-			<h1 style="font-family:'Carter One',sans-serif; font-weight:800; font-size:1.4rem; color:#e0eaf8; margin:0 0 16px; padding-right:88px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{lure.name}</h1>
+			<h1 style="font-family:'Carter One',sans-serif; font-weight:800; font-size:1.4rem; color:var(--of-text-bright); margin:0 0 16px; padding-right:88px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{lure.name}</h1>
 
 			<!-- Core details grid -->
 			<dl style="display:grid; grid-template-columns:1fr 1fr; gap:16px 24px; font-size:0.875rem; padding-right:88px; margin-bottom:16px;">
 				{#if lure.brand}
 					<div>
-						<dt style="font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; color:#3d6a84; margin-bottom:3px;">{t.brand}</dt>
-						<dd style="font-weight:600; color:#e0eaf8; margin:0;">{lure.brand}</dd>
+						<dt style="font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--of-text-4); margin-bottom:3px;">{t.brand}</dt>
+						<dd style="font-weight:600; color:var(--of-text-bright); margin:0;">{lure.brand}</dd>
 					</div>
 				{/if}
 				{#if lure.type}
 					<div>
-						<dt style="font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; color:#3d6a84; margin-bottom:3px;">{t.type}</dt>
-						<dd style="font-weight:600; color:#e0eaf8; margin:0;">{lure.type}</dd>
+						<dt style="font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--of-text-4); margin-bottom:3px;">{t.type}</dt>
+						<dd style="font-weight:600; color:var(--of-text-bright); margin:0;">{lure.type}</dd>
 					</div>
 				{/if}
 				{#if lure.color}
 					<div>
-						<dt style="font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; color:#3d6a84; margin-bottom:3px;">{t.color}</dt>
-						<dd style="font-weight:600; color:#e0eaf8; margin:0;">{lure.color}</dd>
+						<dt style="font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--of-text-4); margin-bottom:3px;">{t.color}</dt>
+						<dd style="font-weight:600; color:var(--of-text-bright); margin:0;">{lure.color}</dd>
 					</div>
 				{/if}
 				{#if lure.weight}
 					<div>
-						<dt style="font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; color:#3d6a84; margin-bottom:3px;">{t.weightG}</dt>
-						<dd style="font-weight:600; color:#e0eaf8; margin:0;">{lure.weight}g</dd>
+						<dt style="font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--of-text-4); margin-bottom:3px;">{t.weightG}</dt>
+						<dd style="font-weight:600; color:var(--of-text-bright); margin:0;">{lure.weight}g</dd>
 					</div>
 				{/if}
 				{#if lure.amount > 1}
 					<div>
-						<dt style="font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; color:#3d6a84; margin-bottom:3px;">{t.amount}</dt>
-						<dd style="font-weight:600; color:#e0eaf8; margin:0;">×{lure.amount}</dd>
+						<dt style="font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--of-text-4); margin-bottom:3px;">{t.amount}</dt>
+						<dd style="font-weight:600; color:var(--of-text-bright); margin:0;">×{lure.amount}</dd>
 					</div>
 				{/if}
 				{#if lure.size}
 					<div>
-						<dt style="font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; color:#3d6a84; margin-bottom:3px;">{t.size}</dt>
-						<dd style="font-weight:600; color:#e0eaf8; margin:0;">{lure.size}</dd>
+						<dt style="font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--of-text-4); margin-bottom:3px;">{t.size}</dt>
+						<dd style="font-weight:600; color:var(--of-text-bright); margin:0;">{lure.size}</dd>
 					</div>
 				{/if}
 				{#if lure.runningDepth}
 					<div>
-						<dt style="font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; color:#3d6a84; margin-bottom:3px;">{t.runningDepth}</dt>
-						<dd style="font-weight:600; color:#e0eaf8; margin:0;">{runningDepthLabels[lure.runningDepth] ?? lure.runningDepth}</dd>
+						<dt style="font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--of-text-4); margin-bottom:3px;">{t.runningDepth}</dt>
+						<dd style="font-weight:600; color:var(--of-text-bright); margin:0;">{runningDepthLabels[lure.runningDepth] ?? lure.runningDepth}</dd>
 					</div>
 				{/if}
 				{#if lure.waterType}
 					<div>
-						<dt style="font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; color:#3d6a84; margin-bottom:3px;">{t.waterType}</dt>
-						<dd style="font-weight:600; color:#e0eaf8; margin:0;">{waterTypeLabels[lure.waterType] ?? lure.waterType}</dd>
+						<dt style="font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--of-text-4); margin-bottom:3px;">{t.waterType}</dt>
+						<dd style="font-weight:600; color:var(--of-text-bright); margin:0;">{waterTypeLabels[lure.waterType] ?? lure.waterType}</dd>
 					</div>
 				{/if}
 				{#if lure.lightConditions != null}
 					<div>
-						<dt style="font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; color:#3d6a84; margin-bottom:3px;">{t.lightConditions}</dt>
-						<dd style="font-weight:600; color:#e0eaf8; margin:0;">{t[`lightConditions_${lure.lightConditions}` as keyof typeof t] ?? lure.lightConditions}</dd>
+						<dt style="font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--of-text-4); margin-bottom:3px;">{t.lightConditions}</dt>
+						<dd style="font-weight:600; color:var(--of-text-bright); margin:0;">{t[`lightConditions_${lure.lightConditions}` as keyof typeof t] ?? lure.lightConditions}</dd>
 					</div>
 				{/if}
 			</dl>
 
 			<!-- Divider -->
-			<div style="height:1px; background:#172f4a; margin:0 0 16px;"></div>
+			<div style="height:1px; background:var(--of-border-subtle); margin:0 0 16px;"></div>
 
 			<!-- Tags -->
 			{#if lure.tags.length > 0}
 				<div style="margin-bottom:14px;">
-					<p style="font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; color:#3d6a84; margin:0 0 8px;">{t.tags}</p>
+					<p style="font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--of-text-4); margin:0 0 8px;">{t.tags}</p>
 					<div style="display:flex; flex-wrap:wrap; gap:6px;">
 						{#each lure.tags as tag (tag.id)}
-							<span style="font-size:0.78rem; padding:3px 10px; border-radius:20px; background:rgba(74,222,128,0.08); color:#4ade80; border:1px solid rgba(74,222,128,0.15); font-weight:500;">{tag.name}</span>
+							<span style="font-size:0.78rem; padding:3px 10px; border-radius:20px; background:var(--of-success-bg); color:var(--of-success); border:1px solid var(--of-success-border); font-weight:500;">{tag.name}</span>
 						{/each}
 					</div>
 				</div>
@@ -158,10 +158,10 @@
 			<!-- Species -->
 			{#if lure.species}
 				<div style="margin-bottom:14px;">
-					<p style="font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; color:#3d6a84; margin:0 0 8px;">{t.fishSpecies}</p>
+					<p style="font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--of-text-4); margin:0 0 8px;">{t.fishSpecies}</p>
 					<div style="display:flex; flex-wrap:wrap; gap:6px;">
 						{#each lure.species.split(/\s+/).filter(Boolean) as s}
-							<span style="font-size:0.78rem; padding:3px 10px; border-radius:20px; background:rgba(6,182,212,0.1); color:#22d3ee; border:1px solid rgba(6,182,212,0.2); font-weight:500;">{s}</span>
+							<span style="font-size:0.78rem; padding:3px 10px; border-radius:20px; background:var(--of-accent-bg); color:var(--of-accent); border:1px solid var(--of-accent-border); font-weight:500;">{s}</span>
 						{/each}
 					</div>
 				</div>
@@ -170,8 +170,8 @@
 			<!-- Notes -->
 			{#if lure.notes}
 				<div style="margin-bottom:14px;">
-					<p style="font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; color:#3d6a84; margin:0 0 6px;">{t.notes}</p>
-					<p style="font-size:0.875rem; color:#8ab8cc; white-space:pre-wrap; margin:0; line-height:1.6;">{lure.notes}</p>
+					<p style="font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--of-text-4); margin:0 0 6px;">{t.notes}</p>
+					<p style="font-size:0.875rem; color:var(--of-text-2); white-space:pre-wrap; margin:0; line-height:1.6;">{lure.notes}</p>
 				</div>
 			{/if}
 
@@ -179,13 +179,13 @@
 			{#if lure.qrCoded || lure.lost}
 				<div style="margin-bottom:14px; display:flex; flex-wrap:wrap; gap:8px;">
 					{#if lure.qrCoded}
-						<span style="display:inline-flex; align-items:center; gap:6px; background:rgba(74,222,128,0.08); color:#4ade80; font-size:0.78rem; font-weight:600; padding:4px 10px; border-radius:20px; border:1px solid rgba(74,222,128,0.2);">
+						<span style="display:inline-flex; align-items:center; gap:6px; background:var(--of-success-bg); color:var(--of-success); font-size:0.78rem; font-weight:600; padding:4px 10px; border-radius:20px; border:1px solid var(--of-success-border);">
 							<svg width="10" height="10" viewBox="0 0 11 11" fill="none"><path d="M2 5.5L4.5 8L9 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
 							{t.labeledStatus}
 						</span>
 					{/if}
 					{#if lure.lost}
-						<span style="display:inline-flex; align-items:center; gap:6px; background:rgba(245,158,11,0.1); color:#fbbf24; font-size:0.78rem; font-weight:600; padding:4px 10px; border-radius:20px; border:1px solid rgba(245,158,11,0.25);">
+						<span style="display:inline-flex; align-items:center; gap:6px; background:var(--of-warning-bg); color:var(--of-warning); font-size:0.78rem; font-weight:600; padding:4px 10px; border-radius:20px; border:1px solid var(--of-warning-border);">
 							<svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
 							{t.lostStatus}
 						</span>
@@ -194,11 +194,11 @@
 			{/if}
 
 			<!-- Actions -->
-			<div style="display:flex; gap:8px; padding-top:16px; border-top:1px solid #172f4a; margin-top:16px;">
+			<div style="display:flex; gap:8px; padding-top:16px; border-top:1px solid var(--of-border-subtle); margin-top:16px;">
 				<a href="/lures/{lure.id}/edit"
-					style="display:inline-block; background:#06b6d4; color:#030a12; font-size:0.875rem; font-weight:600; padding:9px 20px; border-radius:9px; text-decoration:none; transition:background 0.15s; font-family:'DM Sans',sans-serif;"
-					onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='#22d3ee';}}
-					onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='#06b6d4';}}
+					style="display:inline-block; background:var(--of-accent-solid); color:var(--of-ink); font-size:0.875rem; font-weight:600; padding:9px 20px; border-radius:9px; text-decoration:none; transition:background 0.15s; font-family:'DM Sans',sans-serif;"
+					onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-accent-hover)';}}
+					onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-accent-solid)';}}
 				>
 					{t.edit}
 				</a>
@@ -206,32 +206,32 @@
 
 			<!-- Share link management -->
 			{#if authEnabled}
-				<div style="padding-top:16px; border-top:1px solid #172f4a; margin-top:16px;">
-					<p style="font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; color:#3d6a84; margin:0 0 10px; display:flex; align-items:center; gap:6px;">
+				<div style="padding-top:16px; border-top:1px solid var(--of-border-subtle); margin-top:16px;">
+					<p style="font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--of-text-4); margin:0 0 10px; display:flex; align-items:center; gap:6px;">
 						<svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
 						{t.shareLink}
 					</p>
 					{#if shareUrl}
 						<div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin-bottom:8px;">
 							<input type="text" value={shareUrl} readonly
-								style="flex:1; min-width:0; background:#060d17; border:1px solid #172f4a; border-radius:8px; color:#8ab8cc; font-family:'JetBrains Mono',monospace; font-size:0.72rem; padding:7px 10px; outline:none;" />
+								style="flex:1; min-width:0; background:var(--of-bg-base); border:1px solid var(--of-border-subtle); border-radius:8px; color:var(--of-text-2); font-family:'JetBrains Mono',monospace; font-size:0.72rem; padding:7px 10px; outline:none;" />
 							<button onclick={copyShare}
-								style="background:{copied ? 'rgba(74,222,128,0.12)' : '#0f2238'}; color:{copied ? '#4ade80' : '#8ab8cc'}; border:1px solid {copied ? 'rgba(74,222,128,0.3)' : '#243f5e'}; font-size:0.8rem; font-weight:500; padding:7px 14px; border-radius:8px; cursor:pointer; white-space:nowrap; transition:all 0.15s; font-family:'DM Sans',sans-serif;">
+								style="background:{copied ? 'var(--of-success-bg)' : 'var(--of-bg-elevated)'}; color:{copied ? 'var(--of-success)' : 'var(--of-text-2)'}; border:1px solid {copied ? 'var(--of-success-border)' : 'var(--of-border)'}; font-size:0.8rem; font-weight:500; padding:7px 14px; border-radius:8px; cursor:pointer; white-space:nowrap; transition:all 0.15s; font-family:'DM Sans',sans-serif;">
 								{copied ? t.shareCopied : t.shareCopy}
 							</button>
 							<button onclick={revokeShare}
-								style="background:#0f2238; color:#f87171; border:1px solid rgba(248,113,113,0.2); font-size:0.8rem; font-weight:500; padding:7px 14px; border-radius:8px; cursor:pointer; white-space:nowrap; font-family:'DM Sans',sans-serif;"
-								onmouseenter={function(e){(e.currentTarget as HTMLElement).style.borderColor='rgba(248,113,113,0.5)';}}
-								onmouseleave={function(e){(e.currentTarget as HTMLElement).style.borderColor='rgba(248,113,113,0.2)';}}>
+								style="background:var(--of-bg-elevated); color:var(--of-danger); border:1px solid var(--of-danger-border); font-size:0.8rem; font-weight:500; padding:7px 14px; border-radius:8px; cursor:pointer; white-space:nowrap; font-family:'DM Sans',sans-serif;"
+								onmouseenter={function(e){(e.currentTarget as HTMLElement).style.borderColor='var(--of-danger)';}}
+								onmouseleave={function(e){(e.currentTarget as HTMLElement).style.borderColor='var(--of-danger-border)';}}>
 								{t.shareRevoke}
 							</button>
 						</div>
-						<p style="font-size:0.72rem; color:#3d6a84; margin:0;">{t.sharePublicNote}</p>
+						<p style="font-size:0.72rem; color:var(--of-text-4); margin:0;">{t.sharePublicNote}</p>
 					{:else}
 						<button onclick={createShare}
-							style="display:inline-flex; align-items:center; gap:6px; background:#0f2238; color:#8ab8cc; font-size:0.8rem; font-weight:500; padding:8px 14px; border-radius:8px; border:1px solid #243f5e; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.15s;"
-							onmouseenter={function(e){(e.currentTarget as HTMLElement).style.borderColor='rgba(6,182,212,0.4)'; (e.currentTarget as HTMLElement).style.color='#22d3ee';}}
-							onmouseleave={function(e){(e.currentTarget as HTMLElement).style.borderColor='#243f5e'; (e.currentTarget as HTMLElement).style.color='#8ab8cc';}}>
+							style="display:inline-flex; align-items:center; gap:6px; background:var(--of-bg-elevated); color:var(--of-text-2); font-size:0.8rem; font-weight:500; padding:8px 14px; border-radius:8px; border:1px solid var(--of-border); cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.15s;"
+							onmouseenter={function(e){(e.currentTarget as HTMLElement).style.borderColor='var(--of-accent-border)'; (e.currentTarget as HTMLElement).style.color='var(--of-accent)';}}
+							onmouseleave={function(e){(e.currentTarget as HTMLElement).style.borderColor='var(--of-border)'; (e.currentTarget as HTMLElement).style.color='var(--of-text-2)';}}>
 							<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
 							{t.shareGenerate}
 						</button>
@@ -242,28 +242,28 @@
 	</div>
 
 	<!-- Catches with this lure -->
-<div style="background:#0b1a2c; border:1px solid #172f4a; border-radius:14px; padding:20px; margin-top:16px;">
-	<p style="font-family:'Carter One',sans-serif; font-size:1rem; color:#e0eaf8; margin:0 0 14px;">{t.navCatches}</p>
+<div style="background:var(--of-bg-surface); border:1px solid var(--of-border-subtle); border-radius:14px; padding:20px; margin-top:16px;">
+	<p style="font-family:'Carter One',sans-serif; font-size:1rem; color:var(--of-text-bright); margin:0 0 14px;">{t.navCatches}</p>
 
 	{#if lureCatches.length === 0}
-		<p style="font-size:0.875rem; color:#3d6a84; margin:0;">{t.catchNoItems}</p>
+		<p style="font-size:0.875rem; color:var(--of-text-4); margin:0;">{t.catchNoItems}</p>
 	{:else}
 		<div style="overflow-x:auto;">
 			<table style="width:100%; border-collapse:collapse; font-size:0.82rem;">
 				<thead>
-					<tr style="border-bottom:1px solid #172f4a;">
-						<th style="text-align:left; font-size:0.68rem; font-weight:500; color:#3d6a84; text-transform:uppercase; letter-spacing:0.06em; padding:0 12px 8px 0;"></th>
-						<th style="text-align:left; font-size:0.68rem; font-weight:500; color:#3d6a84; text-transform:uppercase; letter-spacing:0.06em; padding:0 12px 8px 0;">{t.catchSpeciesLabel}</th>
-						<th style="text-align:left; font-size:0.68rem; font-weight:500; color:#3d6a84; text-transform:uppercase; letter-spacing:0.06em; padding:0 12px 8px 0;">{t.catchDateLabel}</th>
-						<th style="text-align:right; font-size:0.68rem; font-weight:500; color:#3d6a84; text-transform:uppercase; letter-spacing:0.06em; padding:0 12px 8px 0;">{t.catchLengthLabel}</th>
-						<th style="text-align:right; font-size:0.68rem; font-weight:500; color:#3d6a84; text-transform:uppercase; letter-spacing:0.06em; padding:0 0 8px 0;">{t.catchWeightLabel}</th>
+					<tr style="border-bottom:1px solid var(--of-border-subtle);">
+						<th style="text-align:left; font-size:0.68rem; font-weight:500; color:var(--of-text-4); text-transform:uppercase; letter-spacing:0.06em; padding:0 12px 8px 0;"></th>
+						<th style="text-align:left; font-size:0.68rem; font-weight:500; color:var(--of-text-4); text-transform:uppercase; letter-spacing:0.06em; padding:0 12px 8px 0;">{t.catchSpeciesLabel}</th>
+						<th style="text-align:left; font-size:0.68rem; font-weight:500; color:var(--of-text-4); text-transform:uppercase; letter-spacing:0.06em; padding:0 12px 8px 0;">{t.catchDateLabel}</th>
+						<th style="text-align:right; font-size:0.68rem; font-weight:500; color:var(--of-text-4); text-transform:uppercase; letter-spacing:0.06em; padding:0 12px 8px 0;">{t.catchLengthLabel}</th>
+						<th style="text-align:right; font-size:0.68rem; font-weight:500; color:var(--of-text-4); text-transform:uppercase; letter-spacing:0.06em; padding:0 0 8px 0;">{t.catchWeightLabel}</th>
 					</tr>
 				</thead>
 				<tbody>
 					{#each lureCatches as c}
-						<tr style="border-bottom:1px solid #0f2238; cursor:pointer;"
+						<tr style="border-bottom:1px solid var(--of-bg-elevated); cursor:pointer;"
 							onclick={() => window.location.href = `/catches/${c.id}`}
-							onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='rgba(6,182,212,0.04)';}}
+							onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-accent-glow)';}}
 							onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='';}}
 						>
 							<td style="padding:8px 10px 8px 0; width:40px;">
@@ -272,17 +272,17 @@
 										<img src="/uploads/{c.photos[0].filename}" alt="" style="width:100%; height:100%; object-fit:cover;" />
 									</div>
 								{:else}
-									<div style="width:36px; height:28px; border-radius:5px; background:#0d1f35; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-										<svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="color:#1d3d5c;">
+									<div style="width:36px; height:28px; border-radius:5px; background:var(--of-bg-overlay); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+										<svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="color:var(--of-bg-hover);">
 											<path d="M2 12 C4 8 7 6 10 7 C13 8 14 11 17 11 C20 11 22 9 22 9 C22 9 21 14 18 15 C15 16 13 14 10 14 C7 14 4 16 2 12Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
 										</svg>
 									</div>
 								{/if}
 							</td>
-							<td style="padding:8px 12px 8px 0; font-weight:600; color:#c2dce8; white-space:nowrap;">{c.species ?? '—'}</td>
-							<td style="padding:8px 12px 8px 0; color:#5d8fa8; white-space:nowrap;">{formatDate(c.caughtAt)}</td>
-							<td style="padding:8px 12px 8px 0; color:#22d3ee; font-family:'JetBrains Mono',monospace; text-align:right; white-space:nowrap;">{c.lengthCm != null ? `${c.lengthCm}` : '—'}</td>
-							<td style="padding:8px 0 8px 0; color:#22d3ee; font-family:'JetBrains Mono',monospace; text-align:right; white-space:nowrap;">{c.weightG != null ? `${c.weightG}` : '—'}</td>
+							<td style="padding:8px 12px 8px 0; font-weight:600; color:var(--of-text); white-space:nowrap;">{c.species ?? '—'}</td>
+							<td style="padding:8px 12px 8px 0; color:var(--of-text-3); white-space:nowrap;">{formatDate(c.caughtAt)}</td>
+							<td style="padding:8px 12px 8px 0; color:var(--of-accent); font-family:'JetBrains Mono',monospace; text-align:right; white-space:nowrap;">{c.lengthCm != null ? `${c.lengthCm}` : '—'}</td>
+							<td style="padding:8px 0 8px 0; color:var(--of-accent); font-family:'JetBrains Mono',monospace; text-align:right; white-space:nowrap;">{c.weightG != null ? `${c.weightG}` : '—'}</td>
 						</tr>
 					{/each}
 				</tbody>

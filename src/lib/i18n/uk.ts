@@ -1,4 +1,4 @@
-export default {
+﻿export default {
 	// Header
 	navLures: 'Приманки',
 	add: 'Додати',
@@ -359,4 +359,32 @@ export default {
 	catchExportFrom: 'Від',
 	catchExportTo: 'До',
 	catchExportBtn: 'Завантажити CSV',
+
+	// Appearance settings
+	navAppearance: 'Вигляд',
+	settingsAppearance: 'Вигляд',
+	appearanceTitle: 'Вигляд',
+	appearanceColorMode: 'Колірний режим',
+	appearanceModeDark: 'Темний',
+	appearanceModeLight: 'Світлий',
+	appearanceModeSystem: 'Система',
+	appearanceSaved: 'Збережено',
+	appearanceTheme: 'Тема',
+	appearanceThemeOcean: 'Ocean',
+
+	// Резервна копія та відновлення
+	backupSchemaHash: 'Хеш схеми',
+	backupExportTitle: 'Експортувати резервну копію',
+	backupExportDesc: 'Завантажує всі приманки, місця, улови та фото у вигляді ZIP-архіву.',
+	backupExportBtn: 'Експортувати',
+	backupImportTitle: 'Імпортувати резервну копію',
+	backupImportDesc: 'Замінює всі наявні дані та фото вмістом резервної копії. Версія схеми автоматично перевіряється перед будь-якими змінами.',
+	backupImportSuccess: 'Імпорт успішний — відновлено {lures} приманок, {spots} місць, {catches} уловів.',
+	backupChooseFile: 'Вибрати файл',
+	backupNoFile: 'Файл не вибрано',
+	backupConfirmBefore: 'Я розумію, що це',
+	backupConfirmBold: 'назавжди замінить усі поточні дані',
+	backupConfirmAfter: 'вмістом цієї резервної копії. Це неможливо скасувати.',
+	backupImporting: 'Імпортування…',
+	backupImportBtn: 'Імпортувати та замінити',
 } as const;
