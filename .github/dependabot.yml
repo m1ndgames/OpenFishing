@@ -4,8 +4,34 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    commit-message:
+      prefix: "fix"
+      prefix-development: "fix"
+    groups:
+      svelte:
+        patterns: ["@sveltejs/*", "svelte", "svelte-check"]
+      tailwind:
+        patterns: ["tailwindcss", "@tailwindcss/*"]
+      drizzle:
+        patterns: ["drizzle-*"]
+      vite:
+        patterns: ["vite", "@vitejs/*"]
+      types:
+        patterns: ["@types/*"]
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "fix"
+    groups:
+      actions:
+        patterns: ["*"]
+
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
       interval: "weekly"
-      
+    commit-message:
+      prefix: "fix"
