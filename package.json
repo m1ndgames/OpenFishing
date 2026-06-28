@@ -44,6 +44,6 @@
 		"marked": "^18.0.5",
 		"qrcode": "^1.5.4",
 		"sharp": "^0.35.2",
-		"swagger-ui-dist": "^5.32.6"
+		"swagger-ui-dist": "^5.32.8"
 	}
 }
