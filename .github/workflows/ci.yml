@@ -31,6 +31,8 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          DATABASE_URL: /tmp/ci.db
 
       - name: Security audit
         run: npm audit --audit-level=high
