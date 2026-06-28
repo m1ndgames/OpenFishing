@@ -101,18 +101,19 @@ test.describe('Add new lure', () => {
 
 	test('creates a lure and redirects to detail page', async ({ page }) => {
 		await page.goto('/lures/new');
+		await page.waitForLoadState('networkidle');
 		await page.getByLabel(/name/i).fill('E2E Test Lure');
 		await page.getByLabel(/brand/i).fill('TestBrand');
 		// Upload photo via the hidden file input (triggers CropModal)
 		await page.locator('input[type="file"][accept="image/*"]:not([capture]):not([name])').setInputFiles('e2e/fixtures/test-photo.jpg');
-		// Wait for CropperJS to fully initialize (canvas overlay appears)
-		await page.waitForSelector('.cropper-canvas', { state: 'visible', timeout: 10000 });
+		// Wait for CropperJS to fully initialize — image must load first, so allow extra time in CI
+		await page.waitForSelector('.cropper-canvas', { state: 'visible', timeout: 30000 });
 		// Confirm crop
 		await page.getByRole('button', { name: 'Apply' }).click();
 		// Wait for photo preview then save
-		await expect(page.locator('img[alt="Preview"]')).toBeVisible({ timeout: 10000 });
+		await expect(page.locator('img[alt="Preview"]')).toBeVisible({ timeout: 15000 });
 		await page.getByRole('button', { name: 'Save Lure' }).click();
-		await expect(page).toHaveURL(/\/lures\//, { timeout: 10000 });
+		await expect(page).toHaveURL(/\/lures\//, { timeout: 15000 });
 		await expect(page.getByText('E2E Test Lure')).toBeVisible();
 	});
 });
