@@ -370,7 +370,6 @@
 	appearanceModeSystem: 'Sistema',
 	appearanceSaved: 'Salvato',
 	appearanceTheme: 'Tema',
-	appearanceThemeOcean: 'Ocean',
 
 	// Backup e ripristino
 	backupSchemaHash: 'Hash schema',
