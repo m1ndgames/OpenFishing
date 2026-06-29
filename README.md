@@ -9,36 +9,6 @@
 
 A self-hosted web app to organize your fishing lures, mark fishing spots, and log your catches.
 
-## Screenshots
-
-### Lures
-
-![Lure Overview](screenshots/lure-overview.png)
-
-![Add Lure](screenshots/lure-add.png)
-
-### Spots
-
-![Spot Overview](screenshots/spot-overview.png)
-
-![Add Spot](screenshots/spot-add.png)
-
-### Catches
-
-![Catch Overview](screenshots/catch-overview.png)
-
-![Log Catch](screenshots/catch-add.png)
-
-### Stats
-
-![Stats](screenshots/stats.png)
-
-### Tackle
-
-![Tackle Overview](screenshots/tackle-overview.png)
-
-![Reel Detail](screenshots/tackle-reel.png)
-
 ---
 
 ## Features

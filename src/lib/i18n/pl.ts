@@ -370,7 +370,6 @@
 	appearanceModeSystem: 'System',
 	appearanceSaved: 'Zapisano',
 	appearanceTheme: 'Motyw',
-	appearanceThemeOcean: 'Ocean',
 
 	// Kopia zapasowa i przywracanie
 	backupSchemaHash: 'Hash schematu',

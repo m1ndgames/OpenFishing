@@ -370,7 +370,6 @@ export default {
 	appearanceModeSystem: 'System',
 	appearanceSaved: 'Saved',
 	appearanceTheme: 'Theme',
-	appearanceThemeOcean: 'Ocean',
 
 	// Backup & Restore
 	backupSchemaHash: 'Schema hash',

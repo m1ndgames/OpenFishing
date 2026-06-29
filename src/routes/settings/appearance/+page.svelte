@@ -17,9 +17,6 @@
 		saveTimer = setTimeout(() => { saved = false; }, 2000);
 	}
 
-	function themeLabel(theme: typeof THEMES[number]): string {
-		return (t as Record<string, unknown>)[theme.labelKey] as string ?? theme.id;
-	}
 </script>
 
 <div style="display:flex; flex-direction:column; gap:16px;">
@@ -27,8 +24,7 @@
 	<!-- Color mode -->
 	<section style="background:var(--of-bg-surface); border:1px solid var(--of-border-subtle); border-radius:16px; overflow:hidden;">
 		<div style="padding:20px;">
-			<p style="font-weight:600; color:var(--of-text); margin:0 0 4px; font-size:0.925rem;">{t.appearanceColorMode}</p>
-			<p style="font-size:0.8rem; color:var(--of-text-4); margin:0 0 16px;">{t.appearanceModeDark} · {t.appearanceModeLight} · {t.appearanceModeSystem}</p>
+			<p style="font-weight:600; color:var(--of-text); margin:0 0 16px; font-size:0.925rem;">{t.appearanceColorMode}</p>
 
 			<form
 				method="POST"
@@ -85,10 +81,10 @@
 					};
 				}}
 			>
-				<div style="display:flex; gap:12px; flex-wrap:wrap;">
+				<div style="display:flex; gap:8px; flex-wrap:wrap;">
 					{#each THEMES as theme}
 						{@const active = selectedTheme === theme.id}
-						<label style="cursor:pointer;">
+						<label style="cursor:pointer; flex:1 1 100px; min-width:100px; max-width:160px; display:flex;">
 							<input
 								type="radio"
 								name="themeName"
@@ -98,7 +94,7 @@
 								onchange={(e) => (e.currentTarget as HTMLInputElement).form?.requestSubmit()}
 							/>
 							<div style="
-								width:120px; border-radius:12px; overflow:hidden;
+								flex:1 1 100px; min-width:100px; max-width:160px; border-radius:12px; overflow:hidden;
 								border:2px solid {active ? 'var(--of-accent-border)' : 'var(--of-border)'};
 								background:{active ? 'var(--of-accent-bg-hover)' : 'var(--of-bg-elevated)'};
 								transition:all 0.15s;
@@ -111,7 +107,7 @@
 								</div>
 								<!-- Label -->
 								<div style="padding:8px 10px;">
-									<p style="margin:0; font-size:0.8rem; font-weight:600; color:{active ? 'var(--of-accent)' : 'var(--of-text-2)'}; font-family:'DM Sans',sans-serif;">{themeLabel(theme)}</p>
+									<p style="margin:0; font-size:0.8rem; font-weight:600; color:{active ? 'var(--of-accent)' : 'var(--of-text-2)'}; font-family:'DM Sans',sans-serif;">{theme.label}</p>
 								</div>
 							</div>
 						</label>

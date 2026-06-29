@@ -370,7 +370,6 @@
 	appearanceModeSystem: 'Система',
 	appearanceSaved: 'Збережено',
 	appearanceTheme: 'Тема',
-	appearanceThemeOcean: 'Ocean',
 
 	// Резервна копія та відновлення
 	backupSchemaHash: 'Хеш схеми',
