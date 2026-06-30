@@ -21,8 +21,9 @@ const mockSelect = vi.fn();
 function makeChain(result: any = []) {
 	const self: any = {
 		from: vi.fn(() => self),
-		where: vi.fn(() => Promise.resolve(result)),
+		where: vi.fn(() => self),
 		orderBy: vi.fn(() => self),
+		limit: vi.fn(() => self),
 		then: (fn: any, rej: any) => Promise.resolve(result).then(fn, rej),
 		catch: (fn: any) => Promise.resolve(result).catch(fn),
 	};

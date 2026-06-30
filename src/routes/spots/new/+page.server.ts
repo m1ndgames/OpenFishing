@@ -2,14 +2,15 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
 import { spot, spotTag, spotPhoto } from '$lib/server/db/schema';
-import { saveUpload } from '$lib/server/uploads';
+import { saveUpload, deleteUpload, QuotaExceededError } from '$lib/server/uploads';
+import { ownerId } from '$lib/server/scope';
 
 export const load: PageServerLoad = async () => {
 	return {};
 };
 
 export const actions: Actions = {
-	default: async ({ request }) => {
+	default: async ({ request, locals }) => {
 		const data = await request.formData();
 
 		const name = (data.get('name') as string)?.trim() || 'Untitled Spot';
@@ -23,7 +24,21 @@ export const actions: Actions = {
 		const lng = parseFloat(lngRaw);
 		if (isNaN(lat) || isNaN(lng)) return fail(400, { error: 'locationRequired' });
 
-		const [newSpot] = await db.insert(spot).values({ name, lat, lng, notes }).returning();
+		// Save photos first so a quota failure never leaves an orphaned spot.
+		const photoFiles = data.getAll('photos') as File[];
+		const validPhotos = photoFiles.filter((f) => f && f.size > 0);
+		const filenames: string[] = [];
+		try {
+			for (const f of validPhotos) filenames.push(await saveUpload(f, locals?.user));
+		} catch (e) {
+			if (e instanceof QuotaExceededError) {
+				await Promise.all(filenames.map((fn) => deleteUpload(fn)));
+				return fail(413, { error: 'quotaExceeded' });
+			}
+			throw e;
+		}
+
+		const [newSpot] = await db.insert(spot).values({ userId: ownerId(locals), name, lat, lng, notes }).returning();
 
 		if (tagsRaw) {
 			const tagNames = tagsRaw.split(/\s+/).filter(Boolean);
@@ -32,10 +47,7 @@ export const actions: Actions = {
 			}
 		}
 
-		const photoFiles = data.getAll('photos') as File[];
-		const validPhotos = photoFiles.filter((f) => f && f.size > 0);
-		if (validPhotos.length > 0) {
-			const filenames = await Promise.all(validPhotos.map((f) => saveUpload(f)));
+		if (filenames.length > 0) {
 			await db.insert(spotPhoto).values(
 				filenames.map((filename, i) => ({ spotId: newSpot.id, filename, sortOrder: i }))
 			);

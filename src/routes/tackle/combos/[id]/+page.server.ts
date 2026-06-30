@@ -2,11 +2,12 @@ import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
 import { combo, reelLineLog } from '$lib/server/db/schema';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, and } from 'drizzle-orm';
+import { userFilter } from '$lib/server/scope';
 
-export const load: PageServerLoad = async ({ params }) => {
+export const load: PageServerLoad = async ({ params, locals }) => {
 	const found = await db.query.combo.findFirst({
-		where: eq(combo.id, params.id),
+		where: and(eq(combo.id, params.id), userFilter(locals, combo.userId)),
 		with: { rod: true, reel: true }
 	});
 	if (!found) error(404, 'Combo not found');

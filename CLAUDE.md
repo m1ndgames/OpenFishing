@@ -6,7 +6,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **OpenFishing** is a self-hosted SvelteKit + SQLite web app for organizing fishing lures, marking fishing spots, and logging catches.
 
-Optional built-in password auth via `AUTH_PASSWORD` env var. If unset, the app is fully open. When set, `src/hooks.server.ts` intercepts every request and redirects to `/login` if the `of_session` cookie is missing or invalid. The session token is an HMAC-SHA256 of the password — no DB storage, no server-side state. Changing the password invalidates all sessions immediately.
+Optional multi-user auth via `AUTH_PASSWORD` env var. If unset, the app is fully open and single-tenant (no login, no data scoping — exactly as before multi-user). When set, the app becomes multi-user: every request is gated by `src/hooks.server.ts`, and all data (lures/spots/catches/tackle) is isolated per user via a nullable `userId` FK on the owned tables.
+
+- **Login**: users sign in with **email or username + password** (`/login`). Passwords are scrypt-hashed (`src/lib/server/auth.ts`, no new deps). The session cookie `of_session` is a stateless value `"<userId>.<hmac>"` where the HMAC is keyed on `AUTH_PASSWORD` and bound to the user's password hash — so changing a password or `AUTH_PASSWORD` invalidates sessions. `resolveSessionUser()` validates it and loads the user each request; `event.locals.user` carries the `SessionUser` (or `null` in open mode).
+- **Admin**: the admin account is auto-provisioned on startup by `ensureAdminUser()` from env — username `admin`, email `ADMIN_EMAIL` (default `admin@openfishing.local`), password `AUTH_PASSWORD`, re-synced every boot so it can't lock itself out. On first provisioning it claims all orphan (`userId IS NULL`) rows for the admin. Admin-only backend at `/admin` (gated in the hook) manages users: create/edit/delete, set storage quota, reset password, enable/disable, toggle chatbot access, regenerate API token.
+- **Account**: `/account` lets a user change their own email/username/password, and view/copy their API token and storage usage. The admin's identity is env-controlled (read-only here).
+- **Data scoping**: server loads/actions filter by `userFilter(locals, table.userId)` and stamp `ownerId(locals)` on inserts (`src/lib/server/scope.ts`). Both are null-safe: in open mode (`AUTH_PASSWORD` unset, `locals.user` null) they apply no filter and stamp `null`, preserving single-tenant behaviour. Detail/edit reads verify ownership (404 otherwise). `/share/*` lookups stay owner-independent (by token).
+- **REST API**: `/api/v1/*` authenticates with a **per-user** `Authorization: Bearer <user.apiToken>` and returns only that user's data.
+- **Quotas**: per-user total upload storage (`user.quotaBytes`, MB; null = unlimited). `saveUpload(file, owner)` processes to a buffer, enforces the quota before writing, and tracks `user.usedBytes`; `deleteUpload(file, owner)` reclaims it.
+- **Appearance**: color mode + theme are per-user (`userSetting` table, composite PK `(userId, key)`) when logged in, falling back to the global `appSetting` in open mode.
+- **Chatbot**: per-user `user.chatbotEnabled` flag gates the widget and `/api/chat` (only meaningful when the global `CHATBOT` env is on).
+
+The legacy single-shared-password model (HMAC of `'openfishing-session'`) has been replaced by the above.
 
 Share links allow individual lures, spots, and catches to be shared publicly even when auth is enabled. A `shareToken` UUID column on each entity controls access. The `/share/*` and `/uploads/*` paths are always bypassed by the auth hook. Share management UI (create/copy/revoke) is shown on detail pages only when `AUTH_PASSWORD` is set.
 
@@ -133,11 +144,18 @@ Tests live in `e2e/*.test.ts`. Config: `playwright.config.ts`.
 | `/share/lures/[token]` | Public read-only lure view (no auth required) |
 | `/share/spots/[token]` | Public read-only spot view (no auth required) |
 | `/share/catches/[token]` | Public read-only catch view (no auth required) |
-| `/login` | Password login page (only shown when `AUTH_PASSWORD` is set) |
+| `/login` | Email/username + password login (only when `AUTH_PASSWORD` is set) |
+| `/logout` | POST action — clears the session cookie and redirects to `/login` |
+| `/account` | Self-service: change own email/username/password, view API token + storage usage |
+| `/admin` | Admin-only user management (create/edit/delete users, quotas, password reset, enable/disable, chatbot toggle, API token) + full backup/restore-all |
+| `/admin/export` | GET — admin-only ZIP of **all** users + all their data (full-instance backup) |
 
 ### Data model
 
-- `lure` — id (UUID), lureNumber (sequential int), name, brand, type, color, weight, size, notes, photoPath, species, runningDepth, waterType, lightConditions (integer 0–10), amount (integer, default 1), favourite (boolean), qrCoded (boolean), lost (boolean), shareToken (nullable UUID), createdAt, updatedAt
+- `user` — id (UUID), email (unique, lowercased), username (unique), passwordHash (scrypt `salt:hash`), isAdmin (boolean), disabled (boolean), quotaBytes (nullable int = unlimited), usedBytes (int), chatbotEnabled (boolean, default true), apiToken (nullable unique), createdAt, updatedAt
+- `userSetting` — composite PK (userId FK → user cascade, key); value. Per-user prefs (colorMode/themeName) when logged in
+- The **owned** tables (`lure`, `spot`, `fishCatch`, `rod`, `reel`, `fishingLine`, `combo`, `chatMessage`) each carry a nullable `userId` (FK → user). Child tables (`tag`, `spotTag`, `spotPhoto`, `catchPhoto`, `reelLineLog`) inherit ownership through their parent FK. NOTE: the `userId` FK does **not** cascade on user delete (SQLite ALTER-ADD limitation) — `/admin` deletes a user's owned rows explicitly, then the user row (which cascades `userSetting`/`chatMessage`).
+- `lure` — id (UUID), userId (nullable FK), lureNumber (sequential int, per-user), name, brand, type, color, weight, size, notes, photoPath, species, runningDepth, waterType, lightConditions (integer 0–10), amount (integer, default 1), favourite (boolean), qrCoded (boolean), lost (boolean), shareToken (nullable UUID), createdAt, updatedAt
 - `tag` — id, lureId (FK → lure, cascade delete), name
 - `spot` — id (UUID), name, lat, lng, notes, shareToken (nullable UUID), createdAt, updatedAt
 - `spotTag` — id, spotId (FK → spot, cascade delete), name
@@ -182,6 +200,14 @@ The language switcher is a `<select>` with flag emoji options, posting to `/api/
 Translations live in `src/lib/i18n/{en,de,fr,es,it,nl,pl,pt,uk}.ts` (9 files). The layout server (`src/routes/+layout.server.ts`) reads the `lang` cookie (falling back to `Accept-Language` header) and returns `{ t, lang }`, which SvelteKit merges into every page's `data` prop automatically.
 
 When adding new UI strings, add keys to **all 9 language files**. The server-side AI endpoints (`/api/chat`, `/api/identify-fish`, `/api/identify-lure`) also read the `lang` cookie and inject a language instruction into their prompts so AI responses are in the user's language.
+
+### Backup & restore
+
+Shared logic lives in `src/lib/server/backup.ts` (`buildBackup`, `packBackupZip`, `parseBackupZip`, `restoreUserBackup`, `restoreAllBackup`). The backup format is a ZIP with `backup.json` (+ `uploads/` photos). `meta.scope` is `'user'` or `'all'`; `parseBackupZip` rejects a mismatched scope. Restore uses drizzle inserts inside a `client.transaction`, reviving ISO date strings back to `Date`. The format now covers **all** entities including tackle (rods/reels/lines/combos/reelLineLog) with full column fidelity.
+
+- **Per-user** (`/settings`, `/api/settings/export`): a user backs up / restores **only their own** data (`buildBackup('user', ownerId(locals))`; restore deletes + re-inserts only `userId`'s rows). In open mode (`AUTH_PASSWORD` unset) this is the whole DB. Admin's normal backup/restore is identical — admin is just a user.
+- **Admin all** (`/admin/export` GET + `/admin` `restoreAll` action): `buildBackup('all', null)` dumps every user's data **plus the `user` accounts**. `restoreAllBackup` does a **full wipe + rebuild** (all owned tables + users), then `reprovisionAdmin()` re-syncs the env admin so login with `AUTH_PASSWORD` always works afterward. Restoring across scopes is rejected (a personal backup can't be used in restore-all and vice-versa).
+- The legacy single-tenant import (raw `client.prepare` INSERTs, lures/spots/catches only) was replaced by the above; the old format dropped tackle and several lure/catch columns on restore — the new path is full-fidelity.
 
 ### File uploads
 
@@ -308,7 +334,8 @@ Drizzle migrations run automatically on startup in production (`NODE_ENV=product
 | `DATABASE_URL` | `local.db` | Path to SQLite file |
 | `UPLOAD_PATH` | `./uploads` | Directory for lure/spot/catch photos |
 | `BASE_URL` | `http://localhost:5173` | Public base URL — used to generate QR code links |
-| `AUTH_PASSWORD` | _(unset)_ | If set, enables password login. Leave unset for open access. |
+| `AUTH_PASSWORD` | _(unset)_ | If set, enables multi-user login and seeds the admin account's password (re-synced every startup). Leave unset for fully open, single-tenant access. |
+| `ADMIN_EMAIL` | `admin@openfishing.local` | The admin account's login email. Admin logs in with username `admin` or this email + `AUTH_PASSWORD`. |
 | `DEMO_MODE` | _(unset)_ | If set to any value, enables read-only demo mode. All writes are blocked server-side; the UI shows a banner and a toast on submit attempts. Language switching still works. |
 | `CHATBOT` | _(unset)_ | If set to any truthy value, enables the AI chatbot widget. Requires `LITELLM_URL` and `LITELLM_MODEL`. |
 | `LITELLM_URL` | _(unset)_ | Base URL of the LiteLLM proxy (e.g. `http://litellm:4000`). |

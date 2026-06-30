@@ -91,7 +91,7 @@ describe('settings/qr load', () => {
 	});
 
 	it('returns empty items when no unlabeled lures', async () => {
-		const result = await qrLoad();
+		const result = await qrLoad({ locals: { user: null } } as any);
 		expect(result.items).toEqual([]);
 	});
 
@@ -99,7 +99,7 @@ describe('settings/qr load', () => {
 		mockLureFindMany.mockResolvedValue([
 			{ id: 'l1', lureNumber: 1, name: 'Spinner', brand: 'Rapala', color: 'Gold' }
 		]);
-		const result = await qrLoad();
+		const result = await qrLoad({ locals: { user: null } } as any);
 		expect(result.items).toHaveLength(1);
 		expect(result.items[0].qrSvg).toBe('<svg>qr</svg>');
 		expect(result.items[0].id).toBe('l1');
@@ -110,7 +110,7 @@ describe('settings/qr load', () => {
 		mockLureFindMany.mockResolvedValue([
 			{ id: 'l1', lureNumber: 1, name: 'Spinner', brand: null, color: null }
 		]);
-		const result = await qrLoad();
+		const result = await qrLoad({ locals: { user: null } } as any);
 		expect(result.items).toHaveLength(1);
 	});
 });
@@ -145,7 +145,7 @@ describe('settings load', () => {
 	});
 
 	it('returns entity counts and schema hash', async () => {
-		const result = await settingsLoad();
+		const result = await settingsLoad({ locals: { user: null } } as any);
 		expect(result.lureCount).toBe(5);
 		expect(result.spotCount).toBe(3);
 		expect(result.catchCount).toBe(2);
@@ -158,7 +158,7 @@ describe('settings load', () => {
 describe('settings/appearance load', () => {
 	it('returns defaults when no settings in DB', async () => {
 		mockSelect.mockReturnValue(makeSelectChain([]));
-		const result = await appearanceLoad();
+		const result = await appearanceLoad({ locals: { user: null } } as any);
 		expect(result.colorMode).toBe('dark');
 		expect(result.themeName).toBe('ocean');
 	});
@@ -168,7 +168,7 @@ describe('settings/appearance load', () => {
 			{ key: 'colorMode', value: 'light' },
 			{ key: 'themeName', value: 'ocean' },
 		]));
-		const result = await appearanceLoad();
+		const result = await appearanceLoad({ locals: { user: null } } as any);
 		expect(result.colorMode).toBe('light');
 		expect(result.themeName).toBe('ocean');
 	});

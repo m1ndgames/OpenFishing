@@ -81,7 +81,7 @@
 
 				{#if form?.error}
 					<div style="background:var(--of-danger-bg); border:1px solid var(--of-danger-border); color:var(--of-danger); font-size:0.82rem; padding:10px 14px; border-radius:9px; margin-bottom:12px; line-height:1.5;">
-						{form.error}
+						{(t as unknown as Record<string,string>)[form.error] ?? form.error}
 					</div>
 				{/if}
 

@@ -1,35 +1,40 @@
 import { fail, redirect } from '@sveltejs/kit';
-import { createHmac } from 'node:crypto';
 import { env } from '$env/dynamic/private';
 import type { Actions, PageServerLoad } from './$types';
-
-function sessionToken(password: string): string {
-	return createHmac('sha256', password).update('openfishing-session').digest('hex');
-}
+import {
+	SESSION_COOKIE_NAME,
+	ensureAdminUser,
+	findUserByIdentifier,
+	resolveSessionUser,
+	sessionCookieValue,
+	verifyPassword
+} from '$lib/server/auth';
 
 export const load: PageServerLoad = async ({ cookies }) => {
-	const password = env.AUTH_PASSWORD;
-	if (!password) redirect(303, '/');
+	if (!env.AUTH_PASSWORD) redirect(303, '/');
 
-	const token = cookies.get('of_session');
-	if (token === sessionToken(password)) redirect(303, '/');
+	await ensureAdminUser();
+	const current = await resolveSessionUser(cookies.get(SESSION_COOKIE_NAME));
+	if (current) redirect(303, '/');
 
 	return {};
 };
 
 export const actions: Actions = {
 	default: async ({ request, cookies }) => {
-		const password = env.AUTH_PASSWORD;
-		if (!password) redirect(303, '/');
+		if (!env.AUTH_PASSWORD) redirect(303, '/');
+		await ensureAdminUser();
 
 		const data = await request.formData();
+		const identifier = (data.get('identifier') as string) ?? '';
 		const submitted = (data.get('password') as string) ?? '';
 
-		if (submitted !== password) {
+		const account = await findUserByIdentifier(identifier);
+		if (!account || account.disabled || !(await verifyPassword(submitted, account.passwordHash))) {
 			return fail(401, { error: true });
 		}
 
-		cookies.set('of_session', sessionToken(password), {
+		cookies.set(SESSION_COOKIE_NAME, sessionCookieValue(account), {
 			path: '/',
 			httpOnly: true,
 			sameSite: 'strict',

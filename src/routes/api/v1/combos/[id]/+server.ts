@@ -1,17 +1,18 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, and } from 'drizzle-orm';
 import { combo, reelLineLog } from '$lib/server/db/schema';
+import { userFilter } from '$lib/server/scope';
 
-export const GET: RequestHandler = async ({ params }) => {
+export const GET: RequestHandler = async ({ params, locals }) => {
 	const found = await db.query.combo.findFirst({
-		where: eq(combo.id, params.id),
+		where: and(eq(combo.id, params.id), userFilter(locals, combo.userId)),
 		with: { rod: true, reel: true }
 	});
 	if (!found) error(404, 'Combo not found');
 
-	const { rod: r, reel: re, ...c } = found;
+	const { rod: r, reel: re, userId: _u, ...c } = found;
 
 	const latest = re ? await db.query.reelLineLog.findFirst({
 		where: eq(reelLineLog.reelId, re.id),

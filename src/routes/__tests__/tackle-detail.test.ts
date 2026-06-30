@@ -416,7 +416,7 @@ describe('tackle/combos/new', () => {
 	});
 
 	it('load returns available rods and reels', async () => {
-		const result = await comboNewLoad();
+		const result = await comboNewLoad({ locals: { user: null } } as any);
 		expect(result.rods).toEqual([]);
 		expect(result.reels).toEqual([]);
 	});

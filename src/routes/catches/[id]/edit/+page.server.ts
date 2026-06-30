@@ -2,28 +2,29 @@ import { error, fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
 import { fishCatch, catchPhoto, lure, combo } from '$lib/server/db/schema';
-import { eq, asc } from 'drizzle-orm';
-import { saveUpload, deleteUpload } from '$lib/server/uploads';
+import { eq, asc, and } from 'drizzle-orm';
+import { saveUpload, deleteUpload, QuotaExceededError } from '$lib/server/uploads';
+import { userFilter } from '$lib/server/scope';
 
-export const load: PageServerLoad = async ({ params }) => {
+export const load: PageServerLoad = async ({ params, locals }) => {
 	const [found, lures, combos] = await Promise.all([
 		db.query.fishCatch.findFirst({
-			where: eq(fishCatch.id, params.id),
+			where: and(eq(fishCatch.id, params.id), userFilter(locals, fishCatch.userId)),
 			with: {
 				photos: { orderBy: [asc(catchPhoto.sortOrder)] },
 				lure: true,
 				combo: true
 			}
 		}),
-		db.select({ id: lure.id, lureNumber: lure.lureNumber, name: lure.name }).from(lure).orderBy(asc(lure.lureNumber)),
-		db.query.combo.findMany({ orderBy: [asc(combo.name)], with: { rod: true, reel: true } })
+		db.select({ id: lure.id, lureNumber: lure.lureNumber, name: lure.name }).from(lure).where(userFilter(locals, lure.userId)).orderBy(asc(lure.lureNumber)),
+		db.query.combo.findMany({ where: userFilter(locals, combo.userId), orderBy: [asc(combo.name)], with: { rod: true, reel: true } })
 	]);
 	if (!found) error(404, 'Catch not found');
 	return { catch: found, lures, combos };
 };
 
 export const actions: Actions = {
-	update: async ({ request, params }) => {
+	update: async ({ request, params, locals }) => {
 		const data = await request.formData();
 
 		const caughtAtRaw = (data.get('caught_at') as string)?.trim();
@@ -48,7 +49,7 @@ export const actions: Actions = {
 		if (lat === null || lng === null || isNaN(lat) || isNaN(lng)) return fail(400, { error: 'locationRequired' });
 
 		const existing = await db.query.fishCatch.findFirst({
-			where: eq(fishCatch.id, params.id),
+			where: and(eq(fishCatch.id, params.id), userFilter(locals, fishCatch.userId)),
 			with: { photos: true }
 		});
 		if (!existing) error(404);
@@ -70,7 +71,16 @@ export const actions: Actions = {
 				orderBy: [asc(catchPhoto.sortOrder)]
 			});
 			const nextOrder = remaining.length > 0 ? Math.max(...remaining.map((p) => p.sortOrder)) + 1 : 0;
-			const filenames = await Promise.all(validPhotos.map((f) => saveUpload(f)));
+			const filenames: string[] = [];
+			try {
+				for (const f of validPhotos) filenames.push(await saveUpload(f, locals?.user));
+			} catch (e) {
+				if (e instanceof QuotaExceededError) {
+					await Promise.all(filenames.map((fn) => deleteUpload(fn)));
+					return fail(413, { error: 'quotaExceeded' });
+				}
+				throw e;
+			}
 			await db.insert(catchPhoto).values(
 				filenames.map((filename, i) => ({ catchId: params.id, filename, sortOrder: nextOrder + i }))
 			);
@@ -79,19 +89,19 @@ export const actions: Actions = {
 		await db
 			.update(fishCatch)
 			.set({ caughtAt, species, weightG, lengthCm, lat, lng, notes, lureId, comboId, catchAndRelease, presentation, updatedAt: new Date() })
-			.where(eq(fishCatch.id, params.id));
+			.where(and(eq(fishCatch.id, params.id), userFilter(locals, fishCatch.userId)));
 
 		redirect(303, `/catches/${params.id}`);
 	},
 
-	delete: async ({ params }) => {
+	delete: async ({ params, locals }) => {
 		const found = await db.query.fishCatch.findFirst({
-			where: eq(fishCatch.id, params.id),
+			where: and(eq(fishCatch.id, params.id), userFilter(locals, fishCatch.userId)),
 			with: { photos: true }
 		});
 		if (found) {
 			for (const ph of found.photos) await deleteUpload(ph.filename);
-			await db.delete(fishCatch).where(eq(fishCatch.id, params.id));
+			await db.delete(fishCatch).where(and(eq(fishCatch.id, params.id), userFilter(locals, fishCatch.userId)));
 		}
 		redirect(303, '/catches');
 	}

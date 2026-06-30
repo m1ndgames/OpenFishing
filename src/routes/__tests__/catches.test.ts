@@ -25,8 +25,7 @@ const mockInsert = vi.fn();
 
 function makeChain(result: any = undefined) {
 	const self: any = {};
-	['from', 'set', 'orderBy'].forEach(k => { self[k] = vi.fn(() => self); });
-	self.where = vi.fn(() => Promise.resolve(result ?? []));
+	['from', 'set', 'orderBy', 'where', 'limit'].forEach(k => { self[k] = vi.fn(() => self); });
 	self.values = vi.fn(() => ({
 		returning: vi.fn(() => Promise.resolve(Array.isArray(result) ? result : [result])),
 		then: (fn: any, rej: any) => Promise.resolve(undefined).then(fn, rej),
@@ -190,7 +189,7 @@ describe('catches/new load', () => {
 	});
 
 	it('returns lures and combos', async () => {
-		const result = await newLoad();
+		const result = await newLoad({ locals: { user: null } } as any);
 		expect(result.lures).toEqual([]);
 		expect(result.combos).toEqual([]);
 	});

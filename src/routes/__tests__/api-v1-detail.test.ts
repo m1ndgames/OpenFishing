@@ -198,14 +198,14 @@ describe('lures overview / load', () => {
 	});
 
 	it('returns lures and lureIdsWithCatches', async () => {
-		const result = await luresOverviewLoad();
+		const result = await luresOverviewLoad({ locals: { user: null } } as any);
 		expect(result.lures).toEqual([]);
 		expect(result.lureIdsWithCatches).toEqual([]);
 	});
 
 	it('builds lureIdsWithCatches set from catch rows', async () => {
 		mockSelectDistinct.mockImplementation(() => makeChain([{ lureId: 'l1' }, { lureId: 'l2' }]));
-		const result = await luresOverviewLoad();
+		const result = await luresOverviewLoad({ locals: { user: null } } as any);
 		expect(result.lureIdsWithCatches).toContain('l1');
 		expect(result.lureIdsWithCatches).toContain('l2');
 	});
@@ -217,7 +217,7 @@ describe('catches list / load', () => {
 	});
 
 	it('returns catches array', async () => {
-		const result = await catchesLoad();
+		const result = await catchesLoad({ locals: { user: null } } as any);
 		expect(result.catches).toEqual([]);
 	});
 });

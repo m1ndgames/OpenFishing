@@ -1,13 +1,14 @@
 import type { PageServerLoad, Actions } from './$types';
 import { db } from '$lib/server/db';
 import { lure } from '$lib/server/db/schema';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import QRCode from 'qrcode';
 import { env } from '$env/dynamic/private';
+import { userFilter } from '$lib/server/scope';
 
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async ({ locals }) => {
 	const unlabeled = await db.query.lure.findMany({
-		where: eq(lure.qrCoded, false),
+		where: and(eq(lure.qrCoded, false), userFilter(locals, lure.userId)),
 		orderBy: (lure, { asc }) => [asc(lure.lureNumber)]
 	});
 
@@ -29,11 +30,11 @@ export const load: PageServerLoad = async () => {
 };
 
 export const actions: Actions = {
-	markLabeled: async ({ request }) => {
+	markLabeled: async ({ request, locals }) => {
 		const data = await request.formData();
 		const id = data.get('id') as string;
 		if (id) {
-			await db.update(lure).set({ qrCoded: true }).where(eq(lure.id, id));
+			await db.update(lure).set({ qrCoded: true }).where(and(eq(lure.id, id), userFilter(locals, lure.userId)));
 		}
 		return { success: true };
 	}

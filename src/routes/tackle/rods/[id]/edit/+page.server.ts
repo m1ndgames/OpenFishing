@@ -2,16 +2,17 @@ import { error, fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
 import { rod } from '$lib/server/db/schema';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
+import { userFilter } from '$lib/server/scope';
 
-export const load: PageServerLoad = async ({ params }) => {
-	const found = await db.select().from(rod).where(eq(rod.id, params.id)).limit(1);
+export const load: PageServerLoad = async ({ params, locals }) => {
+	const found = await db.select().from(rod).where(and(eq(rod.id, params.id), userFilter(locals, rod.userId))).limit(1);
 	if (!found[0]) error(404, 'Rod not found');
 	return { rod: found[0] };
 };
 
 export const actions: Actions = {
-	update: async ({ request, params }) => {
+	update: async ({ request, params, locals }) => {
 		const data = await request.formData();
 		const brand = (data.get('brand') as string)?.trim() || null;
 		const model = (data.get('model') as string)?.trim();
@@ -24,12 +25,12 @@ export const actions: Actions = {
 
 		const lengthM = lengthRaw ? parseFloat(lengthRaw) : null;
 
-		await db.update(rod).set({ brand, model, lengthM, castingWeight, type, notes, updatedAt: new Date() }).where(eq(rod.id, params.id));
+		await db.update(rod).set({ brand, model, lengthM, castingWeight, type, notes, updatedAt: new Date() }).where(and(eq(rod.id, params.id), userFilter(locals, rod.userId)));
 		redirect(303, `/tackle/rods/${params.id}`);
 	},
 
-	delete: async ({ params }) => {
-		await db.delete(rod).where(eq(rod.id, params.id));
+	delete: async ({ params, locals }) => {
+		await db.delete(rod).where(and(eq(rod.id, params.id), userFilter(locals, rod.userId)));
 		redirect(303, '/tackle');
 	}
 };

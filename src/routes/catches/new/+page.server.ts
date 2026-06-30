@@ -2,20 +2,21 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
 import { fishCatch, catchPhoto, lure, combo } from '$lib/server/db/schema';
-import { saveUpload } from '$lib/server/uploads';
-import { asc, desc } from 'drizzle-orm';
+import { saveUpload, deleteUpload, QuotaExceededError } from '$lib/server/uploads';
+import { asc } from 'drizzle-orm';
 import { fetchWeather } from '$lib/server/biteIndex';
+import { ownerId, userFilter } from '$lib/server/scope';
 
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async ({ locals }) => {
 	const [lures, combos] = await Promise.all([
-		db.select({ id: lure.id, lureNumber: lure.lureNumber, name: lure.name }).from(lure).orderBy(asc(lure.lureNumber)),
-		db.query.combo.findMany({ orderBy: [asc(combo.name)], with: { rod: true, reel: true } })
+		db.select({ id: lure.id, lureNumber: lure.lureNumber, name: lure.name }).from(lure).where(userFilter(locals, lure.userId)).orderBy(asc(lure.lureNumber)),
+		db.query.combo.findMany({ where: userFilter(locals, combo.userId), orderBy: [asc(combo.name)], with: { rod: true, reel: true } })
 	]);
 	return { lures, combos };
 };
 
 export const actions: Actions = {
-	default: async ({ request }) => {
+	default: async ({ request, locals }) => {
 		const data = await request.formData();
 
 		const caughtAtRaw = (data.get('caught_at') as string)?.trim();
@@ -42,15 +43,26 @@ export const actions: Actions = {
 		const weather = await fetchWeather(lat, lng);
 		const biteIndex = weather?.biteIndex ?? null;
 
-		const [newCatch] = await db
-			.insert(fishCatch)
-			.values({ caughtAt, species, weightG, lengthCm, lat, lng, notes, lureId, comboId, catchAndRelease, presentation, biteIndex })
-			.returning();
-
+		// Save photos first so a quota failure never leaves an orphaned catch.
 		const photoFiles = data.getAll('photos') as File[];
 		const validPhotos = photoFiles.filter((f) => f && f.size > 0);
-		if (validPhotos.length > 0) {
-			const filenames = await Promise.all(validPhotos.map((f) => saveUpload(f)));
+		const filenames: string[] = [];
+		try {
+			for (const f of validPhotos) filenames.push(await saveUpload(f, locals?.user));
+		} catch (e) {
+			if (e instanceof QuotaExceededError) {
+				await Promise.all(filenames.map((fn) => deleteUpload(fn)));
+				return fail(413, { error: 'quotaExceeded' });
+			}
+			throw e;
+		}
+
+		const [newCatch] = await db
+			.insert(fishCatch)
+			.values({ userId: ownerId(locals), caughtAt, species, weightG, lengthCm, lat, lng, notes, lureId, comboId, catchAndRelease, presentation, biteIndex })
+			.returning();
+
+		if (filenames.length > 0) {
 			await db.insert(catchPhoto).values(
 				filenames.map((filename, i) => ({ catchId: newCatch.id, filename, sortOrder: i }))
 			);

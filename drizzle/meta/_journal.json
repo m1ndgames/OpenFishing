@@ -127,6 +127,13 @@
       "when": 1782664879675,
       "tag": "0017_whole_vector",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "6",
+      "when": 1782778938422,
+      "tag": "0018_brief_living_lightning",
+      "breakpoints": true
     }
   ]
 }

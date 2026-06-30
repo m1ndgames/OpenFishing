@@ -2,22 +2,23 @@ import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
 import { fishCatch, catchPhoto, spot } from '$lib/server/db/schema';
-import { eq, asc } from 'drizzle-orm';
+import { eq, asc, and } from 'drizzle-orm';
 import { env } from '$env/dynamic/private';
+import { userFilter } from '$lib/server/scope';
 
 import { haversineMeters } from '$lib/server/haversine';
 
-export const load: PageServerLoad = async ({ params }) => {
+export const load: PageServerLoad = async ({ params, locals }) => {
 	const [found, allSpots] = await Promise.all([
 		db.query.fishCatch.findFirst({
-			where: eq(fishCatch.id, params.id),
+			where: and(eq(fishCatch.id, params.id), userFilter(locals, fishCatch.userId)),
 			with: {
 				photos: { orderBy: [asc(catchPhoto.sortOrder)] },
 				lure: true,
 				combo: { with: { rod: true, reel: true } }
 			}
 		}),
-		db.select({ id: spot.id, name: spot.name, lat: spot.lat, lng: spot.lng }).from(spot)
+		db.select({ id: spot.id, name: spot.name, lat: spot.lat, lng: spot.lng }).from(spot).where(userFilter(locals, spot.userId))
 	]);
 
 	if (!found) error(404, 'Catch not found');

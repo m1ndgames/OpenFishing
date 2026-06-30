@@ -9,6 +9,10 @@
 	let { children, data }: { children: import('svelte').Snippet; data: LayoutData } = $props();
 	const { t, lang, demoMode, chatbotEnabled } = data;
 
+	const adminActive = $derived($page.url.pathname.startsWith('/admin'));
+	const accountActive = $derived($page.url.pathname.startsWith('/account'));
+	let showUserMenu = $state(false);
+
 	$effect(() => {
 		document.documentElement.setAttribute('data-mode', data.colorMode);
 		document.documentElement.setAttribute('data-theme', data.themeName);
@@ -52,6 +56,7 @@
 
 <svelte:document onclick={(e) => {
 	if (showAddMenu && !(e.target as Element).closest('[data-add-menu]')) showAddMenu = false;
+	if (showUserMenu && !(e.target as Element).closest('[data-user-menu]')) showUserMenu = false;
 }} />
 
 <svelte:head>
@@ -139,6 +144,41 @@
 
 			<div class="flex-1"></div>
 
+				<!-- User menu (desktop) -->
+				{#if data.user}
+				<div data-user-menu="true" style="position:relative; flex-shrink:0;">
+					<button
+						onclick={() => showUserMenu = !showUserMenu}
+						title={data.user.email}
+						style="display:flex; align-items:center; gap:6px; font-size:0.8rem; font-weight:600; padding:6px 11px; border-radius:9px; cursor:pointer; font-family:'DM Sans',sans-serif;
+							border:1px solid {(adminActive || accountActive) ? 'var(--of-accent-border)' : 'var(--of-border)'};
+							background:{(adminActive || accountActive) ? 'var(--of-accent-glow)' : 'var(--of-bg-elevated)'};
+							color:{(adminActive || accountActive) ? 'var(--of-accent)' : 'var(--of-text-2)'};">
+						<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.7"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+						{data.user.username}
+					</button>
+					{#if showUserMenu}
+						<div style="position:absolute; top:calc(100% + 6px); right:0; min-width:170px; background:var(--of-bg-elevated); border:1px solid var(--of-border); border-radius:10px; padding:4px; z-index:100; box-shadow:0 8px 24px rgba(0,0,0,0.4);">
+							<a href="/account" onclick={() => showUserMenu = false} style="display:flex; align-items:center; gap:9px; padding:9px 12px; border-radius:7px; text-decoration:none; color:var(--of-text); font-size:0.85rem; font-weight:500;"
+								onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-accent-bg)';}} onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='';}}>
+								{t.navAccount}
+							</a>
+							{#if data.user.isAdmin}
+								<a href="/admin" onclick={() => showUserMenu = false} style="display:flex; align-items:center; gap:9px; padding:9px 12px; border-radius:7px; text-decoration:none; color:var(--of-text); font-size:0.85rem; font-weight:500;"
+									onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-accent-bg)';}} onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='';}}>
+									{t.navAdmin}
+								</a>
+							{/if}
+							<form method="POST" action="/logout" style="margin:0;">
+								<button type="submit" style="width:100%; text-align:left; display:flex; align-items:center; gap:9px; padding:9px 12px; border-radius:7px; background:none; border:none; cursor:pointer; color:var(--of-danger); font-size:0.85rem; font-weight:500; font-family:'DM Sans',sans-serif;">
+									{t.navLogout}
+								</button>
+							</form>
+						</div>
+					{/if}
+				</div>
+				{/if}
+
 			<!-- Add... dropdown -->
 			<div data-add-menu="true" style="position:relative; flex-shrink:0;">
 				<button
@@ -215,6 +255,33 @@
 			</a>
 
 			<div style="flex:1;"></div>
+
+				<!-- User menu (mobile) -->
+				{#if data.user}
+				<div data-user-menu="true" style="position:relative; flex-shrink:0;">
+					<button
+						onclick={() => showUserMenu = !showUserMenu}
+						aria-label={data.user.username}
+						style="display:flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:8px; cursor:pointer;
+							border:1px solid {(adminActive || accountActive) ? 'var(--of-accent-border)' : 'var(--of-border)'};
+							background:{(adminActive || accountActive) ? 'var(--of-accent-glow)' : 'var(--of-bg-elevated)'};
+							color:{(adminActive || accountActive) ? 'var(--of-accent)' : 'var(--of-text-2)'};">
+						<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.7"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+					</button>
+					{#if showUserMenu}
+						<div style="position:absolute; top:calc(100% + 6px); right:0; min-width:170px; background:var(--of-bg-elevated); border:1px solid var(--of-border); border-radius:10px; padding:4px; z-index:100; box-shadow:0 8px 24px rgba(0,0,0,0.5);">
+							<div style="padding:7px 12px 4px; font-size:0.78rem; color:var(--of-text-4); font-weight:600;">{data.user.username}</div>
+							<a href="/account" onclick={() => showUserMenu = false} style="display:flex; align-items:center; gap:9px; padding:10px 12px; border-radius:7px; text-decoration:none; color:var(--of-text); font-size:0.875rem; font-weight:500;">{t.navAccount}</a>
+							{#if data.user.isAdmin}
+								<a href="/admin" onclick={() => showUserMenu = false} style="display:flex; align-items:center; gap:9px; padding:10px 12px; border-radius:7px; text-decoration:none; color:var(--of-text); font-size:0.875rem; font-weight:500;">{t.navAdmin}</a>
+							{/if}
+							<form method="POST" action="/logout" style="margin:0;">
+								<button type="submit" style="width:100%; text-align:left; padding:10px 12px; border-radius:7px; background:none; border:none; cursor:pointer; color:var(--of-danger); font-size:0.875rem; font-weight:500; font-family:'DM Sans',sans-serif;">{t.navLogout}</button>
+							</form>
+						</div>
+					{/if}
+				</div>
+				{/if}
 
 			<!-- Add... dropdown (mobile) -->
 			<div data-add-menu="true" style="position:relative; flex-shrink:0;">

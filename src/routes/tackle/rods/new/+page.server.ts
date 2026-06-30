@@ -2,9 +2,10 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
 import { db } from '$lib/server/db';
 import { rod } from '$lib/server/db/schema';
+import { ownerId } from '$lib/server/scope';
 
 export const actions: Actions = {
-	default: async ({ request }) => {
+	default: async ({ request, locals }) => {
 		const data = await request.formData();
 		const brand = (data.get('brand') as string)?.trim() || null;
 		const model = (data.get('model') as string)?.trim();
@@ -17,7 +18,7 @@ export const actions: Actions = {
 
 		const lengthM = lengthRaw ? parseFloat(lengthRaw) : null;
 
-		const [newRod] = await db.insert(rod).values({ brand, model, lengthM, castingWeight, type, notes }).returning();
+		const [newRod] = await db.insert(rod).values({ userId: ownerId(locals), brand, model, lengthM, castingWeight, type, notes }).returning();
 		redirect(303, `/tackle/rods/${newRod.id}`);
 	}
 };
