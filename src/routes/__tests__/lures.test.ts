@@ -21,8 +21,7 @@ const mockInsert = vi.fn();
 
 function makeChain(result: any = undefined) {
 	const self: any = {};
-	['from', 'set', 'orderBy'].forEach(k => { self[k] = vi.fn(() => self); });
-	self.where = vi.fn(() => Promise.resolve(result ?? []));
+	['from', 'set', 'orderBy', 'where', 'limit'].forEach(k => { self[k] = vi.fn(() => self); });
 	self.values = vi.fn(() => ({
 		returning: vi.fn(() => Promise.resolve(Array.isArray(result) ? result : [result])),
 		then: (fn: any, rej: any) => Promise.resolve(undefined).then(fn, rej),
@@ -161,7 +160,7 @@ describe('lures/[id]/edit update action', () => {
 				request: makeRequest({ name: 'X', photo: file }),
 			} as any)
 		).rejects.toMatchObject({ status: 303 });
-		expect(saveUpload).toHaveBeenCalledWith(file);
+		expect(saveUpload).toHaveBeenCalledWith(file, undefined);
 		expect(deleteUpload).toHaveBeenCalledWith('old.jpg');
 	});
 
@@ -231,7 +230,7 @@ describe('lures/new load', () => {
 	});
 
 	it('returns suggestions object', async () => {
-		const result = await newLoad();
+		const result = await newLoad({ locals: { user: null } } as any);
 		expect(result.suggestions).toBeDefined();
 		expect(result.suggestions.names).toBeDefined();
 	});
@@ -258,7 +257,7 @@ describe('lures/new default action', () => {
 				request: makeRequest({ name: 'Test Lure', photo: file }),
 			} as any)
 		).rejects.toMatchObject({ status: 303, location: '/lures/new-lure-id' });
-		expect(saveUpload).toHaveBeenCalledWith(file);
+		expect(saveUpload).toHaveBeenCalledWith(file, undefined);
 	});
 
 	it('inserts tags when provided', async () => {

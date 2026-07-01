@@ -1,19 +1,17 @@
 import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { db, client } from '$lib/server/db';
-import { lure, tag, spot, spotTag, spotPhoto, fishCatch, catchPhoto } from '$lib/server/db/schema';
+import { lure, spot, fishCatch } from '$lib/server/db/schema';
 import { getSchemaHash } from '$lib/server/db/schema-hash';
-import { UPLOAD_DIR } from '$lib/server/uploads';
 import { count } from 'drizzle-orm';
-import { mkdirSync, writeFileSync } from 'fs';
-import { join } from 'path';
-import AdmZip from 'adm-zip';
+import { ownerId, userFilter } from '$lib/server/scope';
+import { parseBackupZip, restoreUserBackup, BackupError } from '$lib/server/backup';
 
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async ({ locals }) => {
 	const [[{ lureCount }], [{ spotCount }], [{ catchCount }]] = await Promise.all([
-		db.select({ lureCount: count() }).from(lure),
-		db.select({ spotCount: count() }).from(spot),
-		db.select({ catchCount: count() }).from(fishCatch)
+		db.select({ lureCount: count() }).from(lure).where(userFilter(locals, lure.userId)),
+		db.select({ spotCount: count() }).from(spot).where(userFilter(locals, spot.userId)),
+		db.select({ catchCount: count() }).from(fishCatch).where(userFilter(locals, fishCatch.userId))
 	]);
 	return {
 		schemaHash: getSchemaHash(client),
@@ -24,154 +22,22 @@ export const load: PageServerLoad = async () => {
 };
 
 export const actions: Actions = {
-	import: async ({ request }) => {
+	import: async ({ request, locals }) => {
+		const uid = ownerId(locals);
 		const formData = await request.formData();
 		const file = formData.get('backup') as File;
 
-		if (!file || file.size === 0) return fail(400, { error: 'No file provided.' });
-		if (!file.name.endsWith('.zip')) return fail(400, { error: 'File must be a .zip backup.' });
+		if (!file || file.size === 0) return fail(400, { error: 'backupErrorNoFile' });
+		if (!file.name.endsWith('.zip')) return fail(400, { error: 'backupErrorNotZip' });
 
-		let zip: AdmZip;
 		try {
-			zip = new AdmZip(Buffer.from(await file.arrayBuffer()));
-		} catch {
-			return fail(400, { error: 'Could not read the ZIP file.' });
+			const { payload, extractPhotos } = parseBackupZip(Buffer.from(await file.arrayBuffer()), 'user');
+			extractPhotos();
+			const result = restoreUserBackup(payload, uid);
+			return { success: true, ...result };
+		} catch (e) {
+			if (e instanceof BackupError) return fail(e.key === 'backupErrorSchema' ? 409 : 400, { error: e.key });
+			throw e;
 		}
-
-		const jsonEntry = zip.getEntry('backup.json');
-		if (!jsonEntry) return fail(400, { error: 'Invalid backup — backup.json not found in archive.' });
-
-		let payload: {
-			meta: { schemaHash: string; appVersion: string; exportedAt: string };
-			lures: Record<string, unknown>[];
-			tags: Record<string, unknown>[];
-			spots: Record<string, unknown>[];
-			spotTags: Record<string, unknown>[];
-			spotPhotos: Record<string, unknown>[];
-			catches: Record<string, unknown>[];
-			catchPhotos: Record<string, unknown>[];
-		};
-		try {
-			payload = JSON.parse(jsonEntry.getData().toString('utf-8'));
-		} catch {
-			return fail(400, { error: 'Could not parse backup.json.' });
-		}
-
-		if (!payload?.meta?.schemaHash || !Array.isArray(payload.lures) || !Array.isArray(payload.tags)) {
-			return fail(400, { error: 'Invalid backup format — missing required fields.' });
-		}
-
-		const currentHash = getSchemaHash(client);
-		if (payload.meta.schemaHash !== currentHash) {
-			return fail(409, {
-				error: `Schema mismatch — this backup is incompatible with the current database schema. Backup: ${payload.meta.schemaHash.slice(0, 8)}… / Current: ${currentHash.slice(0, 8)}…`
-			});
-		}
-
-		// Extract photo files before touching the DB
-		mkdirSync(UPLOAD_DIR, { recursive: true });
-		const photoEntries = zip.getEntries().filter((e) => e.entryName.startsWith('uploads/') && !e.isDirectory);
-		for (const entry of photoEntries) {
-			const filename = entry.entryName.replace('uploads/', '');
-			if (filename) writeFileSync(join(UPLOAD_DIR, filename), entry.getData());
-		}
-
-		// Drizzle SQLite mode:'timestamp' stores Unix seconds (not ms) — convert accordingly
-		const toSec = (v: unknown): number | null =>
-			v ? Math.floor(new Date(v as string).getTime() / 1000) : null;
-
-		const importFn = client.transaction(() => {
-			// Delete in FK-safe order (children first)
-			client.prepare('DELETE FROM catch_photo').run();
-			client.prepare('DELETE FROM fish_catch').run();
-			client.prepare('DELETE FROM spot_photo').run();
-			client.prepare('DELETE FROM spot_tag').run();
-			client.prepare('DELETE FROM spot').run();
-			client.prepare('DELETE FROM tag').run();
-			client.prepare('DELETE FROM lure').run();
-
-			// Lures
-			const insertLure = client.prepare(
-				`INSERT INTO lure (id, lure_number, name, brand, type, color, weight, size, notes,
-				 photo_path, species, running_depth, water_type, light_conditions, qr_coded, created_at, updated_at)
-				 VALUES (@id, @lure_number, @name, @brand, @type, @color, @weight, @size, @notes,
-				 @photo_path, @species, @running_depth, @water_type, @light_conditions, @qr_coded, @created_at, @updated_at)`
-			);
-			for (const l of payload.lures) {
-				insertLure.run({
-					id: l.id, lure_number: l.lureNumber ?? null, name: l.name ?? 'Untitled',
-					brand: l.brand ?? null, type: l.type ?? null, color: l.color ?? null,
-					weight: l.weight ?? null, size: l.size ?? null, notes: l.notes ?? null,
-					photo_path: l.photoPath ?? null, species: l.species ?? null,
-					running_depth: l.runningDepth ?? null, water_type: l.waterType ?? null,
-					light_conditions: l.lightConditions ?? null, qr_coded: l.qrCoded ? 1 : 0,
-					created_at: toSec(l.createdAt), updated_at: toSec(l.updatedAt)
-				});
-			}
-
-			// Lure tags
-			const insertTag = client.prepare(`INSERT INTO tag (id, lure_id, name) VALUES (@id, @lure_id, @name)`);
-			for (const t of payload.tags) {
-				insertTag.run({ id: t.id, lure_id: t.lureId, name: t.name });
-			}
-
-			// Spots
-			const insertSpot = client.prepare(
-				`INSERT INTO spot (id, name, lat, lng, notes, created_at, updated_at)
-				 VALUES (@id, @name, @lat, @lng, @notes, @created_at, @updated_at)`
-			);
-			for (const s of (payload.spots ?? [])) {
-				insertSpot.run({
-					id: s.id, name: s.name ?? 'Untitled', lat: s.lat, lng: s.lng, notes: s.notes ?? null,
-					created_at: toSec(s.createdAt), updated_at: toSec(s.updatedAt)
-				});
-			}
-
-			// Spot tags
-			const insertSpotTag = client.prepare(`INSERT INTO spot_tag (id, spot_id, name) VALUES (@id, @spot_id, @name)`);
-			for (const t of (payload.spotTags ?? [])) {
-				insertSpotTag.run({ id: t.id, spot_id: t.spotId, name: t.name });
-			}
-
-			// Spot photos
-			const insertSpotPhoto = client.prepare(
-				`INSERT INTO spot_photo (id, spot_id, filename, sort_order) VALUES (@id, @spot_id, @filename, @sort_order)`
-			);
-			for (const p of (payload.spotPhotos ?? [])) {
-				insertSpotPhoto.run({ id: p.id, spot_id: p.spotId, filename: p.filename, sort_order: p.sortOrder ?? 0 });
-			}
-
-			// Catches
-			const insertCatch = client.prepare(
-				`INSERT INTO fish_catch (id, caught_at, species, weight_g, length_cm, lat, lng, notes, lure_id, created_at, updated_at)
-				 VALUES (@id, @caught_at, @species, @weight_g, @length_cm, @lat, @lng, @notes, @lure_id, @created_at, @updated_at)`
-			);
-			for (const c of (payload.catches ?? [])) {
-				insertCatch.run({
-					id: c.id, species: c.species ?? null, weight_g: c.weightG ?? null,
-					length_cm: c.lengthCm ?? null, lat: c.lat ?? null, lng: c.lng ?? null,
-					notes: c.notes ?? null, lure_id: c.lureId ?? null,
-					caught_at: toSec(c.caughtAt) ?? Math.floor(Date.now() / 1000),
-					created_at: toSec(c.createdAt), updated_at: toSec(c.updatedAt)
-				});
-			}
-
-			// Catch photos
-			const insertCatchPhoto = client.prepare(
-				`INSERT INTO catch_photo (id, catch_id, filename, sort_order) VALUES (@id, @catch_id, @filename, @sort_order)`
-			);
-			for (const p of (payload.catchPhotos ?? [])) {
-				insertCatchPhoto.run({ id: p.id, catch_id: p.catchId, filename: p.filename, sort_order: p.sortOrder ?? 0 });
-			}
-
-			return {
-				lureCount: payload.lures.length,
-				spotCount: (payload.spots ?? []).length,
-				catchCount: (payload.catches ?? []).length
-			};
-		});
-
-		const result = importFn() as { lureCount: number; spotCount: number; catchCount: number };
-		return { success: true, ...result };
 	}
 };

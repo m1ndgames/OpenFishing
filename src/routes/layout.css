@@ -544,3 +544,14 @@ option:checked {
   background: var(--of-bg-hover);
   color: var(--of-accent);
 }
+
+/* ── Responsive form grids ─────────────────────────────────────────────────── */
+
+.of-grid-2    { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.of-grid-2-sm { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.of-grid-3    { display: grid; grid-template-columns: 1fr 1fr 0.65fr; gap: 16px; }
+
+@media (max-width: 480px) {
+  .of-grid-2, .of-grid-2-sm { grid-template-columns: 1fr; }
+  .of-grid-3                 { grid-template-columns: 1fr 1fr; }
+}

@@ -8,7 +8,7 @@ const spec = {
 		title: 'OpenFishing API',
 		version: '1.0.0',
 		description:
-			'Read-only REST API for OpenFishing. All endpoints require a `Bearer` token matching `AUTH_PASSWORD` when password auth is enabled.'
+			"Read-only REST API for OpenFishing. When auth is enabled, all endpoints require a per-user `Bearer` token (the user's API token, found on their account page) and return only that user's data."
 	},
 	servers: [{ url: '/api/v1' }],
 	security: [{ bearerAuth: [] }],
@@ -17,7 +17,7 @@ const spec = {
 			bearerAuth: {
 				type: 'http',
 				scheme: 'bearer',
-				description: 'The value of `AUTH_PASSWORD`'
+				description: "The user's API token (shown on their account page)"
 			}
 		},
 		schemas: {

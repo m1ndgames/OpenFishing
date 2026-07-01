@@ -1,11 +1,13 @@
 import type { PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
 import { spot, spotPhoto, fishCatch } from '$lib/server/db/schema';
-import { asc, isNotNull } from 'drizzle-orm';
+import { and, asc, isNotNull } from 'drizzle-orm';
+import { userFilter } from '$lib/server/scope';
 
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async ({ locals }) => {
 	const [spots, catches] = await Promise.all([
 		db.query.spot.findMany({
+			where: userFilter(locals, spot.userId),
 			orderBy: [asc(spot.createdAt)],
 			with: {
 				tags: true,
@@ -18,7 +20,7 @@ export const load: PageServerLoad = async () => {
 			lng: fishCatch.lng,
 			species: fishCatch.species,
 			caughtAt: fishCatch.caughtAt
-		}).from(fishCatch).where(isNotNull(fishCatch.lat))
+		}).from(fishCatch).where(and(isNotNull(fishCatch.lat), userFilter(locals, fishCatch.userId)))
 	]);
 	return { spots, catches };
 };

@@ -55,8 +55,12 @@ test.describe('Navigation', () => {
 		await page.goto('/settings/appearance');
 		await page.waitForLoadState('networkidle');
 		const lightLabel = page.locator('label').filter({ hasText: /light/i });
-		await lightLabel.click();
-		await page.waitForLoadState('networkidle');
+		// Wait for the enhance POST (the DB write) to finish before reloading, otherwise
+		// the reload can race ahead of the persisted setting.
+		await Promise.all([
+			page.waitForResponse((r) => r.url().includes('/settings/appearance') && r.request().method() === 'POST'),
+			lightLabel.click()
+		]);
 		await page.reload();
 		await page.waitForLoadState('networkidle');
 		const htmlEl = page.locator('html');

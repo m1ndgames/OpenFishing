@@ -62,7 +62,7 @@ A self-hosted web app to organize your fishing lures, mark fishing spots, and lo
 
 ### General
 - 9 languages (EN, DE, FR, ES, IT, NL, PL, PT, UK) — auto-detected from browser, switchable via flag picker; AI responses (chatbot, fish/lure identification) follow the selected language
-- Optional password authentication via `AUTH_PASSWORD` env var
+- Optional multi-user authentication via `ADMIN_PASSWORD` env var (each user has isolated data; an admin backend manages users, quotas and API tokens). The old `AUTH_PASSWORD` name still works as a deprecated fallback. Optional email-based password reset for users when SMTP is configured.
 - Share links bypass authentication so individual records can be shared publicly without exposing the whole app
 - **Demo mode** via `DEMO_MODE` env var — read-only view, all writes blocked, localized banner and toast inform users
 - **REST API** — read-only JSON endpoints for external integrations (see below)
@@ -74,13 +74,13 @@ OpenFishing exposes a read-only REST API at `/api/v1/`. Interactive documentatio
 
 ### Authentication
 
-When `AUTH_PASSWORD` is set the API requires a Bearer token on every request:
+When auth is enabled (`ADMIN_PASSWORD` set) the API requires each user's personal API token (shown on their account page) as a Bearer token, and returns only that user's data:
 
 ```
-Authorization: Bearer <your_password>
+Authorization: Bearer <your_api_token>
 ```
 
-When `AUTH_PASSWORD` is not set the endpoints are openly accessible.
+When auth is not enabled the endpoints are openly accessible.
 
 ### Endpoints
 
@@ -169,7 +169,7 @@ services:
       - DATABASE_URL=/app/data/openfishing.db
       - UPLOAD_PATH=/app/uploads
       - BASE_URL=https://fishing.yourdomain.com
-      - AUTH_PASSWORD=your_secure_password   # omit to disable auth
+      - ADMIN_PASSWORD=your_secure_password  # omit to disable auth (admin login password)
       - DEMO_MODE=1                          # omit to allow writes
 ```
 

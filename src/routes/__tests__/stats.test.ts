@@ -7,7 +7,8 @@ function makeSelectChain(result: any[]) {
 	const chain: any = {
 		from: vi.fn(() => chain),
 		orderBy: vi.fn(() => chain),
-		where: vi.fn(() => Promise.resolve(result)),
+		where: vi.fn(() => chain),
+		limit: vi.fn(() => chain),
 		then: (fn: any, rej: any) => Promise.resolve(result).then(fn, rej),
 		catch: (fn: any) => Promise.resolve(result).catch(fn),
 	};
@@ -55,7 +56,7 @@ describe('stats load — empty database', () => {
 	});
 
 	it('returns zero totals', async () => {
-		const result = await load();
+		const result = await load({ locals: { user: null } } as any);
 		expect(result.totals.totalCatches).toBe(0);
 		expect(result.totals.cnrCount).toBe(0);
 		expect(result.totals.cnrRate).toBe(0);
@@ -64,7 +65,7 @@ describe('stats load — empty database', () => {
 	});
 
 	it('returns empty arrays for all stat groups', async () => {
-		const result = await load();
+		const result = await load({ locals: { user: null } } as any);
 		expect(result.speciesStats).toHaveLength(0);
 		expect(result.lureStats).toHaveLength(0);
 		expect(result.spotStats).toHaveLength(0);
@@ -72,18 +73,18 @@ describe('stats load — empty database', () => {
 	});
 
 	it('returns 12 months', async () => {
-		const result = await load();
+		const result = await load({ locals: { user: null } } as any);
 		expect(result.months).toHaveLength(12);
 		expect(result.months.every((m: any) => m.count === 0)).toBe(true);
 	});
 
 	it('returns 24 hourly buckets', async () => {
-		const result = await load();
+		const result = await load({ locals: { user: null } } as any);
 		expect(result.hourly).toHaveLength(24);
 	});
 
 	it('returns 7 weekday buckets starting from Monday', async () => {
-		const result = await load();
+		const result = await load({ locals: { user: null } } as any);
 		expect(result.weekdays).toHaveLength(7);
 		expect(result.weekdays[0].day).toBe(1); // Monday
 		expect(result.weekdays[6].day).toBe(0); // Sunday moved to end
@@ -97,7 +98,7 @@ describe('stats load — with catches', () => {
 
 	it('counts total catches', async () => {
 		mockFindMany.mockResolvedValue([makeCatch(), makeCatch({ id: 'c2', species: 'Perch' })]);
-		const result = await load();
+		const result = await load({ locals: { user: null } } as any);
 		expect(result.totals.totalCatches).toBe(2);
 	});
 
@@ -107,7 +108,7 @@ describe('stats load — with catches', () => {
 			makeCatch({ id: 'c2', species: 'Perch' }),
 			makeCatch({ id: 'c3', species: 'Pike' }),
 		]);
-		const result = await load();
+		const result = await load({ locals: { user: null } } as any);
 		expect(result.totals.distinctSpecies).toBe(2);
 	});
 
@@ -116,7 +117,7 @@ describe('stats load — with catches', () => {
 			makeCatch({ catchAndRelease: true }),
 			makeCatch({ id: 'c2', catchAndRelease: false }),
 		]);
-		const result = await load();
+		const result = await load({ locals: { user: null } } as any);
 		expect(result.totals.cnrCount).toBe(1);
 		expect(result.totals.cnrRate).toBe(50);
 	});
@@ -127,7 +128,7 @@ describe('stats load — with catches', () => {
 			makeCatch({ id: 'c2', species: 'Perch' }),
 			makeCatch({ id: 'c3', species: 'Pike' }),
 		]);
-		const result = await load();
+		const result = await load({ locals: { user: null } } as any);
 		expect(result.speciesStats[0].species).toBe('Pike');
 		expect(result.speciesStats[0].count).toBe(2);
 		expect(result.speciesStats[1].species).toBe('Perch');
@@ -138,7 +139,7 @@ describe('stats load — with catches', () => {
 			makeCatch({ species: 'Pike', weightG: 1000, lengthCm: 50, id: 'c1' }),
 			makeCatch({ species: 'Pike', weightG: 2000, lengthCm: 40, id: 'c2' }),
 		]);
-		const result = await load();
+		const result = await load({ locals: { user: null } } as any);
 		const pike = result.speciesStats.find((s: any) => s.species === 'Pike');
 		expect(pike.maxWeight).toBe(2000);
 		expect(pike.maxWeightId).toBe('c2');
@@ -151,7 +152,7 @@ describe('stats load — with catches', () => {
 			makeCatch({ species: 'Pike', catchAndRelease: true }),
 			makeCatch({ id: 'c2', species: 'Pike', catchAndRelease: false }),
 		]);
-		const result = await load();
+		const result = await load({ locals: { user: null } } as any);
 		const pike = result.speciesStats.find((s: any) => s.species === 'Pike');
 		expect(pike.cnr).toBe(1);
 	});
@@ -160,7 +161,7 @@ describe('stats load — with catches', () => {
 		mockFindMany.mockResolvedValue([
 			makeCatch({ species: null as any }),
 		]);
-		const result = await load();
+		const result = await load({ locals: { user: null } } as any);
 		expect(result.speciesStats).toHaveLength(0);
 	});
 
@@ -169,19 +170,19 @@ describe('stats load — with catches', () => {
 			makeCatch({ id: `c${i}`, lure: { id: `l${i}`, name: `Lure ${i}`, lureNumber: i, brand: 'X' } })
 		);
 		mockFindMany.mockResolvedValue(catches);
-		const result = await load();
+		const result = await load({ locals: { user: null } } as any);
 		expect(result.lureStats.length).toBeLessThanOrEqual(8);
 	});
 
 	it('skips catches with no lure in lure stats', async () => {
 		mockFindMany.mockResolvedValue([makeCatch({ lure: null as any })]);
-		const result = await load();
+		const result = await load({ locals: { user: null } } as any);
 		expect(result.lureStats).toHaveLength(0);
 	});
 
 	it('buckets catches into hourly bins', async () => {
 		mockFindMany.mockResolvedValue([makeCatch(), makeCatch({ id: 'c2' })]);
-		const result = await load();
+		const result = await load({ locals: { user: null } } as any);
 		// Use getHours() — same local interpretation the code uses
 		const expectedHour = new Date(BASE_DATE).getHours();
 		const bucket = result.hourly.find((h: any) => h.hour === expectedHour);
@@ -191,7 +192,7 @@ describe('stats load — with catches', () => {
 	it('buckets catches into weekday bins', async () => {
 		// 2025-06-15 is a Sunday (day=0)
 		mockFindMany.mockResolvedValue([makeCatch()]);
-		const result = await load();
+		const result = await load({ locals: { user: null } } as any);
 		const sunday = result.weekdays.find((w: any) => w.day === 0);
 		expect(sunday?.count).toBe(1);
 	});
@@ -202,14 +203,14 @@ describe('stats load — with catches', () => {
 			makeCatch({ id: 'c2', presentation: 'Slow retrieve' }),
 			makeCatch({ id: 'c3', presentation: 'Fast' }),
 		]);
-		const result = await load();
+		const result = await load({ locals: { user: null } } as any);
 		expect(result.presentationStats[0].style).toBe('Fast');
 		expect(result.presentationStats[0].count).toBe(2);
 	});
 
 	it('skips catches with no presentation', async () => {
 		mockFindMany.mockResolvedValue([makeCatch({ presentation: null as any })]);
-		const result = await load();
+		const result = await load({ locals: { user: null } } as any);
 		expect(result.presentationStats).toHaveLength(0);
 	});
 });
@@ -223,7 +224,7 @@ describe('stats load — spot productivity', () => {
 		mockSelectFrom.mockImplementation(() => makeSelectChain([
 			{ id: 'spot1', name: 'Test Lake', lat: 52.5200, lng: 13.4001 },
 		]));
-		const result = await load();
+		const result = await load({ locals: { user: null } } as any);
 		expect(result.spotStats).toHaveLength(1);
 		expect(result.spotStats[0].name).toBe('Test Lake');
 		expect(result.spotStats[0].count).toBe(1);
@@ -237,7 +238,7 @@ describe('stats load — spot productivity', () => {
 		mockSelectFrom.mockImplementation(() => makeSelectChain([
 			{ id: 'spot1', name: 'Distant Lake', lat: 52.5300, lng: 13.4000 },
 		]));
-		const result = await load();
+		const result = await load({ locals: { user: null } } as any);
 		expect(result.spotStats).toHaveLength(0);
 	});
 
@@ -248,7 +249,7 @@ describe('stats load — spot productivity', () => {
 		mockSelectFrom.mockImplementation(() => makeSelectChain([
 			{ id: 'spot1', name: 'Lake', lat: 52.52, lng: 13.40 },
 		]));
-		const result = await load();
+		const result = await load({ locals: { user: null } } as any);
 		expect(result.spotStats).toHaveLength(0);
 	});
 });

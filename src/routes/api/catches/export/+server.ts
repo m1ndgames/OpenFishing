@@ -3,6 +3,7 @@ import { db } from '$lib/server/db';
 import { fishCatch } from '$lib/server/db/schema';
 import { gte, lte, and } from 'drizzle-orm';
 import { asc } from 'drizzle-orm';
+import { userFilter } from '$lib/server/scope';
 
 function escapeCsv(value: string | number | boolean | null | undefined): string {
 	if (value === null || value === undefined) return '';
@@ -13,7 +14,7 @@ function escapeCsv(value: string | number | boolean | null | undefined): string 
 	return str;
 }
 
-export const GET: RequestHandler = async ({ url }) => {
+export const GET: RequestHandler = async ({ url, locals }) => {
 	const fromParam = url.searchParams.get('from');
 	const toParam = url.searchParams.get('to');
 
@@ -22,7 +23,7 @@ export const GET: RequestHandler = async ({ url }) => {
 	const toDate = toParam ? new Date(toParam + 'T23:59:59') : new Date(year, 11, 31, 23, 59, 59);
 
 	const catches = await db.query.fishCatch.findMany({
-		where: and(gte(fishCatch.caughtAt, fromDate), lte(fishCatch.caughtAt, toDate)),
+		where: and(gte(fishCatch.caughtAt, fromDate), lte(fishCatch.caughtAt, toDate), userFilter(locals, fishCatch.userId)),
 		orderBy: [asc(fishCatch.caughtAt)],
 		with: { lure: true }
 	});

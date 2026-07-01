@@ -2,26 +2,27 @@ import { error, fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
 import { lure, tag } from '$lib/server/db/schema';
-import { eq, isNotNull } from 'drizzle-orm';
-import { saveUpload, deleteUpload } from '$lib/server/uploads';
+import { and, eq, isNotNull } from 'drizzle-orm';
+import { saveUpload, deleteUpload, QuotaExceededError } from '$lib/server/uploads';
+import { userFilter } from '$lib/server/scope';
 
-export const load: PageServerLoad = async ({ params }) => {
+export const load: PageServerLoad = async ({ params, locals }) => {
 	const existing = await db.query.lure.findFirst({
-		where: (lure, { eq }) => eq(lure.id, params.id),
+		where: and(eq(lure.id, params.id), userFilter(locals, lure.userId)),
 		with: { tags: true }
 	});
 
 	if (!existing) error(404, 'Lure not found');
 
 	const distinct = async <T>(col: Parameters<typeof db.selectDistinct>[0]) => {
-		const rows = await db.selectDistinct(col).from(lure).where(isNotNull(Object.values(col)[0] as Parameters<typeof isNotNull>[0]));
+		const rows = await db.selectDistinct(col).from(lure).where(and(isNotNull(Object.values(col)[0] as Parameters<typeof isNotNull>[0]), userFilter(locals, lure.userId)));
 		return rows.map((r) => Object.values(r)[0] as T).filter(Boolean);
 	};
 
 	const speciesRows = await db
 		.select({ val: lure.species })
 		.from(lure)
-		.where(isNotNull(lure.species));
+		.where(and(isNotNull(lure.species), userFilter(locals, lure.userId)));
 	const species = [...new Set(speciesRows.flatMap((r) => (r.val as string).split(/\s+/).filter(Boolean)))].sort();
 
 	const [names, brands, types, colors] = await Promise.all([
@@ -35,7 +36,7 @@ export const load: PageServerLoad = async ({ params }) => {
 };
 
 export const actions: Actions = {
-	update: async ({ request, params }) => {
+	update: async ({ request, params, locals }) => {
 		const data = await request.formData();
 
 		const name = (data.get('name') as string)?.trim();
@@ -64,7 +65,7 @@ export const actions: Actions = {
 		const clearPhoto = data.get('clear_photo') === '1';
 
 		const existing = await db.query.lure.findFirst({
-			where: (l, { eq }) => eq(l.id, params.id)
+			where: and(eq(lure.id, params.id), userFilter(locals, lure.userId))
 		});
 		if (!existing) error(404);
 
@@ -73,14 +74,21 @@ export const actions: Actions = {
 			if (existing.photoPath) await deleteUpload(existing.photoPath);
 			photoPath = null;
 		} else if (photoFile && photoFile.size > 0) {
+			let saved: string;
+			try {
+				saved = await saveUpload(photoFile, locals?.user);
+			} catch (e) {
+				if (e instanceof QuotaExceededError) return fail(413, { error: 'quotaExceeded' });
+				throw e;
+			}
 			if (existing.photoPath) await deleteUpload(existing.photoPath);
-			photoPath = await saveUpload(photoFile);
+			photoPath = saved;
 		}
 
 		await db
 			.update(lure)
 			.set({ name, brand, type, color, weight, size, notes, photoPath, species, runningDepth, waterType, lightConditions, amount, qrCoded, updatedAt: new Date() })
-			.where(eq(lure.id, params.id));
+			.where(and(eq(lure.id, params.id), userFilter(locals, lure.userId)));
 
 		await db.delete(tag).where(eq(tag.lureId, params.id));
 		if (tagsRaw) {
@@ -93,28 +101,29 @@ export const actions: Actions = {
 		redirect(303, `/lures/${params.id}`);
 	},
 
-	delete: async ({ params }) => {
+	delete: async ({ params, locals }) => {
 		const existing = await db.query.lure.findFirst({
-			where: (l, { eq }) => eq(l.id, params.id)
+			where: and(eq(lure.id, params.id), userFilter(locals, lure.userId))
 		});
-		if (existing?.photoPath) await deleteUpload(existing.photoPath);
-		await db.delete(lure).where(eq(lure.id, params.id));
+		if (!existing) error(404);
+		if (existing.photoPath) await deleteUpload(existing.photoPath);
+		await db.delete(lure).where(and(eq(lure.id, params.id), userFilter(locals, lure.userId)));
 		redirect(303, '/');
 	},
 
-	markLost: async ({ params }) => {
+	markLost: async ({ params, locals }) => {
 		await db
 			.update(lure)
 			.set({ lost: true, qrCoded: false, updatedAt: new Date() })
-			.where(eq(lure.id, params.id));
+			.where(and(eq(lure.id, params.id), userFilter(locals, lure.userId)));
 		redirect(303, `/lures/${params.id}`);
 	},
 
-	markFound: async ({ params }) => {
+	markFound: async ({ params, locals }) => {
 		await db
 			.update(lure)
 			.set({ lost: false, updatedAt: new Date() })
-			.where(eq(lure.id, params.id));
+			.where(and(eq(lure.id, params.id), userFilter(locals, lure.userId)));
 		redirect(303, `/lures/${params.id}`);
 	}
 };

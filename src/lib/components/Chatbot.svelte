@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { marked } from 'marked';
 	import type { Translations } from '$lib/i18n';
+	import icon from '$lib/assets/openfishing-mark.svg?raw';
 
 	function renderMarkdown(text: string): string {
 		return marked.parse(text, { async: false }) as string;
@@ -133,8 +134,8 @@
 		const d = new Date(seconds * 1000);
 		const diffDays = Math.floor((Date.now() - d.getTime()) / 86_400_000);
 		if (diffDays === 0) return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-		if (diffDays === 1) return 'Yesterday';
-		if (diffDays < 7) return `${diffDays}d ago`;
+		if (diffDays === 1) return t.chatbotYesterday;
+		if (diffDays < 7) return t.chatbotDaysAgo.replace('{n}', String(diffDays));
 		return d.toLocaleDateString([], { day: '2-digit', month: 'short' });
 	}
 
@@ -170,20 +171,13 @@
 	<!-- Header -->
 	<div style="padding:14px 16px 13px;border-bottom:1px solid var(--of-border);display:flex;align-items:center;gap:8px;background:var(--of-bg-elevated);flex-shrink:0;" class="chat-panel-header">
 		{#if showHistory}
-			<button onclick={() => (showHistory = false)} aria-label="Back" style={headerBtnStyle()}>
+			<button onclick={() => (showHistory = false)} aria-label={t.chatbotBack} style={headerBtnStyle()}>
 				<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
 			</button>
 			<span style="font-family:'Carter One',sans-serif;font-size:0.9rem;color:var(--of-text);">{t.chatbotHistory}</span>
 		{:else}
-			<div style="width:32px;height:32px;border-radius:50%;background:var(--of-accent-bg-hover);border:1px solid var(--of-accent-border);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-				<svg width="16" height="16" viewBox="0 0 48 48" fill="none" style="color:var(--of-accent);">
-					<g transform="translate(2,1)">
-						<circle cx="25" cy="11" r="5" stroke="currentColor" stroke-width="3.5"/>
-						<path d="M25 16 V30 C25 38.5 13.5 39.5 13.5 30 V25.5" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
-						<path d="M13.5 27 L17.5 29.5" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>
-						<path d="M6 41 q4 -4 8 0 t8 0 t8 0 t8 0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-					</g>
-				</svg>
+			<div style="width:32px;height:32px;border-radius:50%;background:var(--of-accent-bg-hover);border:1px solid var(--of-accent-border);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--of-accent);">
+				{@html icon.replace('<svg ', '<svg width="18" height="18" ')}
 			</div>
 			<span style="font-family:'Carter One',sans-serif;font-size:0.9rem;color:var(--of-text);">{t.chatbotTitle}</span>
 		{/if}
@@ -222,11 +216,11 @@
 					>
 						<div style="flex:1;min-width:0;">
 							<div style="font-size:0.82rem;color:var(--of-text);font-family:'DM Sans',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4;">{truncate(session.firstMessage)}</div>
-							<div style="font-size:0.72rem;color:var(--of-text-4);font-family:'DM Sans',sans-serif;margin-top:3px;">{formatDate(session.lastAt)} · {session.count} msgs</div>
+							<div style="font-size:0.72rem;color:var(--of-text-4);font-family:'DM Sans',sans-serif;margin-top:3px;">{formatDate(session.lastAt)} · {t.chatbotMsgCount.replace('{n}', String(session.count))}</div>
 						</div>
 						<button
 							onclick={(e) => deleteSession(session.sessionId, e)}
-							aria-label="Delete session"
+							aria-label={t.chatbotDeleteSession}
 							style="width:26px;height:26px;border-radius:6px;flex-shrink:0;background:transparent;border:1px solid transparent;color:var(--of-text-4);cursor:pointer;display:flex;align-items:center;justify-content:center;"
 						>
 							<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -241,14 +235,9 @@
 		<div bind:this={messagesEl} onclick={handleLinkClick} style="flex:1;overflow-y:auto;padding:14px 14px 8px;display:flex;flex-direction:column;gap:10px;scrollbar-width:thin;scrollbar-color:var(--of-border) transparent;">
 			{#if messages.length === 0}
 				<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:20px;">
-					<svg width="36" height="36" viewBox="0 0 48 48" fill="none" style="color:var(--of-border);flex-shrink:0;">
-						<g transform="translate(2,1)">
-							<circle cx="25" cy="11" r="5" stroke="currentColor" stroke-width="3.5"/>
-							<path d="M25 16 V30 C25 38.5 13.5 39.5 13.5 30 V25.5" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
-							<path d="M13.5 27 L17.5 29.5" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>
-							<path d="M6 41 q4 -4 8 0 t8 0 t8 0 t8 0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-						</g>
-					</svg>
+					<div style="color:var(--of-border);flex-shrink:0;">
+						{@html icon.replace('<svg ', '<svg width="36" height="36" ')}
+					</div>
 					<p style="color:var(--of-text-4);font-size:0.82rem;font-family:'DM Sans',sans-serif;line-height:1.5;margin:0;">{t.chatbotEmptyHint}</p>
 					<div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:4px;">
 						{#each [t.chatbotSuggestion1, t.chatbotSuggestion2, t.chatbotSuggestion3] as suggestion}
@@ -311,7 +300,7 @@
 			<button
 				onclick={send}
 				disabled={loading || !input.trim()}
-				aria-label="Send"
+				aria-label={t.chatbotSend}
 				style="width:38px;height:38px;border-radius:10px;flex-shrink:0;background:{loading || !input.trim() ? 'var(--of-bg-elevated)' : 'var(--of-accent-solid)'};border:1px solid {loading || !input.trim() ? 'var(--of-border)' : 'var(--of-accent)'};color:{loading || !input.trim() ? 'var(--of-text-4)' : 'var(--of-ink)'};display:flex;align-items:center;justify-content:center;cursor:{loading || !input.trim() ? 'default' : 'pointer'};transition:background 0.15s,border-color 0.15s,color 0.15s;"
 			>
 				<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M22 2 11 13M22 2 15 22 11 13 2 9l20-7z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg>

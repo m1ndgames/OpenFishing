@@ -2,19 +2,20 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
 import { lure, tag } from '$lib/server/db/schema';
-import { isNotNull, max } from 'drizzle-orm';
-import { saveUpload } from '$lib/server/uploads';
+import { and, isNotNull, max } from 'drizzle-orm';
+import { saveUpload, QuotaExceededError } from '$lib/server/uploads';
+import { ownerId, userFilter } from '$lib/server/scope';
 
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async ({ locals }) => {
 	const distinct = async <T>(col: Parameters<typeof db.selectDistinct>[0]) => {
-		const rows = await db.selectDistinct(col).from(lure).where(isNotNull(Object.values(col)[0] as Parameters<typeof isNotNull>[0]));
+		const rows = await db.selectDistinct(col).from(lure).where(and(isNotNull(Object.values(col)[0] as Parameters<typeof isNotNull>[0]), userFilter(locals, lure.userId)));
 		return rows.map((r) => Object.values(r)[0] as T).filter(Boolean);
 	};
 
 	const speciesRows = await db
 		.select({ val: lure.species })
 		.from(lure)
-		.where(isNotNull(lure.species));
+		.where(and(isNotNull(lure.species), userFilter(locals, lure.userId)));
 	const species = [...new Set(speciesRows.flatMap((r) => (r.val as string).split(/\s+/).filter(Boolean)))].sort();
 
 	const [names, brands, types, colors] = await Promise.all([
@@ -28,7 +29,7 @@ export const load: PageServerLoad = async () => {
 };
 
 export const actions: Actions = {
-	default: async ({ request }) => {
+	default: async ({ request, locals }) => {
 		const data = await request.formData();
 
 		const name = (data.get('name') as string)?.trim() || 'Untitled';
@@ -53,14 +54,23 @@ export const actions: Actions = {
 
 		const photoFile = data.get('photo') as File;
 		if (!photoFile || photoFile.size === 0) return fail(400, { error: 'photoRequired' });
-		const photoPath = await saveUpload(photoFile);
+		let photoPath: string;
+		try {
+			photoPath = await saveUpload(photoFile, locals?.user);
+		} catch (e) {
+			if (e instanceof QuotaExceededError) return fail(413, { error: 'quotaExceeded' });
+			throw e;
+		}
 
-		const [{ maxNum }] = await db.select({ maxNum: max(lure.lureNumber) }).from(lure);
+		const [{ maxNum }] = await db
+			.select({ maxNum: max(lure.lureNumber) })
+			.from(lure)
+			.where(userFilter(locals, lure.userId));
 		const lureNumber = (maxNum ?? 0) + 1;
 
 		const [newLure] = await db
 			.insert(lure)
-			.values({ name, brand, type, color, weight, size, notes, photoPath, species, runningDepth, waterType, lightConditions, amount, lureNumber })
+			.values({ userId: ownerId(locals), name, brand, type, color, weight, size, notes, photoPath, species, runningDepth, waterType, lightConditions, amount, lureNumber })
 			.returning();
 
 		if (tagsRaw) {

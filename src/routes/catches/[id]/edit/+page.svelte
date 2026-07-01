@@ -225,7 +225,7 @@
 		</div>
 
 		<!-- Length + Weight -->
-		<div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+		<div class="of-grid-2">
 			<div>
 				<label style={labelStyle} for="length_cm">{t.catchLengthLabel}</label>
 				<input id="length_cm" name="length_cm" type="number" min="0" step="0.1" value={c.lengthCm ?? ''}

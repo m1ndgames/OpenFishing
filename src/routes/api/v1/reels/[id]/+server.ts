@@ -1,11 +1,12 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, and } from 'drizzle-orm';
 import { reel, reelLineLog } from '$lib/server/db/schema';
+import { userFilter } from '$lib/server/scope';
 
-export const GET: RequestHandler = async ({ params }) => {
-	const found = await db.select().from(reel).where(eq(reel.id, params.id)).limit(1);
+export const GET: RequestHandler = async ({ params, locals }) => {
+	const found = await db.select().from(reel).where(and(eq(reel.id, params.id), userFilter(locals, reel.userId))).limit(1);
 	if (!found[0]) error(404, 'Reel not found');
 
 	const latest = await db.query.reelLineLog.findFirst({
@@ -14,8 +15,9 @@ export const GET: RequestHandler = async ({ params }) => {
 		with: { line: true }
 	});
 
+	const { userId: _u, ...rest } = found[0];
 	return json({
-		...found[0],
+		...rest,
 		currentLine: latest ? {
 			lineId: latest.lineId,
 			brand: latest.line?.brand ?? null,

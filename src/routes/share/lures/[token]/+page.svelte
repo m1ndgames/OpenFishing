@@ -1,6 +1,7 @@
 ﻿<script lang="ts">
 	import type { PageData } from './$types';
 	import favicon from '$lib/assets/favicon.svg';
+	import mark from '$lib/assets/openfishing-mark.svg?raw';
 
 	let { data }: { data: PageData } = $props();
 	const { t, lure } = data;
@@ -21,7 +22,7 @@
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
 	<link href="https://fonts.googleapis.com/css2?family=Carter+One&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-	<link rel="icon" href={favicon} />
+	<link rel="icon" href={favicon} type="image/svg+xml" />
 	<title>{lure.name} · OpenFishing</title>
 </svelte:head>
 
@@ -32,14 +33,9 @@
 	<header style="background:var(--of-bg-surface); border-bottom:1px solid var(--of-border-subtle); padding:0 16px;">
 		<div style="max-width:640px; margin:0 auto; height:52px; display:flex; align-items:center; justify-content:space-between;">
 			<span style="font-family:'Carter One',sans-serif; font-size:1.1rem; color:var(--of-text-bright); display:flex; align-items:center; gap:8px;">
-				<svg width="20" height="20" viewBox="0 0 48 48" fill="none" style="color:var(--of-accent); flex-shrink:0;">
-					<g transform="translate(2,1)">
-						<circle cx="25" cy="11" r="5" stroke="currentColor" stroke-width="3.5"/>
-						<path d="M25 16 V30 C25 38.5 13.5 39.5 13.5 30 V25.5" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
-						<path d="M13.5 27 L17.5 29.5" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>
-						<path d="M6 41 q4 -4 8 0 t8 0 t8 0 t8 0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-					</g>
-				</svg>
+				<span style="color:var(--of-accent); flex-shrink:0; display:flex;">
+					{@html mark.replace('<svg ', '<svg width="20" height="20" ')}
+				</span>
 				OpenFishing
 			</span>
 			<span style="font-size:0.72rem; font-weight:500; color:var(--of-text-4); background:var(--of-accent-bg); border:1px solid var(--of-accent-bg-hover); padding:3px 10px; border-radius:20px; letter-spacing:0.04em;">{t.shareViewOnly}</span>

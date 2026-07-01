@@ -165,7 +165,7 @@
 		</div>
 
 		<!-- Brand + Type -->
-		<div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+		<div class="of-grid-2">
 			<div>
 				<label style={labelStyle} for="brand">{t.brand}</label>
 				<input id="brand" name="brand" type="text" list="suggest-brands" value={lure.brand ?? ''}
@@ -179,7 +179,7 @@
 		</div>
 
 		<!-- Color + Weight + Amount -->
-		<div style="display:grid; grid-template-columns:1fr 1fr 0.65fr; gap:16px;">
+		<div class="of-grid-3">
 			<div>
 				<label style={labelStyle} for="color">{t.color}</label>
 				<input id="color" name="color" type="text" list="suggest-colors" value={lure.color ?? ''}
@@ -198,7 +198,7 @@
 		</div>
 
 		<!-- Size + Running Depth -->
-		<div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+		<div class="of-grid-2">
 			<div>
 				<label style={labelStyle} for="size">{t.size} (cm)</label>
 				<input id="size" name="size" type="number" min="0" step="0.1" value={lure.size ?? ''}
@@ -217,7 +217,7 @@
 		</div>
 
 		<!-- Water Type + Weather -->
-		<div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+		<div class="of-grid-2">
 			<div>
 				<label style={labelStyle} for="water_type">{t.waterType}</label>
 				<select id="water_type" name="water_type" style={selectStyle}

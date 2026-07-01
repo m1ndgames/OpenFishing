@@ -3,10 +3,12 @@ import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
 import { desc } from 'drizzle-orm';
 import { combo, reelLineLog } from '$lib/server/db/schema';
+import { userFilter } from '$lib/server/scope';
 
-export const GET: RequestHandler = async () => {
+export const GET: RequestHandler = async ({ locals }) => {
 	const [combos, allLogs] = await Promise.all([
 		db.query.combo.findMany({
+			where: userFilter(locals, combo.userId),
 			orderBy: [desc(combo.createdAt)],
 			with: { rod: true, reel: true }
 		}),
@@ -21,7 +23,7 @@ export const GET: RequestHandler = async () => {
 		if (!currentByReel.has(log.reelId)) currentByReel.set(log.reelId, log);
 	}
 
-	return json(combos.map(({ rod: r, reel: re, ...c }) => {
+	return json(combos.map(({ rod: r, reel: re, userId: _u, ...c }) => {
 		const log = re ? (currentByReel.get(re.id) ?? null) : null;
 		return {
 			...c,

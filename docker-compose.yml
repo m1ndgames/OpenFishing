@@ -10,7 +10,12 @@ services:
       - DATABASE_URL=/app/data/openfishing.db
       - UPLOAD_PATH=/app/uploads
       - BASE_URL=https://fishing.yourdomain.com
-      - AUTH_PASSWORD=your_secure_password   # omit to disable auth
+      - ADMIN_PASSWORD=your_secure_password  # omit to disable auth (admin login password; AUTH_PASSWORD still works as a deprecated fallback)
+    #  - SMTP_HOST=smtp.example.com           # SMTP for "forgot password" emails (needs SMTP_HOST + SMTP_FROM)
+    #  - SMTP_PORT=587
+    #  - SMTP_USER=apikey
+    #  - SMTP_PASS=secret
+    #  - SMTP_FROM=OpenFishing <noreply@example.com>
     #  - DEMO_MODE=                           # set to to true, to enable read-only demo mode
     #  - CHATBOT=                             # set to to true, to enable the AI chatbot
     #  - LITELLM_URL=http://litellm:4000

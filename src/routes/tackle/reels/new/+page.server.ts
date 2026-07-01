@@ -2,9 +2,10 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
 import { db } from '$lib/server/db';
 import { reel } from '$lib/server/db/schema';
+import { ownerId } from '$lib/server/scope';
 
 export const actions: Actions = {
-	default: async ({ request }) => {
+	default: async ({ request, locals }) => {
 		const data = await request.formData();
 		const brand = (data.get('brand') as string)?.trim() || null;
 		const model = (data.get('model') as string)?.trim();
@@ -13,7 +14,7 @@ export const actions: Actions = {
 
 		if (!model) return fail(400, { error: 'reelModelRequired' });
 
-		const [newReel] = await db.insert(reel).values({ brand, model, size, notes }).returning();
+		const [newReel] = await db.insert(reel).values({ userId: ownerId(locals), brand, model, size, notes }).returning();
 		redirect(303, `/tackle/reels/${newReel.id}`);
 	}
 };

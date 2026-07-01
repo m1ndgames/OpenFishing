@@ -1,20 +1,21 @@
 <script lang="ts">
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
+	import logo from '$lib/assets/openfishing-logo.svg?raw';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import type { LayoutData } from './$types';
 	import Chatbot from '$lib/components/Chatbot.svelte';
 
 	let { children, data }: { children: import('svelte').Snippet; data: LayoutData } = $props();
-	const { t, lang, demoMode, chatbotEnabled } = data;
+	const { t, demoMode, chatbotEnabled } = data;
 
 	$effect(() => {
 		document.documentElement.setAttribute('data-mode', data.colorMode);
 		document.documentElement.setAttribute('data-theme', data.themeName);
 	});
 
-	const isLoginPage    = $derived($page.url.pathname === '/login');
+	const isLoginPage    = $derived(['/login', '/forgot-password', '/reset-password'].includes($page.url.pathname));
 	const isSharePage    = $derived($page.url.pathname.startsWith('/share/'));
 	const luresActive    = $derived($page.url.pathname === '/' || $page.url.pathname.startsWith('/lures'));
 	const spotsActive    = $derived($page.url.pathname.startsWith('/spots'));
@@ -58,7 +59,7 @@
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
 	<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-	<link rel="icon" href={favicon} />
+	<link rel="icon" href={favicon} type="image/svg+xml" />
 	<title>OpenFishing</title>
 </svelte:head>
 
@@ -86,12 +87,8 @@
 		<div class="max-w-6xl mx-auto px-4 h-14 flex items-center gap-2">
 
 			<!-- Logo -->
-			<a href="/" style="text-decoration:none; display:flex; align-items:center; margin-right:8px; flex-shrink:0; color:var(--of-text-bright);">
-				<svg viewBox="0 0 192 52" height="26" fill="none" role="img" aria-label="OpenFishing">
-					<text x="2" y="35" font-family="'Inter','Segoe UI',system-ui,-apple-system,sans-serif" font-style="italic" font-size="26" letter-spacing="-0.5" fill="currentColor">
-						<tspan font-weight="400">Open</tspan><tspan font-weight="800">Fishing</tspan>
-					</text>
-				</svg>
+			<a href="/" style="text-decoration:none; display:flex; align-items:center; margin-right:8px; flex-shrink:0; color:var(--of-accent); height:26px;">
+				{@html logo.replace('<svg ', '<svg height="26" ')}
 			</a>
 
 			<!-- Nav links -->
@@ -183,35 +180,14 @@
 					</div>
 				{/if}
 			</div>
-
-			<!-- Language switcher -->
-			<form method="POST" action="/api/lang" style="flex-shrink:0;">
-				<input type="hidden" name="redirect" value={$page.url.pathname} />
-				<select name="lang" onchange={(e) => (e.currentTarget as HTMLSelectElement).form?.submit()}
-					style="font-size:0.8rem; border:1px solid var(--of-border); border-radius:8px; padding:5px 8px; background:var(--of-bg-elevated); color:var(--of-text-2); cursor:pointer; outline:none;">
-					<option value="en" selected={lang === 'en'}>🇬🇧 EN</option>
-					<option value="de" selected={lang === 'de'}>🇩🇪 DE</option>
-					<option value="nl" selected={lang === 'nl'}>🇳🇱 NL</option>
-					<option value="fr" selected={lang === 'fr'}>🇫🇷 FR</option>
-					<option value="es" selected={lang === 'es'}>🇪🇸 ES</option>
-					<option value="it" selected={lang === 'it'}>🇮🇹 IT</option>
-					<option value="pt" selected={lang === 'pt'}>🇵🇹 PT</option>
-					<option value="pl" selected={lang === 'pl'}>🇵🇱 PL</option>
-					<option value="uk" selected={lang === 'uk'}>🇺🇦 UK</option>
-				</select>
-			</form>
 		</div>
 	</header>
 
 	<!-- ── MOBILE TOP BAR (< md) ── -->
 	<header class="no-print md:hidden" style="background-color:var(--of-bg-surface); border-bottom:1px solid var(--of-border-subtle);">
 		<div class="px-4 h-12 flex items-center justify-between gap-2">
-			<a href="/" style="text-decoration:none; display:flex; align-items:center; flex-shrink:0; color:var(--of-text-bright);">
-				<svg viewBox="0 0 192 52" height="22" fill="none" role="img" aria-label="OpenFishing">
-					<text x="2" y="35" font-family="'Inter','Segoe UI',system-ui,-apple-system,sans-serif" font-style="italic" font-size="26" letter-spacing="-0.5" fill="currentColor">
-						<tspan font-weight="400">Open</tspan><tspan font-weight="800">Fishing</tspan>
-					</text>
-				</svg>
+			<a href="/" style="text-decoration:none; display:flex; align-items:center; flex-shrink:0; color:var(--of-accent); height:22px;">
+				{@html logo.replace('<svg ', '<svg height="22" ')}
 			</a>
 
 			<div style="flex:1;"></div>
@@ -254,23 +230,6 @@
 					</div>
 				{/if}
 			</div>
-
-			<!-- Language switcher -->
-			<form method="POST" action="/api/lang" style="flex-shrink:0;">
-				<input type="hidden" name="redirect" value={$page.url.pathname} />
-				<select name="lang" onchange={(e) => (e.currentTarget as HTMLSelectElement).form?.submit()}
-					style="font-size:0.78rem; border:1px solid var(--of-border); border-radius:7px; padding:4px 7px; background:var(--of-bg-elevated); color:var(--of-text-2); cursor:pointer; outline:none;">
-					<option value="en" selected={lang === 'en'}>🇬🇧 EN</option>
-					<option value="de" selected={lang === 'de'}>🇩🇪 DE</option>
-					<option value="nl" selected={lang === 'nl'}>🇳🇱 NL</option>
-					<option value="fr" selected={lang === 'fr'}>🇫🇷 FR</option>
-					<option value="es" selected={lang === 'es'}>🇪🇸 ES</option>
-					<option value="it" selected={lang === 'it'}>🇮🇹 IT</option>
-					<option value="pt" selected={lang === 'pt'}>🇵🇹 PT</option>
-					<option value="pl" selected={lang === 'pl'}>🇵🇱 PL</option>
-					<option value="uk" selected={lang === 'uk'}>🇺🇦 UK</option>
-				</select>
-			</form>
 		</div>
 	</header>
 

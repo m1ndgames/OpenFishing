@@ -7,8 +7,9 @@ const mockFindFirstLog = vi.fn();
 function makeChain(result: any = []) {
 	const self: any = {
 		from: vi.fn(() => self),
-		where: vi.fn(() => Promise.resolve(result)),
+		where: vi.fn(() => self),
 		orderBy: vi.fn(() => self),
+		limit: vi.fn(() => self),
 		then: (fn: any, rej: any) => Promise.resolve(result).then(fn, rej),
 		catch: (fn: any) => Promise.resolve(result).catch(fn),
 	};
@@ -35,7 +36,7 @@ describe('tackle load', () => {
 	});
 
 	it('returns rods, reels, lines, combos, reelCurrentLines', async () => {
-		const result = await load();
+		const result = await load({ locals: { user: null } } as any);
 		expect(result.rods).toEqual([]);
 		expect(result.reels).toEqual([]);
 		expect(result.lines).toEqual([]);
@@ -57,7 +58,7 @@ describe('tackle load', () => {
 			line: { brand: 'Sunline', model: 'FC Rock' },
 		});
 
-		const result = await load();
+		const result = await load({ locals: { user: null } } as any);
 		expect(result.reelCurrentLines['reel-001']).toBeDefined();
 		expect(result.reelCurrentLines['reel-001'].lineName).toBe('Sunline FC Rock');
 	});
@@ -73,7 +74,7 @@ describe('tackle load', () => {
 			line: null,
 		});
 
-		const result = await load();
+		const result = await load({ locals: { user: null } } as any);
 		expect(result.reelCurrentLines['r1'].lineName).toBeNull();
 	});
 });

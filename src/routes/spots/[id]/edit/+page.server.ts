@@ -2,12 +2,13 @@ import { error, fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
 import { spot, spotTag, spotPhoto } from '$lib/server/db/schema';
-import { eq, asc } from 'drizzle-orm';
-import { saveUpload, deleteUpload } from '$lib/server/uploads';
+import { eq, asc, and } from 'drizzle-orm';
+import { saveUpload, deleteUpload, QuotaExceededError } from '$lib/server/uploads';
+import { userFilter } from '$lib/server/scope';
 
-export const load: PageServerLoad = async ({ params }) => {
+export const load: PageServerLoad = async ({ params, locals }) => {
 	const found = await db.query.spot.findFirst({
-		where: eq(spot.id, params.id),
+		where: and(eq(spot.id, params.id), userFilter(locals, spot.userId)),
 		with: {
 			tags: true,
 			photos: { orderBy: [asc(spotPhoto.sortOrder)] }
@@ -18,7 +19,7 @@ export const load: PageServerLoad = async ({ params }) => {
 };
 
 export const actions: Actions = {
-	update: async ({ request, params }) => {
+	update: async ({ request, params, locals }) => {
 		const data = await request.formData();
 
 		const name = (data.get('name') as string)?.trim() || 'Untitled Spot';
@@ -33,7 +34,7 @@ export const actions: Actions = {
 		if (isNaN(lat) || isNaN(lng)) return fail(400, { error: 'locationRequired' });
 
 		const existing = await db.query.spot.findFirst({
-			where: eq(spot.id, params.id),
+			where: and(eq(spot.id, params.id), userFilter(locals, spot.userId)),
 			with: { photos: true }
 		});
 		if (!existing) error(404);
@@ -57,7 +58,16 @@ export const actions: Actions = {
 				orderBy: [asc(spotPhoto.sortOrder)]
 			});
 			const nextOrder = remaining.length > 0 ? Math.max(...remaining.map((p) => p.sortOrder)) + 1 : 0;
-			const filenames = await Promise.all(validPhotos.map((f) => saveUpload(f)));
+			const filenames: string[] = [];
+			try {
+				for (const f of validPhotos) filenames.push(await saveUpload(f, locals?.user));
+			} catch (e) {
+				if (e instanceof QuotaExceededError) {
+					await Promise.all(filenames.map((fn) => deleteUpload(fn)));
+					return fail(413, { error: 'quotaExceeded' });
+				}
+				throw e;
+			}
 			await db.insert(spotPhoto).values(
 				filenames.map((filename, i) => ({ spotId: params.id, filename, sortOrder: nextOrder + i }))
 			);
@@ -66,7 +76,7 @@ export const actions: Actions = {
 		await db
 			.update(spot)
 			.set({ name, lat, lng, notes, updatedAt: new Date() })
-			.where(eq(spot.id, params.id));
+			.where(and(eq(spot.id, params.id), userFilter(locals, spot.userId)));
 
 		await db.delete(spotTag).where(eq(spotTag.spotId, params.id));
 		if (tagsRaw) {
@@ -79,14 +89,14 @@ export const actions: Actions = {
 		redirect(303, `/spots/${params.id}`);
 	},
 
-	delete: async ({ params }) => {
+	delete: async ({ params, locals }) => {
 		const found = await db.query.spot.findFirst({
-			where: eq(spot.id, params.id),
+			where: and(eq(spot.id, params.id), userFilter(locals, spot.userId)),
 			with: { photos: true }
 		});
 		if (found) {
 			for (const ph of found.photos) await deleteUpload(ph.filename);
-			await db.delete(spot).where(eq(spot.id, params.id));
+			await db.delete(spot).where(and(eq(spot.id, params.id), userFilter(locals, spot.userId)));
 		}
 		redirect(303, '/spots');
 	}

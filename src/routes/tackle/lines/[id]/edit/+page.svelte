@@ -38,7 +38,7 @@
 				<option value="Fluoro" selected={l.type === 'Fluoro'}>{t.lineTypeFluoro}</option>
 			</select>
 		</div>
-		<div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+		<div class="of-grid-2-sm">
 			<div>
 				<label style={labelStyle}>{t.lineDiameter}</label>
 				<input name="diameter_mm" type="number" step="0.01" min="0" value={l.diameterMm ?? ''} style={inputStyle} onfocus={focusInput} onblur={blurInput} />

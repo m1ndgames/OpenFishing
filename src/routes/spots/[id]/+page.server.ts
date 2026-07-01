@@ -2,24 +2,26 @@ import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
 import { spot, spotPhoto, fishCatch, catchPhoto } from '$lib/server/db/schema';
-import { eq, asc, isNotNull } from 'drizzle-orm';
+import { eq, asc, isNotNull, and } from 'drizzle-orm';
 import { env } from '$env/dynamic/private';
 import { fetchWeather } from '$lib/server/biteIndex';
+import { userFilter } from '$lib/server/scope';
+import { authEnabled as isAuthEnabled } from '$lib/server/auth';
 
 import { haversineMeters } from '$lib/server/haversine';
 
-export const load: PageServerLoad = async ({ params }) => {
+export const load: PageServerLoad = async ({ params, locals }) => {
 	const [found, allSpots, allCatches] = await Promise.all([
 		db.query.spot.findFirst({
-			where: eq(spot.id, params.id),
+			where: and(eq(spot.id, params.id), userFilter(locals, spot.userId)),
 			with: {
 				tags: true,
 				photos: { orderBy: [asc(spotPhoto.sortOrder)] }
 			}
 		}),
-		db.select({ id: spot.id, lat: spot.lat, lng: spot.lng }).from(spot),
+		db.select({ id: spot.id, lat: spot.lat, lng: spot.lng }).from(spot).where(userFilter(locals, spot.userId)),
 		db.query.fishCatch.findMany({
-			where: isNotNull(fishCatch.lat),
+			where: and(isNotNull(fishCatch.lat), userFilter(locals, fishCatch.userId)),
 			with: {
 				lure: true,
 				photos: { orderBy: [asc(catchPhoto.sortOrder)], limit: 1 }
@@ -47,7 +49,7 @@ export const load: PageServerLoad = async ({ params }) => {
 	nearbyCatches.sort((a, b) => new Date(b.caughtAt).getTime() - new Date(a.caughtAt).getTime());
 
 	const baseUrl = env.BASE_URL ?? 'http://localhost:5173';
-	const authEnabled = !!env.AUTH_PASSWORD;
+	const authEnabled = isAuthEnabled();
 	const shareUrl = found.shareToken ? `${baseUrl}/share/spots/${found.shareToken}` : null;
 
 	return { spot: found, nearbyCatches, weather, authEnabled, shareUrl };

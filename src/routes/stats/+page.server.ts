@@ -1,13 +1,14 @@
 import type { PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
 import { fishCatch, spot } from '$lib/server/db/schema';
+import { userFilter } from '$lib/server/scope';
 
 import { haversineMeters } from '$lib/server/haversine';
 
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async ({ locals }) => {
 	const [catches, spots] = await Promise.all([
-		db.query.fishCatch.findMany({ with: { lure: true } }),
-		db.select({ id: spot.id, name: spot.name, lat: spot.lat, lng: spot.lng }).from(spot)
+		db.query.fishCatch.findMany({ where: userFilter(locals, fishCatch.userId), with: { lure: true } }),
+		db.select({ id: spot.id, name: spot.name, lat: spot.lat, lng: spot.lng }).from(spot).where(userFilter(locals, spot.userId))
 	]);
 
 	// ── Totals ───────────────────────────────────────────────────────────────

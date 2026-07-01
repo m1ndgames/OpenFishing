@@ -37,6 +37,7 @@ playwright-report/
 test-results/
 coverage/
 e2e/uploads/
+e2e/uploads-auth/
 e2e/fixtures/
 *.png
 *.jpg.tmp

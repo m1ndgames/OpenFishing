@@ -3,8 +3,9 @@ import type { RequestHandler } from './$types';
 import { env } from '$env/dynamic/private';
 import { db } from '$lib/server/db';
 import { eq, like, and, desc, gte, lte, sql } from 'drizzle-orm';
-import { lure as lureTable, fishCatch as catchTable, rod as rodTable, reel as reelTable, fishingLine as lineTable, combo as comboTable, reelLineLog, chatMessage as chatMessageTable } from '$lib/server/db/schema';
+import { lure as lureTable, fishCatch as catchTable, spot as spotTable, rod as rodTable, reel as reelTable, fishingLine as lineTable, combo as comboTable, reelLineLog, chatMessage as chatMessageTable } from '$lib/server/db/schema';
 import { fetchWeather, type WeatherData } from '$lib/server/biteIndex';
+import { ownerId, userFilter } from '$lib/server/scope';
 
 const MOON_PHASES = ['New moon', 'Waxing crescent', 'First quarter', 'Waxing gibbous', 'Full moon', 'Waning gibbous', 'Last quarter', 'Waning crescent'];
 
@@ -225,12 +226,13 @@ type RodArgs   = { type?: string; brand?: string };
 type ReelArgs  = { brand?: string };
 type LineArgs  = { type?: string; brand?: string };
 
-async function executeTool(name: string, args: Record<string, unknown>): Promise<string> {
+async function executeTool(name: string, args: Record<string, unknown>, locals: App.Locals): Promise<string> {
 	switch (name) {
 		case 'get_lures': {
 			const { species, waterType, type: lureType, color, minLightConditions, maxLightConditions, includeLost = false, limit = 20, offset = 0 } = args as LureArgs;
 
 			const filters = [];
+			filters.push(userFilter(locals, lureTable.userId));
 			if (!includeLost) filters.push(eq(lureTable.lost, false));
 			if (species)             filters.push(like(lureTable.species,          `%${species}%`));
 			if (waterType)           filters.push(eq(lureTable.waterType,           waterType));
@@ -259,6 +261,7 @@ async function executeTool(name: string, args: Record<string, unknown>): Promise
 			const { species, limit } = args as CatchArgs;
 
 			const filters = [];
+			filters.push(userFilter(locals, catchTable.userId));
 			if (species) filters.push(like(catchTable.species, `%${species}%`));
 
 			const catches = await db.query.fishCatch.findMany({
@@ -277,7 +280,7 @@ async function executeTool(name: string, args: Record<string, unknown>): Promise
 
 		case 'get_spots': {
 			const { tag } = args as SpotArgs;
-			const spots = await db.query.spot.findMany({ with: { tags: true } });
+			const spots = await db.query.spot.findMany({ where: userFilter(locals, spotTable.userId), with: { tags: true } });
 			const filtered = tag
 				? spots.filter((s) => s.tags.some((t) => t.name.toLowerCase().includes(tag.toLowerCase())))
 				: spots;
@@ -291,18 +294,19 @@ async function executeTool(name: string, args: Record<string, unknown>): Promise
 
 		case 'get_rods': {
 			const { type: rodType, brand } = args as RodArgs;
-			const filters = [];
+			const filters = [userFilter(locals, rodTable.userId)];
 			if (rodType) filters.push(like(rodTable.type, `%${rodType}%`));
 			if (brand)   filters.push(like(rodTable.brand, `%${brand}%`));
-			const rods = await db.select().from(rodTable).where(filters.length ? and(...filters) : undefined);
+			const rods = await db.select().from(rodTable).where(and(...filters));
 			return JSON.stringify(rods.map(({ createdAt: _c, updatedAt: _u, ...r }) => r));
 		}
 
 		case 'get_reels': {
 			const { brand } = args as ReelArgs;
-			const filters = brand ? [like(reelTable.brand, `%${brand}%`)] : [];
+			const filters = [userFilter(locals, reelTable.userId)];
+			if (brand) filters.push(like(reelTable.brand, `%${brand}%`));
 			const [reels, allLogs] = await Promise.all([
-				db.select().from(reelTable).where(filters.length ? and(...filters) : undefined),
+				db.select().from(reelTable).where(and(...filters)),
 				db.query.reelLineLog.findMany({
 					with: { line: true },
 					orderBy: [desc(reelLineLog.spooledAt)]
@@ -328,16 +332,16 @@ async function executeTool(name: string, args: Record<string, unknown>): Promise
 
 		case 'get_lines': {
 			const { type: lineType, brand } = args as LineArgs;
-			const filters = [];
+			const filters = [userFilter(locals, lineTable.userId)];
 			if (lineType) filters.push(like(lineTable.type, `%${lineType}%`));
 			if (brand)    filters.push(like(lineTable.brand, `%${brand}%`));
-			const lines = await db.select().from(lineTable).where(filters.length ? and(...filters) : undefined);
+			const lines = await db.select().from(lineTable).where(and(...filters));
 			return JSON.stringify(lines.map(({ createdAt: _c, updatedAt: _u, ...l }) => l));
 		}
 
 		case 'get_combos': {
 			const [combos, allLogs] = await Promise.all([
-				db.query.combo.findMany({ with: { rod: true, reel: true } }),
+				db.query.combo.findMany({ where: userFilter(locals, comboTable.userId), with: { rod: true, reel: true } }),
 				db.query.reelLineLog.findMany({
 					with: { line: true },
 					orderBy: [desc(reelLineLog.spooledAt)]
@@ -368,8 +372,9 @@ async function executeTool(name: string, args: Record<string, unknown>): Promise
 	}
 }
 
-export const GET: RequestHandler = async () => {
+export const GET: RequestHandler = async ({ locals }) => {
 	if (!env.CHATBOT) error(503, 'Chatbot not configured');
+	if (locals.user && !locals.user.chatbotEnabled) error(403, 'Chatbot disabled for this user');
 
 	const sessions = await db
 		.select({
@@ -379,16 +384,18 @@ export const GET: RequestHandler = async () => {
 			count: sql<number>`COUNT(*)`
 		})
 		.from(chatMessageTable)
+		.where(userFilter(locals, chatMessageTable.userId))
 		.groupBy(chatMessageTable.sessionId)
 		.orderBy(sql`MAX(${chatMessageTable.createdAt}) DESC`);
 
 	return json(sessions);
 };
 
-export const POST: RequestHandler = async ({ request, cookies }) => {
+export const POST: RequestHandler = async ({ request, cookies, locals }) => {
 	if (!env.CHATBOT || !env.LITELLM_URL || !env.LITELLM_MODEL) {
 		error(503, 'Chatbot not configured');
 	}
+	if (locals.user && !locals.user.chatbotEnabled) error(403, 'Chatbot disabled for this user');
 
 	const body = await request.json().catch(() => null);
 	if (!body || !Array.isArray(body.messages)) error(400, 'messages array required');
@@ -439,9 +446,10 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			const reply = msg.content ?? '';
 			if (!env.DEMO_MODE && sessionId && lastUserMessage) {
 				try {
+					const uid = ownerId(locals);
 					await db.insert(chatMessageTable).values([
-						{ sessionId, role: 'user', content: lastUserMessage.content },
-						{ sessionId, role: 'assistant', content: reply }
+						{ userId: uid, sessionId, role: 'user', content: lastUserMessage.content },
+						{ userId: uid, sessionId, role: 'assistant', content: reply }
 					]);
 				} catch (e) {
 					console.error('[chat] failed to save messages:', e);
@@ -457,7 +465,8 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 				tool_call_id: tc.id,
 				content: await executeTool(
 					tc.function.name,
-					JSON.parse(tc.function.arguments || '{}')
+					JSON.parse(tc.function.arguments || '{}'),
+					locals
 				)
 			}))
 		);
