@@ -1,11 +1,11 @@
 import { test, expect } from '@playwright/test';
-import { login } from './helpers';
+import { login, logout } from './helpers';
 import { ADMIN, BOB } from './fixtures';
 
 test.describe('Admin backend', () => {
 	test('admin sees the user list with storage usage', async ({ page }) => {
 		await login(page, ADMIN.username, ADMIN.password);
-		await page.goto('/admin');
+		await page.goto('/settings/admin');
 		await page.waitForLoadState('networkidle');
 		// Both accounts listed
 		await expect(page.getByText(ADMIN.username, { exact: true }).first()).toBeVisible();
@@ -16,7 +16,7 @@ test.describe('Admin backend', () => {
 
 	test('admin can create a new user', async ({ page }) => {
 		await login(page, ADMIN.username, ADMIN.password);
-		await page.goto('/admin');
+		await page.goto('/settings/admin');
 		await page.waitForLoadState('networkidle');
 
 		await page.locator('#c_email').fill('carol@example.com');
@@ -36,7 +36,35 @@ test.describe('Admin backend', () => {
 
 	test('non-admin (bob) is redirected away from /admin', async ({ page }) => {
 		await login(page, BOB.email, BOB.password);
-		await page.goto('/admin');
+		await page.goto('/settings/admin');
 		await expect(page).toHaveURL((u) => u.pathname === '/');
+	});
+
+	test('admin can set the default theme and it applies to the login screen', async ({ page }) => {
+		await login(page, ADMIN.username, ADMIN.password);
+		await page.goto('/settings/admin');
+		await page.waitForLoadState('networkidle');
+
+		// Pick "Dusk" as the instance default theme (radio inside the Default appearance card).
+		// The inputs are sr-only (visually hidden), so force is required.
+		await Promise.all([
+			page.waitForResponse((r) => r.url().includes('/admin') && r.request().method() === 'POST'),
+			page.locator('input[name="themeName"][value="dusk"]').check({ force: true })
+		]);
+
+		// The login screen (logged out → global default) now uses the Dusk theme.
+		await logout(page);
+		await page.goto('/login');
+		await page.waitForLoadState('networkidle');
+		await expect(page.locator('html')).toHaveAttribute('data-theme', 'dusk');
+
+		// Restore the default to Ocean so it doesn't leak into other specs.
+		await login(page, ADMIN.username, ADMIN.password);
+		await page.goto('/settings/admin');
+		await page.waitForLoadState('networkidle');
+		await Promise.all([
+			page.waitForResponse((r) => r.url().includes('/admin') && r.request().method() === 'POST'),
+			page.locator('input[name="themeName"][value="ocean"]').check({ force: true })
+		]);
 	});
 });

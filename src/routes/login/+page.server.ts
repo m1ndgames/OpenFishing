@@ -1,28 +1,29 @@
 import { fail, redirect } from '@sveltejs/kit';
-import { env } from '$env/dynamic/private';
 import type { Actions, PageServerLoad } from './$types';
 import {
 	SESSION_COOKIE_NAME,
+	authEnabled,
 	ensureAdminUser,
 	findUserByIdentifier,
 	resolveSessionUser,
 	sessionCookieValue,
 	verifyPassword
 } from '$lib/server/auth';
+import { mailConfigured } from '$lib/server/mail';
 
 export const load: PageServerLoad = async ({ cookies }) => {
-	if (!env.AUTH_PASSWORD) redirect(303, '/');
+	if (!authEnabled()) redirect(303, '/');
 
 	await ensureAdminUser();
 	const current = await resolveSessionUser(cookies.get(SESSION_COOKIE_NAME));
 	if (current) redirect(303, '/');
 
-	return {};
+	return { mailEnabled: mailConfigured() };
 };
 
 export const actions: Actions = {
 	default: async ({ request, cookies }) => {
-		if (!env.AUTH_PASSWORD) redirect(303, '/');
+		if (!authEnabled()) redirect(303, '/');
 		await ensureAdminUser();
 
 		const data = await request.formData();

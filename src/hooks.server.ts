@@ -6,6 +6,7 @@ import { user } from '$lib/server/db/schema';
 import {
 	SESSION_COOKIE_NAME,
 	ensureAdminUser,
+	getAdminPassword,
 	resolveSessionUser,
 	toSessionUser
 } from '$lib/server/auth';
@@ -23,7 +24,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 		}
 	}
 
-	const password = env.AUTH_PASSWORD;
+	const password = getAdminPassword();
 
 	// Auth disabled when no password is configured — fully open, single-tenant.
 	if (!password) return resolve(event);
@@ -31,9 +32,11 @@ export const handle: Handle = async ({ event, resolve }) => {
 	// Ensure the admin account exists and existing data is owned (runs once per process).
 	await ensureAdminUser();
 
-	// Login, logout and share pages are always accessible
+	// Login, logout, password-reset and share pages are always accessible
 	if (event.url.pathname === '/login') return resolve(event);
 	if (event.url.pathname === '/logout') return resolve(event);
+	if (event.url.pathname === '/forgot-password') return resolve(event);
+	if (event.url.pathname === '/reset-password') return resolve(event);
 	if (event.url.pathname.startsWith('/share/')) return resolve(event);
 	if (event.url.pathname.startsWith('/uploads/')) return resolve(event);
 
@@ -57,10 +60,10 @@ export const handle: Handle = async ({ event, resolve }) => {
 	}
 	event.locals.user = sessionUser;
 
-	// Admin-only area
-	if (event.url.pathname.startsWith('/admin')) {
+	// Admin-only area (now a settings sub-section)
+	if (event.url.pathname.startsWith('/settings/admin')) {
 		if (!sessionUser.isAdmin) {
-			if (event.url.pathname.startsWith('/admin/api') || event.request.headers.get('accept')?.includes('application/json')) {
+			if (event.request.headers.get('accept')?.includes('application/json')) {
 				return Response.json({ error: 'Forbidden' }, { status: 403 });
 			}
 			redirect(303, '/');

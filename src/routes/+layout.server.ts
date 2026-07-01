@@ -4,6 +4,7 @@ import { env } from '$env/dynamic/private';
 import { db } from '$lib/server/db';
 import { appSetting, userSetting } from '$lib/server/db/schema';
 import { and, eq, inArray } from 'drizzle-orm';
+import { authEnabled } from '$lib/server/auth';
 
 export const load: LayoutServerLoad = async ({ cookies, request, locals }) => {
 	const cookie = cookies.get('lang') ?? '';
@@ -17,20 +18,22 @@ export const load: LayoutServerLoad = async ({ cookies, request, locals }) => {
 		lang = SUPPORTED_LANGS.includes(browserLang as Lang) ? (browserLang as Lang) : defaultLang;
 	}
 
-	// Appearance settings: per-user when logged in, global app setting otherwise.
-	let settingMap: Record<string, string>;
+	// Appearance: the global `appSetting` holds the instance default (admin-configurable, and
+	// what the login screen uses). A logged-in user's own `userSetting` overrides it per key.
+	const globalRows = await db.select().from(appSetting).where(inArray(appSetting.key, ['colorMode', 'themeName']));
+	const globalMap = Object.fromEntries(globalRows.map((s) => [s.key, s.value]));
+
+	let userMap: Record<string, string> = {};
 	if (locals?.user) {
 		const rows = await db
 			.select({ key: userSetting.key, value: userSetting.value })
 			.from(userSetting)
 			.where(and(eq(userSetting.userId, locals.user.id), inArray(userSetting.key, ['colorMode', 'themeName'])));
-		settingMap = Object.fromEntries(rows.map((s) => [s.key, s.value]));
-	} else {
-		const rows = await db.select().from(appSetting).where(inArray(appSetting.key, ['colorMode', 'themeName']));
-		settingMap = Object.fromEntries(rows.map((s) => [s.key, s.value]));
+		userMap = Object.fromEntries(rows.map((s) => [s.key, s.value]));
 	}
-	const colorMode = (settingMap.colorMode ?? 'dark') as 'dark' | 'light' | 'system';
-	const themeName = settingMap.themeName ?? 'ocean';
+
+	const colorMode = (userMap.colorMode ?? globalMap.colorMode ?? 'dark') as 'dark' | 'light' | 'system';
+	const themeName = userMap.themeName ?? globalMap.themeName ?? 'ocean';
 
 	const chatbotEnabled = !!env.CHATBOT && (locals?.user?.chatbotEnabled ?? true);
 
@@ -41,7 +44,7 @@ export const load: LayoutServerLoad = async ({ cookies, request, locals }) => {
 		chatbotEnabled,
 		colorMode,
 		themeName,
-		authEnabled: !!env.AUTH_PASSWORD,
+		authEnabled: authEnabled(),
 		user: locals?.user ? { username: locals.user.username, email: locals.user.email, isAdmin: locals.user.isAdmin } : null
 	};
 };

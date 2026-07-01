@@ -5,7 +5,9 @@ import { relations } from 'drizzle-orm';
 
 export const user = sqliteTable('user', {
 	id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-	email: text('email').notNull().unique(),
+	// Nullable: the env-controlled admin has no email (it can't self-reset). Regular users
+	// always have one (enforced in the app) for password reset.
+	email: text('email').unique(),
 	username: text('username').notNull().unique(),
 	passwordHash: text('password_hash').notNull(),
 	isAdmin: integer('is_admin', { mode: 'boolean' }).notNull().default(false),
@@ -14,6 +16,8 @@ export const user = sqliteTable('user', {
 	usedBytes: integer('used_bytes').notNull().default(0),
 	chatbotEnabled: integer('chatbot_enabled', { mode: 'boolean' }).notNull().default(true),
 	apiToken: text('api_token').unique(),
+	resetTokenHash: text('reset_token_hash'),
+	resetTokenExpiry: integer('reset_token_expiry', { mode: 'timestamp' }),
 	createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
 	updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date())
 });

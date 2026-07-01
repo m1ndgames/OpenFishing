@@ -27,13 +27,13 @@ vi.mock('$lib/server/db', () => ({
 	db: {
 		query: { user: { findFirst: mockUserFindFirst } },
 		select: () => ({ from: () => ({ where: async () => [], orderBy: async () => [] }) }),
-		insert: () => ({ values: mockInsertValues }),
+		insert: () => ({ values: (v: any) => { mockInsertValues(v); const p: any = Promise.resolve(undefined); p.onConflictDoUpdate = async () => undefined; return p; } }),
 		update: () => ({ set: (v: any) => { mockUpdateSet(v); return { where: async () => undefined }; } }),
 		delete: () => ({ where: mockDeleteWhere }),
 	},
 }));
 
-const { actions } = await import('../admin/+page.server');
+const { actions } = await import('../settings/admin/+page.server');
 
 function form(entries: Record<string, string> = {}) {
 	const fd = new FormData();
@@ -46,6 +46,32 @@ beforeEach(() => {
 	mockInsertValues.mockClear();
 	mockUpdateSet.mockClear();
 	mockDeleteWhere.mockClear();
+});
+
+describe('admin default appearance', () => {
+	it('saves a valid default color mode to appSetting', async () => {
+		const res: any = await actions.setDefaultMode({ request: form({ colorMode: 'light' }) } as any);
+		expect(mockInsertValues).toHaveBeenCalledWith(expect.objectContaining({ key: 'colorMode', value: 'light' }));
+		expect(res).toMatchObject({ success: 'defaultsSaved' });
+	});
+
+	it('rejects an invalid color mode', async () => {
+		const res: any = await actions.setDefaultMode({ request: form({ colorMode: 'rainbow' }) } as any);
+		expect(res).toMatchObject({ status: 400, data: { error: 'invalidValue' } });
+		expect(mockInsertValues).not.toHaveBeenCalled();
+	});
+
+	it('saves a valid default theme to appSetting', async () => {
+		const res: any = await actions.setDefaultTheme({ request: form({ themeName: 'dusk' }) } as any);
+		expect(mockInsertValues).toHaveBeenCalledWith(expect.objectContaining({ key: 'themeName', value: 'dusk' }));
+		expect(res).toMatchObject({ success: 'defaultsSaved' });
+	});
+
+	it('rejects an unknown theme', async () => {
+		const res: any = await actions.setDefaultTheme({ request: form({ themeName: 'not-a-theme' }) } as any);
+		expect(res).toMatchObject({ status: 400, data: { error: 'invalidValue' } });
+		expect(mockInsertValues).not.toHaveBeenCalled();
+	});
 });
 
 describe('admin createUser', () => {
@@ -90,15 +116,15 @@ describe('admin updateUser', () => {
 		expect(res).toMatchObject({ status: 404 });
 	});
 
-	it('does not change email/username for the admin account', async () => {
-		mockUserFindFirst
-			.mockResolvedValueOnce({ id: 'a1', isAdmin: true }) // findUser
-			.mockResolvedValueOnce(undefined); // clash check
-		await actions.updateUser({ request: form({ id: 'a1', email: 'new@b.com', username: 'newname', quota_mb: '10' }) } as any);
+	it('only updates the admin quota (identity + password are env-locked)', async () => {
+		mockUserFindFirst.mockResolvedValueOnce({ id: 'a1', isAdmin: true }); // findUser
+		await actions.updateUser({ request: form({ id: 'a1', email: 'new@b.com', username: 'newname', quota_mb: '10', password: 'shouldbeignored' }) } as any);
 		const set = mockUpdateSet.mock.calls[0][0] as any;
+		expect(set.quotaBytes).toBe(10 * 1024 * 1024);
 		expect(set.email).toBeUndefined();
 		expect(set.username).toBeUndefined();
-		expect(set.quotaBytes).toBe(10 * 1024 * 1024);
+		// Admin password is never reset here, even if a value is provided
+		expect(mockUpdateSet.mock.calls.every((c) => (c[0] as any).passwordHash === undefined)).toBe(true);
 	});
 });
 

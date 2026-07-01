@@ -22,7 +22,7 @@ vi.mock('$lib/server/db', () => ({
 	},
 }));
 
-const { actions } = await import('../account/+page.server');
+const { actions } = await import('../settings/account/+page.server');
 
 function ev(entries: Record<string, string>, user: any = { id: 'u1', isAdmin: false }) {
 	const fd = new FormData();
@@ -38,9 +38,10 @@ beforeEach(() => {
 });
 
 describe('account updateProfile', () => {
-	it('blocks the admin account', async () => {
-		const res: any = await actions.updateProfile(ev({ email: 'a@b.com', username: 'bob' }, { id: 'a1', isAdmin: true }));
-		expect(res).toMatchObject({ status: 403, data: { error: 'adminEnvControlled' } });
+	it('blocks the admin from changing identity (env-controlled)', async () => {
+		const res: any = await actions.updateProfile(ev({ email: 'a@b.com', username: 'admin2' }, { id: 'a1', isAdmin: true }));
+		expect(res).toMatchObject({ status: 403, data: { error: 'cannotModifyAdmin' } });
+		expect(mockUpdateSet).not.toHaveBeenCalled();
 	});
 
 	it('rejects a duplicate email/username', async () => {
@@ -72,6 +73,11 @@ describe('account changePassword', () => {
 			.rejects.toMatchObject({ status: 303, location: '/login' });
 		expect(mockUpdateSet).toHaveBeenCalledWith(expect.objectContaining({ passwordHash: 'hashed' }));
 		expect(cookieDelete).toHaveBeenCalledWith('of_session', { path: '/' });
+	});
+
+	it('blocks the admin (password is env-controlled)', async () => {
+		const res: any = await actions.changePassword(ev({ current_password: 'x', new_password: 'y' }, { id: 'a1', isAdmin: true }));
+		expect(res).toMatchObject({ status: 403, data: { error: 'adminPasswordEnvControlled' } });
 	});
 });
 

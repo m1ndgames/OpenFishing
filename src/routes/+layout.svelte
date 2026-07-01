@@ -1,24 +1,21 @@
 <script lang="ts">
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
+	import logo from '$lib/assets/openfishing-logo.svg?raw';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import type { LayoutData } from './$types';
 	import Chatbot from '$lib/components/Chatbot.svelte';
 
 	let { children, data }: { children: import('svelte').Snippet; data: LayoutData } = $props();
-	const { t, lang, demoMode, chatbotEnabled } = data;
-
-	const adminActive = $derived($page.url.pathname.startsWith('/admin'));
-	const accountActive = $derived($page.url.pathname.startsWith('/account'));
-	let showUserMenu = $state(false);
+	const { t, demoMode, chatbotEnabled } = data;
 
 	$effect(() => {
 		document.documentElement.setAttribute('data-mode', data.colorMode);
 		document.documentElement.setAttribute('data-theme', data.themeName);
 	});
 
-	const isLoginPage    = $derived($page.url.pathname === '/login');
+	const isLoginPage    = $derived(['/login', '/forgot-password', '/reset-password'].includes($page.url.pathname));
 	const isSharePage    = $derived($page.url.pathname.startsWith('/share/'));
 	const luresActive    = $derived($page.url.pathname === '/' || $page.url.pathname.startsWith('/lures'));
 	const spotsActive    = $derived($page.url.pathname.startsWith('/spots'));
@@ -56,14 +53,13 @@
 
 <svelte:document onclick={(e) => {
 	if (showAddMenu && !(e.target as Element).closest('[data-add-menu]')) showAddMenu = false;
-	if (showUserMenu && !(e.target as Element).closest('[data-user-menu]')) showUserMenu = false;
 }} />
 
 <svelte:head>
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
 	<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-	<link rel="icon" href={favicon} />
+	<link rel="icon" href={favicon} type="image/svg+xml" />
 	<title>OpenFishing</title>
 </svelte:head>
 
@@ -91,12 +87,8 @@
 		<div class="max-w-6xl mx-auto px-4 h-14 flex items-center gap-2">
 
 			<!-- Logo -->
-			<a href="/" style="text-decoration:none; display:flex; align-items:center; margin-right:8px; flex-shrink:0; color:var(--of-text-bright);">
-				<svg viewBox="0 0 192 52" height="26" fill="none" role="img" aria-label="OpenFishing">
-					<text x="2" y="35" font-family="'Inter','Segoe UI',system-ui,-apple-system,sans-serif" font-style="italic" font-size="26" letter-spacing="-0.5" fill="currentColor">
-						<tspan font-weight="400">Open</tspan><tspan font-weight="800">Fishing</tspan>
-					</text>
-				</svg>
+			<a href="/" style="text-decoration:none; display:flex; align-items:center; margin-right:8px; flex-shrink:0; color:var(--of-accent); height:26px;">
+				{@html logo.replace('<svg ', '<svg height="26" ')}
 			</a>
 
 			<!-- Nav links -->
@@ -144,41 +136,6 @@
 
 			<div class="flex-1"></div>
 
-				<!-- User menu (desktop) -->
-				{#if data.user}
-				<div data-user-menu="true" style="position:relative; flex-shrink:0;">
-					<button
-						onclick={() => showUserMenu = !showUserMenu}
-						title={data.user.email}
-						style="display:flex; align-items:center; gap:6px; font-size:0.8rem; font-weight:600; padding:6px 11px; border-radius:9px; cursor:pointer; font-family:'DM Sans',sans-serif;
-							border:1px solid {(adminActive || accountActive) ? 'var(--of-accent-border)' : 'var(--of-border)'};
-							background:{(adminActive || accountActive) ? 'var(--of-accent-glow)' : 'var(--of-bg-elevated)'};
-							color:{(adminActive || accountActive) ? 'var(--of-accent)' : 'var(--of-text-2)'};">
-						<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.7"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
-						{data.user.username}
-					</button>
-					{#if showUserMenu}
-						<div style="position:absolute; top:calc(100% + 6px); right:0; min-width:170px; background:var(--of-bg-elevated); border:1px solid var(--of-border); border-radius:10px; padding:4px; z-index:100; box-shadow:0 8px 24px rgba(0,0,0,0.4);">
-							<a href="/account" onclick={() => showUserMenu = false} style="display:flex; align-items:center; gap:9px; padding:9px 12px; border-radius:7px; text-decoration:none; color:var(--of-text); font-size:0.85rem; font-weight:500;"
-								onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-accent-bg)';}} onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='';}}>
-								{t.navAccount}
-							</a>
-							{#if data.user.isAdmin}
-								<a href="/admin" onclick={() => showUserMenu = false} style="display:flex; align-items:center; gap:9px; padding:9px 12px; border-radius:7px; text-decoration:none; color:var(--of-text); font-size:0.85rem; font-weight:500;"
-									onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-accent-bg)';}} onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='';}}>
-									{t.navAdmin}
-								</a>
-							{/if}
-							<form method="POST" action="/logout" style="margin:0;">
-								<button type="submit" style="width:100%; text-align:left; display:flex; align-items:center; gap:9px; padding:9px 12px; border-radius:7px; background:none; border:none; cursor:pointer; color:var(--of-danger); font-size:0.85rem; font-weight:500; font-family:'DM Sans',sans-serif;">
-									{t.navLogout}
-								</button>
-							</form>
-						</div>
-					{/if}
-				</div>
-				{/if}
-
 			<!-- Add... dropdown -->
 			<div data-add-menu="true" style="position:relative; flex-shrink:0;">
 				<button
@@ -223,65 +180,17 @@
 					</div>
 				{/if}
 			</div>
-
-			<!-- Language switcher -->
-			<form method="POST" action="/api/lang" style="flex-shrink:0;">
-				<input type="hidden" name="redirect" value={$page.url.pathname} />
-				<select name="lang" onchange={(e) => (e.currentTarget as HTMLSelectElement).form?.submit()}
-					style="font-size:0.8rem; border:1px solid var(--of-border); border-radius:8px; padding:5px 8px; background:var(--of-bg-elevated); color:var(--of-text-2); cursor:pointer; outline:none;">
-					<option value="en" selected={lang === 'en'}>🇬🇧 EN</option>
-					<option value="de" selected={lang === 'de'}>🇩🇪 DE</option>
-					<option value="nl" selected={lang === 'nl'}>🇳🇱 NL</option>
-					<option value="fr" selected={lang === 'fr'}>🇫🇷 FR</option>
-					<option value="es" selected={lang === 'es'}>🇪🇸 ES</option>
-					<option value="it" selected={lang === 'it'}>🇮🇹 IT</option>
-					<option value="pt" selected={lang === 'pt'}>🇵🇹 PT</option>
-					<option value="pl" selected={lang === 'pl'}>🇵🇱 PL</option>
-					<option value="uk" selected={lang === 'uk'}>🇺🇦 UK</option>
-				</select>
-			</form>
 		</div>
 	</header>
 
 	<!-- ── MOBILE TOP BAR (< md) ── -->
 	<header class="no-print md:hidden" style="background-color:var(--of-bg-surface); border-bottom:1px solid var(--of-border-subtle);">
 		<div class="px-4 h-12 flex items-center justify-between gap-2">
-			<a href="/" style="text-decoration:none; display:flex; align-items:center; flex-shrink:0; color:var(--of-text-bright);">
-				<svg viewBox="0 0 192 52" height="22" fill="none" role="img" aria-label="OpenFishing">
-					<text x="2" y="35" font-family="'Inter','Segoe UI',system-ui,-apple-system,sans-serif" font-style="italic" font-size="26" letter-spacing="-0.5" fill="currentColor">
-						<tspan font-weight="400">Open</tspan><tspan font-weight="800">Fishing</tspan>
-					</text>
-				</svg>
+			<a href="/" style="text-decoration:none; display:flex; align-items:center; flex-shrink:0; color:var(--of-accent); height:22px;">
+				{@html logo.replace('<svg ', '<svg height="22" ')}
 			</a>
 
 			<div style="flex:1;"></div>
-
-				<!-- User menu (mobile) -->
-				{#if data.user}
-				<div data-user-menu="true" style="position:relative; flex-shrink:0;">
-					<button
-						onclick={() => showUserMenu = !showUserMenu}
-						aria-label={data.user.username}
-						style="display:flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:8px; cursor:pointer;
-							border:1px solid {(adminActive || accountActive) ? 'var(--of-accent-border)' : 'var(--of-border)'};
-							background:{(adminActive || accountActive) ? 'var(--of-accent-glow)' : 'var(--of-bg-elevated)'};
-							color:{(adminActive || accountActive) ? 'var(--of-accent)' : 'var(--of-text-2)'};">
-						<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.7"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
-					</button>
-					{#if showUserMenu}
-						<div style="position:absolute; top:calc(100% + 6px); right:0; min-width:170px; background:var(--of-bg-elevated); border:1px solid var(--of-border); border-radius:10px; padding:4px; z-index:100; box-shadow:0 8px 24px rgba(0,0,0,0.5);">
-							<div style="padding:7px 12px 4px; font-size:0.78rem; color:var(--of-text-4); font-weight:600;">{data.user.username}</div>
-							<a href="/account" onclick={() => showUserMenu = false} style="display:flex; align-items:center; gap:9px; padding:10px 12px; border-radius:7px; text-decoration:none; color:var(--of-text); font-size:0.875rem; font-weight:500;">{t.navAccount}</a>
-							{#if data.user.isAdmin}
-								<a href="/admin" onclick={() => showUserMenu = false} style="display:flex; align-items:center; gap:9px; padding:10px 12px; border-radius:7px; text-decoration:none; color:var(--of-text); font-size:0.875rem; font-weight:500;">{t.navAdmin}</a>
-							{/if}
-							<form method="POST" action="/logout" style="margin:0;">
-								<button type="submit" style="width:100%; text-align:left; padding:10px 12px; border-radius:7px; background:none; border:none; cursor:pointer; color:var(--of-danger); font-size:0.875rem; font-weight:500; font-family:'DM Sans',sans-serif;">{t.navLogout}</button>
-							</form>
-						</div>
-					{/if}
-				</div>
-				{/if}
 
 			<!-- Add... dropdown (mobile) -->
 			<div data-add-menu="true" style="position:relative; flex-shrink:0;">
@@ -321,23 +230,6 @@
 					</div>
 				{/if}
 			</div>
-
-			<!-- Language switcher -->
-			<form method="POST" action="/api/lang" style="flex-shrink:0;">
-				<input type="hidden" name="redirect" value={$page.url.pathname} />
-				<select name="lang" onchange={(e) => (e.currentTarget as HTMLSelectElement).form?.submit()}
-					style="font-size:0.78rem; border:1px solid var(--of-border); border-radius:7px; padding:4px 7px; background:var(--of-bg-elevated); color:var(--of-text-2); cursor:pointer; outline:none;">
-					<option value="en" selected={lang === 'en'}>🇬🇧 EN</option>
-					<option value="de" selected={lang === 'de'}>🇩🇪 DE</option>
-					<option value="nl" selected={lang === 'nl'}>🇳🇱 NL</option>
-					<option value="fr" selected={lang === 'fr'}>🇫🇷 FR</option>
-					<option value="es" selected={lang === 'es'}>🇪🇸 ES</option>
-					<option value="it" selected={lang === 'it'}>🇮🇹 IT</option>
-					<option value="pt" selected={lang === 'pt'}>🇵🇹 PT</option>
-					<option value="pl" selected={lang === 'pl'}>🇵🇱 PL</option>
-					<option value="uk" selected={lang === 'uk'}>🇺🇦 UK</option>
-				</select>
-			</form>
 		</div>
 	</header>
 

@@ -7,6 +7,8 @@ export default defineConfig({
 	testDir: './e2e/auth',
 	testMatch: '**/*.test.ts',
 	fullyParallel: false,
+	// All specs share one auth DB and mutate user state — run strictly serially.
+	workers: 1,
 	forbidOnly: !!process.env.CI,
 	retries: process.env.CI ? 1 : 0,
 	reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : [['list'], ['html', { open: 'never' }]],
@@ -24,7 +26,7 @@ export default defineConfig({
 		env: {
 			DATABASE_URL: 'e2e/test-auth.db',
 			UPLOAD_PATH: 'e2e/uploads-auth',
-			AUTH_PASSWORD: 'e2e-secret',
+			ADMIN_PASSWORD: 'e2e-secret',
 			ADMIN_EMAIL: 'admin@openfishing.local',
 			DEMO_MODE: '',
 			CHATBOT: '',

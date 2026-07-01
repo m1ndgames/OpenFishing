@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { page } from '$app/stores';
 	import type { PageData } from './$types';
 	import { THEMES } from '$lib/themes';
 
 	let { data }: { data: PageData } = $props();
-	const { t } = data;
+	const { t, lang } = data;
 
 	let selectedMode = $state(data.colorMode);
 	let selectedTheme = $state(data.themeName);
@@ -20,6 +21,28 @@
 </script>
 
 <div style="display:flex; flex-direction:column; gap:16px;">
+
+	<!-- Language -->
+	<section style="background:var(--of-bg-surface); border:1px solid var(--of-border-subtle); border-radius:16px; overflow:hidden;">
+		<div style="padding:20px;">
+			<p style="font-weight:600; color:var(--of-text); margin:0 0 16px; font-size:0.925rem;">{t.settingsLanguage}</p>
+			<form method="POST" action="/api/lang">
+				<input type="hidden" name="redirect" value={$page.url.pathname} />
+				<select name="lang" onchange={(e) => (e.currentTarget as HTMLSelectElement).form?.submit()}
+					style="font-size:0.875rem; border:1px solid var(--of-border); border-radius:9px; padding:8px 12px; background:var(--of-bg-elevated); color:var(--of-text-2); cursor:pointer; outline:none; min-width:160px;">
+					<option value="en" selected={lang === 'en'}>🇬🇧 English</option>
+					<option value="de" selected={lang === 'de'}>🇩🇪 Deutsch</option>
+					<option value="nl" selected={lang === 'nl'}>🇳🇱 Nederlands</option>
+					<option value="fr" selected={lang === 'fr'}>🇫🇷 Français</option>
+					<option value="es" selected={lang === 'es'}>🇪🇸 Español</option>
+					<option value="it" selected={lang === 'it'}>🇮🇹 Italiano</option>
+					<option value="pt" selected={lang === 'pt'}>🇵🇹 Português</option>
+					<option value="pl" selected={lang === 'pl'}>🇵🇱 Polski</option>
+					<option value="uk" selected={lang === 'uk'}>🇺🇦 Українська</option>
+				</select>
+			</form>
+		</div>
+	</section>
 
 	<!-- Color mode -->
 	<section style="background:var(--of-bg-surface); border:1px solid var(--of-border-subtle); border-radius:16px; overflow:hidden;">

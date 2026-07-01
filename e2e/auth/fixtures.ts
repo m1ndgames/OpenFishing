@@ -4,7 +4,7 @@
 export const ADMIN = {
 	id: 'admin-00000000-0000-0000-000000000001',
 	username: 'admin',
-	email: 'admin@openfishing.local',
+	// Admin has no email — it logs in by username only.
 	password: 'e2e-secret',
 	apiToken: 'admintoken000000000000000000000000000000000000aa01'
 };

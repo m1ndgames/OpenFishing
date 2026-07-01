@@ -9,7 +9,7 @@ test.describe('Upload quota enforcement', () => {
 	test('a 0 MB-quota user is blocked from uploading a photo', async ({ page }) => {
 		// 1. Admin creates the constrained user.
 		await login(page, ADMIN.username, ADMIN.password);
-		await page.goto('/admin');
+		await page.goto('/settings/admin');
 		await page.waitForLoadState('networkidle');
 		await page.locator('#c_email').fill('quser@example.com');
 		await page.locator('#c_username').fill('quser');

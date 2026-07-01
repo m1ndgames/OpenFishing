@@ -29,7 +29,7 @@
 			<label style={labelStyle}>{t.rodModel} *</label>
 			<input name="model" type="text" value={r.model} required style={inputStyle} onfocus={focusInput} onblur={blurInput} />
 		</div>
-		<div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+		<div class="of-grid-2-sm">
 			<div>
 				<label style={labelStyle}>{t.rodLength}</label>
 				<input name="length_m" type="number" step="0.01" min="0" value={r.lengthM ?? ''} style={inputStyle} onfocus={focusInput} onblur={blurInput} />

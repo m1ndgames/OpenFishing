@@ -6,6 +6,7 @@ import { eq, desc, asc, and } from 'drizzle-orm';
 import QRCode from 'qrcode';
 import { env } from '$env/dynamic/private';
 import { userFilter } from '$lib/server/scope';
+import { authEnabled as isAuthEnabled } from '$lib/server/auth';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const [lure, lureCatches] = await Promise.all([
@@ -29,7 +30,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		color: { dark: '#1e293b', light: '#ffffff' }
 	});
 
-	const authEnabled = !!env.AUTH_PASSWORD;
+	const authEnabled = isAuthEnabled();
 	const shareUrl = lure.shareToken ? `${baseUrl}/share/lures/${lure.shareToken}` : null;
 
 	return { lure, qrSvg, lureCatches, authEnabled, shareUrl };

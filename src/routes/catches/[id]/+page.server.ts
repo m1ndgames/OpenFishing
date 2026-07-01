@@ -5,6 +5,7 @@ import { fishCatch, catchPhoto, spot } from '$lib/server/db/schema';
 import { eq, asc, and } from 'drizzle-orm';
 import { env } from '$env/dynamic/private';
 import { userFilter } from '$lib/server/scope';
+import { authEnabled as isAuthEnabled } from '$lib/server/auth';
 
 import { haversineMeters } from '$lib/server/haversine';
 
@@ -35,7 +36,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	}
 
 	const baseUrl = env.BASE_URL ?? 'http://localhost:5173';
-	const authEnabled = !!env.AUTH_PASSWORD;
+	const authEnabled = isAuthEnabled();
 	const shareUrl = found.shareToken ? `${baseUrl}/share/catches/${found.shareToken}` : null;
 
 	return { catch: found, nearbySpot, authEnabled, shareUrl };

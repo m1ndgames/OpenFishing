@@ -18,6 +18,7 @@ vi.mock('$lib/server/db', () => ({
 }));
 vi.mock('$lib/server/auth', () => ({
 	SESSION_COOKIE_NAME: 'of_session',
+	getAdminPassword: () => mockEnv.ADMIN_PASSWORD || mockEnv.AUTH_PASSWORD || undefined,
 	ensureAdminUser: vi.fn().mockResolvedValue(undefined),
 	resolveSessionUser: vi.fn(async () => sessionUser),
 	toSessionUser: (row: any) => row,
@@ -139,14 +140,14 @@ describe('hooks — auth enabled', () => {
 
 	it('allows /admin for an admin user', async () => {
 		sessionUser = { id: 'a1', username: 'admin', isAdmin: true };
-		await handle({ event: makeEvent('/admin', { cookie: 'good' }), resolve });
+		await handle({ event: makeEvent('/settings/admin', { cookie: 'good' }), resolve });
 		expect(resolve).toHaveBeenCalledOnce();
 	});
 
 	it('redirects /admin to / for a non-admin user', async () => {
 		sessionUser = { id: 'u1', username: 'bob', isAdmin: false };
 		await expect(
-			handle({ event: makeEvent('/admin', { cookie: 'good' }), resolve })
+			handle({ event: makeEvent('/settings/admin', { cookie: 'good' }), resolve })
 		).rejects.toMatchObject({ status: 303, location: '/' });
 		expect(resolve).not.toHaveBeenCalled();
 	});
@@ -154,7 +155,7 @@ describe('hooks — auth enabled', () => {
 	it('returns 403 JSON for /admin API requests by a non-admin', async () => {
 		sessionUser = { id: 'u1', username: 'bob', isAdmin: false };
 		const res = await handle({
-			event: makeEvent('/admin', { cookie: 'good', accept: 'application/json' }),
+			event: makeEvent('/settings/admin', { cookie: 'good', accept: 'application/json' }),
 			resolve
 		});
 		expect(res.status).toBe(403);

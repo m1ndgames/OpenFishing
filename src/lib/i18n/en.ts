@@ -340,6 +340,14 @@ export default {
 	chatbotHistory: 'History',
 	chatbotNewChat: 'New chat',
 	chatbotNoHistory: 'No previous conversations',
+	chatbotYesterday: 'Yesterday',
+	chatbotDaysAgo: '{n}d ago',
+	chatbotMsgCount: '{n} msgs',
+	chatbotBack: 'Back',
+	chatbotDeleteSession: 'Delete session',
+	chatbotSend: 'Send',
+	loginShowPassword: 'Show password',
+	loginHidePassword: 'Hide password',
 
 	// Fish identification
 	identifyFish: 'Identify from photo',
@@ -464,4 +472,34 @@ export default {
 	adminRestoreAllConfirm: 'I understand this permanently replaces all data and user accounts for the entire instance. This cannot be undone.',
 	adminRestoreAllBtn: 'Restore all & Replace',
 	restoreAllDone: 'Full restore complete.',
+
+	// Settings restructure
+	settingsLanguage: 'Language',
+	accountAdminPasswordNote: 'Your password is controlled by the server environment (ADMIN_PASSWORD) and re-synced on startup, so it can’t be changed here. You can still change your email and username.',
+	adminPasswordEnvControlled: 'The admin password is controlled by the server environment and cannot be changed here.',
+
+	// Admin account (no email / fixed username) + password reset
+	accountAdminIdentityNote: 'The admin account is managed by the server environment.',
+	loginForgotPassword: 'Forgot password?',
+	forgotTitle: 'Reset password',
+	forgotSubtitle: 'Enter your email to get a reset link',
+	forgotSubmit: 'Send reset link',
+	forgotSent: 'If an account with that email exists, a password reset link has been sent. Check your inbox.',
+	forgotBackToLogin: 'Back to login',
+	resetTitle: 'Set a new password',
+	resetSubtitle: 'Choose a new password for your account',
+	resetSubmit: 'Set new password',
+	resetTokenInvalid: 'This password reset link is invalid or has expired.',
+	resetRequestNew: 'Request a new link',
+	resetSuccess: 'Your password has been reset. You can now log in.',
+	resetEmailSubject: 'Reset your OpenFishing password',
+	resetEmailIntro: 'We received a request to reset your OpenFishing password. Click the button below to choose a new one. This link expires in 1 hour.',
+	resetEmailButton: 'Reset password',
+	resetEmailIgnore: 'If you didn’t request this, you can safely ignore this email.',
+
+	// Admin default appearance
+	adminDefaultAppearance: 'Default appearance',
+	adminDefaultAppearanceDesc: 'The default color mode and theme for the login screen and for users who haven’t chosen their own. Each user can still override it in their own appearance settings.',
+	defaultsSaved: 'Default appearance saved.',
+	invalidValue: 'Invalid value.',
 } as const;

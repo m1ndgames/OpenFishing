@@ -30,11 +30,12 @@ export default async function globalSetup() {
 	const now = new Date();
 
 	// Admin is seeded with isAdmin=true; ensureAdminUser() will find it and only re-sync
-	// its password hash to AUTH_PASSWORD (still verifies), keeping this email/username/token.
+	// its password hash to ADMIN_PASSWORD (still verifies), keeping this username/token.
+	// The admin has NO email (it can't self-reset).
 	await db.insert(schema.user).values([
 		{
 			id: ADMIN.id,
-			email: ADMIN.email,
+			email: null,
 			username: ADMIN.username,
 			passwordHash: hashPassword(ADMIN.password),
 			isAdmin: true,

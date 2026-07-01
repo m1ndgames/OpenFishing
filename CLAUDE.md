@@ -6,20 +6,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **OpenFishing** is a self-hosted SvelteKit + SQLite web app for organizing fishing lures, marking fishing spots, and logging catches.
 
-Optional multi-user auth via `AUTH_PASSWORD` env var. If unset, the app is fully open and single-tenant (no login, no data scoping — exactly as before multi-user). When set, the app becomes multi-user: every request is gated by `src/hooks.server.ts`, and all data (lures/spots/catches/tackle) is isolated per user via a nullable `userId` FK on the owned tables.
+Optional multi-user auth via the `ADMIN_PASSWORD` env var (the old `AUTH_PASSWORD` name still works as a deprecated fallback). If unset, the app is fully open and single-tenant (no login, no data scoping — exactly as before multi-user). When set, the app becomes multi-user: every request is gated by `src/hooks.server.ts`, and all data (lures/spots/catches/tackle) is isolated per user via a nullable `userId` FK on the owned tables.
 
-- **Login**: users sign in with **email or username + password** (`/login`). Passwords are scrypt-hashed (`src/lib/server/auth.ts`, no new deps). The session cookie `of_session` is a stateless value `"<userId>.<hmac>"` where the HMAC is keyed on `AUTH_PASSWORD` and bound to the user's password hash — so changing a password or `AUTH_PASSWORD` invalidates sessions. `resolveSessionUser()` validates it and loads the user each request; `event.locals.user` carries the `SessionUser` (or `null` in open mode).
-- **Admin**: the admin account is auto-provisioned on startup by `ensureAdminUser()` from env — username `admin`, email `ADMIN_EMAIL` (default `admin@openfishing.local`), password `AUTH_PASSWORD`, re-synced every boot so it can't lock itself out. On first provisioning it claims all orphan (`userId IS NULL`) rows for the admin. Admin-only backend at `/admin` (gated in the hook) manages users: create/edit/delete, set storage quota, reset password, enable/disable, toggle chatbot access, regenerate API token.
-- **Account**: `/account` lets a user change their own email/username/password, and view/copy their API token and storage usage. The admin's identity is env-controlled (read-only here).
-- **Data scoping**: server loads/actions filter by `userFilter(locals, table.userId)` and stamp `ownerId(locals)` on inserts (`src/lib/server/scope.ts`). Both are null-safe: in open mode (`AUTH_PASSWORD` unset, `locals.user` null) they apply no filter and stamp `null`, preserving single-tenant behaviour. Detail/edit reads verify ownership (404 otherwise). `/share/*` lookups stay owner-independent (by token).
+- **Auth secret**: `getAdminPassword()` (`src/lib/server/auth.ts`) returns `ADMIN_PASSWORD`, falling back to the deprecated `AUTH_PASSWORD`. `authEnabled()` is the canonical "is multi-user on" check — use these helpers, not `env.AUTH_PASSWORD` directly.
+- **Login**: users sign in with **email or username + password** (`/login`, form fields `identifier`/`password`). Passwords are scrypt-hashed. The session cookie `of_session` is a stateless value `"<userId>.<hmac>"` where the HMAC is keyed on the admin password and bound to the user's password hash — so changing a password or the admin password invalidates sessions. `resolveSessionUser()` validates it; `event.locals.user` carries the `SessionUser` (or `null` in open mode).
+- **Admin**: auto-provisioned on startup by `ensureAdminUser()` → `syncAdminFromEnv()`. The admin is intentionally **minimal and fully env-controlled**: username is always `admin`, it has **no email** (`email` is nullable; admin's is null), and its password comes from `ADMIN_PASSWORD`. All three are re-synced **every boot** so the admin can't lock itself out or drift. On first provisioning it claims all orphan (`userId IS NULL`) rows for the admin. Admin-only backend at `/settings/admin` (gated in the hook) manages users + full backup/restore-all; the admin's own row there shows only an editable quota.
+- **Account**: `/settings/account` — regular users change their own **email, username, and password**; the **admin** sees only a read-only identity note (nothing editable). Everyone can view/copy their API token + storage usage and **log out**. There is no top-nav user menu; Account and (for admins) Admin are tabs in the Settings sub-nav.
+- **Password reset**: when SMTP is configured (`mailConfigured()`, `src/lib/server/mail.ts` via nodemailer), `/login` shows a "Forgot password?" link → `/forgot-password` (email → emailed reset link, generic response to avoid enumeration) → `/reset-password?token=…`. Tokens are random, stored **hashed** (`user.resetTokenHash`) with a 1-hour expiry (`user.resetTokenExpiry`). The admin has no email so it can't self-reset (its password is env-controlled anyway). Both routes are bypassed by the auth hook and disabled when SMTP is unset.
+- **Data scoping**: server loads/actions filter by `userFilter(locals, table.userId)` and stamp `ownerId(locals)` on inserts (`src/lib/server/scope.ts`). Both are null-safe: in open mode (auth disabled, `locals.user` null) they apply no filter and stamp `null`, preserving single-tenant behaviour. Detail/edit reads verify ownership (404 otherwise). `/share/*` lookups stay owner-independent (by token).
 - **REST API**: `/api/v1/*` authenticates with a **per-user** `Authorization: Bearer <user.apiToken>` and returns only that user's data.
-- **Quotas**: per-user total upload storage (`user.quotaBytes`, MB; null = unlimited). `saveUpload(file, owner)` processes to a buffer, enforces the quota before writing, and tracks `user.usedBytes`; `deleteUpload(file, owner)` reclaims it.
-- **Appearance**: color mode + theme are per-user (`userSetting` table, composite PK `(userId, key)`) when logged in, falling back to the global `appSetting` in open mode.
+- **Quotas**: per-user total upload storage (`user.quotaBytes`, MB; null = unlimited). Usage is computed on demand from photo files on disk via `getUsedBytes(userId)` (`src/lib/server/uploads.ts`) — no stored counter to drift; `saveUpload(file, owner)` enforces the quota before writing. The `user.usedBytes` column is dead/unused.
+- **Appearance + language**: color mode, theme, and language switcher live on `/settings/appearance`. Color mode/theme are per-user (`userSetting` table, composite PK `(userId, key)`) when logged in, falling back to the global `appSetting` in open mode.
 - **Chatbot**: per-user `user.chatbotEnabled` flag gates the widget and `/api/chat` (only meaningful when the global `CHATBOT` env is on).
 
-The legacy single-shared-password model (HMAC of `'openfishing-session'`) has been replaced by the above.
-
-Share links allow individual lures, spots, and catches to be shared publicly even when auth is enabled. A `shareToken` UUID column on each entity controls access. The `/share/*` and `/uploads/*` paths are always bypassed by the auth hook. Share management UI (create/copy/revoke) is shown on detail pages only when `AUTH_PASSWORD` is set.
+Share links allow individual lures, spots, and catches to be shared publicly even when auth is enabled. A `shareToken` UUID column on each entity controls access. The `/share/*` and `/uploads/*` paths are always bypassed by the auth hook. Share management UI (create/copy/revoke) is shown on detail pages only when auth is enabled (`authEnabled()`).
 
 ## Tech Stack
 
@@ -144,17 +144,19 @@ Tests live in `e2e/*.test.ts`. Config: `playwright.config.ts`.
 | `/share/lures/[token]` | Public read-only lure view (no auth required) |
 | `/share/spots/[token]` | Public read-only spot view (no auth required) |
 | `/share/catches/[token]` | Public read-only catch view (no auth required) |
-| `/login` | Email/username + password login (only when `AUTH_PASSWORD` is set) |
+| `/login` | Email/username + password login (only when `ADMIN_PASSWORD` is set). Shows a "Forgot password?" link when SMTP is configured |
+| `/forgot-password` | Request a password-reset email (gated behind `mailConfigured()`; admin has no email so can't use it) |
+| `/reset-password` | Set a new password from a `?token=` reset link (hashed token, 1h expiry) |
 | `/logout` | POST action — clears the session cookie and redirects to `/login` |
-| `/account` | Self-service: change own email/username/password, view API token + storage usage |
-| `/admin` | Admin-only user management (create/edit/delete users, quotas, password reset, enable/disable, chatbot toggle, API token) + full backup/restore-all |
-| `/admin/export` | GET — admin-only ZIP of **all** users + all their data (full-instance backup) |
+| `/settings/account` | Self-service Settings tab: change own email/username (+ password for non-admins), view API token + storage usage, log out (`/account` redirects here) |
+| `/settings/admin` | Admin-only Settings tab: user management (create/edit/delete users, quotas, password reset, enable/disable, chatbot toggle, API token) + full backup/restore-all (`/admin` redirects here) |
+| `/settings/admin/export` | GET — admin-only ZIP of **all** users + all their data (full-instance backup) |
 
 ### Data model
 
-- `user` — id (UUID), email (unique, lowercased), username (unique), passwordHash (scrypt `salt:hash`), isAdmin (boolean), disabled (boolean), quotaBytes (nullable int = unlimited), usedBytes (int), chatbotEnabled (boolean, default true), apiToken (nullable unique), createdAt, updatedAt
+- `user` — id (UUID), email (**nullable**, unique, lowercased — admin has none), username (unique), passwordHash (scrypt `salt:hash`), isAdmin (boolean), disabled (boolean), quotaBytes (nullable int = unlimited), usedBytes (int, unused — usage is computed from disk), chatbotEnabled (boolean, default true), apiToken (nullable unique), resetTokenHash (nullable, SHA-256 of the emailed reset token), resetTokenExpiry (nullable timestamp), createdAt, updatedAt
 - `userSetting` — composite PK (userId FK → user cascade, key); value. Per-user prefs (colorMode/themeName) when logged in
-- The **owned** tables (`lure`, `spot`, `fishCatch`, `rod`, `reel`, `fishingLine`, `combo`, `chatMessage`) each carry a nullable `userId` (FK → user). Child tables (`tag`, `spotTag`, `spotPhoto`, `catchPhoto`, `reelLineLog`) inherit ownership through their parent FK. NOTE: the `userId` FK does **not** cascade on user delete (SQLite ALTER-ADD limitation) — `/admin` deletes a user's owned rows explicitly, then the user row (which cascades `userSetting`/`chatMessage`).
+- The **owned** tables (`lure`, `spot`, `fishCatch`, `rod`, `reel`, `fishingLine`, `combo`, `chatMessage`) each carry a nullable `userId` (FK → user). Child tables (`tag`, `spotTag`, `spotPhoto`, `catchPhoto`, `reelLineLog`) inherit ownership through their parent FK. NOTE: the `userId` FK does **not** cascade on user delete (SQLite ALTER-ADD limitation) — `/settings/admin` deletes a user's owned rows explicitly, then the user row (which cascades `userSetting`/`chatMessage`).
 - `lure` — id (UUID), userId (nullable FK), lureNumber (sequential int, per-user), name, brand, type, color, weight, size, notes, photoPath, species, runningDepth, waterType, lightConditions (integer 0–10), amount (integer, default 1), favourite (boolean), qrCoded (boolean), lost (boolean), shareToken (nullable UUID), createdAt, updatedAt
 - `tag` — id, lureId (FK → lure, cascade delete), name
 - `spot` — id (UUID), name, lat, lng, notes, shareToken (nullable UUID), createdAt, updatedAt
@@ -191,7 +193,12 @@ The layout (`src/routes/+layout.svelte`) renders the full nav chrome for all rou
 - **Desktop**: SVG wordmark logo (`src/lib/assets/openfishing-logo.svg`) + section links (Lures | Tackle | Spots | Catches | Stats | Settings) + "Add" dropdown + language switcher
 - **Mobile**: Top bar (logo + Add dropdown + lang) + fixed bottom tab bar
 
-The share pages and chatbot use the hook icon (`src/lib/assets/favicon.svg`) which also serves as the browser favicon.
+**SVG assets** — three files handle branding:
+- `src/lib/assets/openfishing-logo.svg` — the wordmark (path-based, `fill: currentColor` via CSS class). Imported `?raw` in the layout and login page; injected with `{@html logo.replace('<svg ', '<svg height="Npx" ')}` (nav) or `style="width:100%;display:block;"` (login). Color set on the parent element (`color:var(--of-accent)`), so it adapts to the active theme.
+- `src/lib/assets/openfishing-mark.svg` — the square icon (`fill="currentColor"` directly on the path). Used inside the app (chatbot header/empty-state, share page headers) where it must follow the theme accent. Also imported `?raw` and injected with explicit `width`/`height` attributes.
+- `src/lib/assets/favicon.svg` — identical path to `openfishing-mark.svg` but with a **hardcoded `#175b68` fill** (CSS variables and `currentColor` don't work when a browser loads an SVG as an external favicon resource). Linked as `<link rel="icon" type="image/svg+xml">` in the layout `<svelte:head>`.
+
+**Responsive form grids** — `src/routes/layout.css` defines three global utility classes: `.of-grid-2` (2-col, 16px gap), `.of-grid-2-sm` (2-col, 12px gap), `.of-grid-3` (3-col 1fr/1fr/0.65fr, 16px gap). A `@media (max-width: 480px)` block collapses `.of-grid-2` and `.of-grid-2-sm` to 1-col, and `.of-grid-3` to 2-col. Used on all form field pair grids across lure, catch, and tackle forms.
 
 The language switcher is a `<select>` with flag emoji options, posting to `/api/lang`. Supported languages: EN, DE, FR, ES, IT, NL, PL, PT, UK.
 
@@ -206,7 +213,7 @@ When adding new UI strings, add keys to **all 9 language files**. The server-sid
 Shared logic lives in `src/lib/server/backup.ts` (`buildBackup`, `packBackupZip`, `parseBackupZip`, `restoreUserBackup`, `restoreAllBackup`). The backup format is a ZIP with `backup.json` (+ `uploads/` photos). `meta.scope` is `'user'` or `'all'`; `parseBackupZip` rejects a mismatched scope. Restore uses drizzle inserts inside a `client.transaction`, reviving ISO date strings back to `Date`. The format now covers **all** entities including tackle (rods/reels/lines/combos/reelLineLog) with full column fidelity.
 
 - **Per-user** (`/settings`, `/api/settings/export`): a user backs up / restores **only their own** data (`buildBackup('user', ownerId(locals))`; restore deletes + re-inserts only `userId`'s rows). In open mode (`AUTH_PASSWORD` unset) this is the whole DB. Admin's normal backup/restore is identical — admin is just a user.
-- **Admin all** (`/admin/export` GET + `/admin` `restoreAll` action): `buildBackup('all', null)` dumps every user's data **plus the `user` accounts**. `restoreAllBackup` does a **full wipe + rebuild** (all owned tables + users), then `reprovisionAdmin()` re-syncs the env admin so login with `AUTH_PASSWORD` always works afterward. Restoring across scopes is rejected (a personal backup can't be used in restore-all and vice-versa).
+- **Admin all** (`/settings/admin/export` GET + `/settings/admin` `restoreAll` action): `buildBackup('all', null)` dumps every user's data **plus the `user` accounts**. `restoreAllBackup` does a **full wipe + rebuild** (all owned tables + users), then `reprovisionAdmin()` re-syncs the env admin so admin login always works afterward. Restoring across scopes is rejected (a personal backup can't be used in restore-all and vice-versa).
 - The legacy single-tenant import (raw `client.prepare` INSERTs, lures/spots/catches only) was replaced by the above; the old format dropped tackle and several lure/catch columns on restore — the new path is full-fidelity.
 
 ### File uploads
@@ -229,7 +236,7 @@ Filter bars use `flex-wrap:wrap` (not `overflow-x:auto`) so they reflow to multi
 
 ### Themes & appearance
 
-Color mode and theme are stored in the `appSetting` table as simple key/value rows. The layout server reads them on every request and sets `data-mode` (`dark`/`light`/`system`) on `<html>` and `data-theme` on `<body>`. CSS token blocks in `src/routes/layout.css` use `[data-mode="light"]` selectors to switch the full design-token set; a `@media (prefers-color-scheme: light)` block handles `data-mode="system"`.
+Color mode and theme are stored as key/value rows: the global `appSetting` holds the **instance default** (admin-configurable at `/settings/admin`, used by the login screen and as the fallback for users without a preference), and each logged-in user's `userSetting` overrides it per key (merged in `+layout.server.ts`). The layout sets `data-mode` (`dark`/`light`/`system`) and `data-theme` both on `<html>` (via the `$effect` in `+layout.svelte`). CSS token blocks in `src/routes/layout.css` use `[data-mode="light"]` selectors to switch the full design-token set; a `@media (prefers-color-scheme: light)` block handles `data-mode="system"`.
 
 Theme definitions live in `src/lib/themes.ts` as a `THEMES: ThemeDefinition[]` array. Currently only `ocean` exists. Each theme has id, labelKey, and preview swatch colors. The `/settings/appearance` page renders a picker grid using these definitions.
 
@@ -257,7 +264,7 @@ The shared utility lives in `src/lib/server/biteIndex.ts` and exports `fetchWeat
 
 ### Share links
 
-Each of `lure`, `spot`, and `fishCatch` has a nullable `shareToken` column. When non-null, the token grants unauthenticated read-only access to `/share/[entity]/[token]`. The share management UI (create/copy URL/revoke) appears on detail pages only when `AUTH_PASSWORD` is set — if auth is disabled, everything is already public so the UI is hidden. The `/share/*` and `/uploads/*` paths are exempted from the auth hook so photos render correctly on share pages. Share tokens are standard UUIDs generated with `crypto.randomUUID()`.
+Each of `lure`, `spot`, and `fishCatch` has a nullable `shareToken` column. When non-null, the token grants unauthenticated read-only access to `/share/[entity]/[token]`. The share management UI (create/copy URL/revoke) appears on detail pages only when auth is enabled — if auth is disabled, everything is already public so the UI is hidden. The `/share/*` and `/uploads/*` paths are exempted from the auth hook so photos render correctly on share pages. Share tokens are standard UUIDs generated with `crypto.randomUUID()`.
 
 ### Auto-suggest
 
@@ -317,8 +324,8 @@ Two server-side endpoints proxy image data to LiteLLM, keeping API keys off the 
 
 Read-only JSON API at `/api/v1/`. Auth handled in `src/hooks.server.ts` separately from the cookie-based session auth:
 
-- When `AUTH_PASSWORD` is set, `/api/v1/*` requires `Authorization: Bearer <password>`. Missing or wrong token → `401 { error: 'Unauthorized' }`. Never redirects to `/login`.
-- When `AUTH_PASSWORD` is unset, `/api/v1/*` is open.
+- When auth is enabled, `/api/v1/*` requires a **per-user** `Authorization: Bearer <user.apiToken>` and returns only that user's data. Missing or unknown token (or a disabled user) → `401 { error: 'Unauthorized' }`. Never redirects to `/login`.
+- When auth is disabled, `/api/v1/*` is open.
 - `/api/openapi` serves the OpenAPI 3.0 spec (guarded by normal cookie auth so Swagger UI can fetch it in-browser).
 - `/api-docs` renders Swagger UI (`swagger-ui-dist` package, SSR disabled via `+page.ts`). The page is fully themed to match the app — CSS overrides live in `src/routes/api-docs/+page.svelte`.
 - Photo paths are excluded from all API responses. Tags are returned as `string[]`. Catches include `lure: { id, name } | null`.
@@ -334,8 +341,8 @@ Drizzle migrations run automatically on startup in production (`NODE_ENV=product
 | `DATABASE_URL` | `local.db` | Path to SQLite file |
 | `UPLOAD_PATH` | `./uploads` | Directory for lure/spot/catch photos |
 | `BASE_URL` | `http://localhost:5173` | Public base URL — used to generate QR code links |
-| `AUTH_PASSWORD` | _(unset)_ | If set, enables multi-user login and seeds the admin account's password (re-synced every startup). Leave unset for fully open, single-tenant access. |
-| `ADMIN_EMAIL` | `admin@openfishing.local` | The admin account's login email. Admin logs in with username `admin` or this email + `AUTH_PASSWORD`. |
+| `ADMIN_PASSWORD` | _(unset)_ | If set, enables multi-user login and is the admin account's password (re-synced every startup; admin username is always `admin`, no email). Leave unset for fully open, single-tenant access. The old `AUTH_PASSWORD` name is still honored as a deprecated fallback. |
+| `SMTP_HOST` / `SMTP_PORT` / `SMTP_SECURE` / `SMTP_USER` / `SMTP_PASS` / `SMTP_FROM` | _(unset)_ | SMTP config for "forgot password" reset emails (`src/lib/server/mail.ts`, nodemailer). Needs at least `SMTP_HOST` + `SMTP_FROM`; otherwise the feature is hidden. Reset links use `BASE_URL`. |
 | `DEMO_MODE` | _(unset)_ | If set to any value, enables read-only demo mode. All writes are blocked server-side; the UI shows a banner and a toast on submit attempts. Language switching still works. |
 | `CHATBOT` | _(unset)_ | If set to any truthy value, enables the AI chatbot widget. Requires `LITELLM_URL` and `LITELLM_MODEL`. |
 | `LITELLM_URL` | _(unset)_ | Base URL of the LiteLLM proxy (e.g. `http://litellm:4000`). |

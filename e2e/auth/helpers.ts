@@ -11,9 +11,10 @@ export async function login(page: Page, identifier: string, password: string) {
 	]);
 }
 
-/** Open the (desktop) user menu and log out, waiting for the redirect to /login. */
+/** Log out from the Account settings page, waiting for the redirect to /login. */
 export async function logout(page: Page) {
-	await page.locator('[data-user-menu] button:visible').first().click();
+	await page.goto('/settings/account');
+	await page.waitForLoadState('networkidle');
 	await Promise.all([
 		page.waitForURL('**/login'),
 		page.getByRole('button', { name: /log out/i }).click()

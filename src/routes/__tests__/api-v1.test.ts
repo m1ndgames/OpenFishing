@@ -211,6 +211,29 @@ describe('layout server load', () => {
 		expect(result.lang).toBe('en');
 	});
 
+	it('uses the global appSetting as the default theme/mode (logged out)', async () => {
+		mockSelect.mockReturnValue(makeChain([{ key: 'themeName', value: 'dusk' }, { key: 'colorMode', value: 'light' }]));
+		const result = await layoutLoad({
+			cookies: { get: vi.fn().mockReturnValue(null) },
+			request: { headers: { get: vi.fn().mockReturnValue('') } },
+			locals: {},
+		} as any);
+		expect(result.themeName).toBe('dusk');
+		expect(result.colorMode).toBe('light');
+	});
+
+	it('lets a logged-in user override the global default theme', async () => {
+		mockSelect
+			.mockReturnValueOnce(makeChain([{ key: 'themeName', value: 'dusk' }])) // global appSetting
+			.mockReturnValueOnce(makeChain([{ key: 'themeName', value: 'sunset' }])); // user's userSetting
+		const result = await layoutLoad({
+			cookies: { get: vi.fn().mockReturnValue(null) },
+			request: { headers: { get: vi.fn().mockReturnValue('') } },
+			locals: { user: { id: 'u1', username: 'bob', email: 'b@e.com', isAdmin: false } },
+		} as any);
+		expect(result.themeName).toBe('sunset');
+	});
+
 	it('exposes demoMode from env', async () => {
 		mockEnv.env.DEMO_MODE = '1';
 		const result = await layoutLoad({

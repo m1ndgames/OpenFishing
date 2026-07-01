@@ -35,6 +35,15 @@ test.describe('Auth — login & logout', () => {
 	});
 
 	test('/admin redirects to /login when logged out', async ({ page }) => {
-		await expectLoggedOutRedirect(page, '/admin');
+		await expectLoggedOutRedirect(page, '/settings/admin');
+	});
+
+	test('forgot-password is hidden/disabled when SMTP is not configured', async ({ page }) => {
+		await page.goto('/login');
+		await page.waitForLoadState('networkidle');
+		await expect(page.getByRole('link', { name: /forgot password/i })).toHaveCount(0);
+		// The route itself redirects back to /login when mail is off.
+		await page.goto('/forgot-password');
+		await expect(page).toHaveURL((u) => u.pathname === '/login');
 	});
 });

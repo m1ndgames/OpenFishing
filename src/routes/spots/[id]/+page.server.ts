@@ -6,6 +6,7 @@ import { eq, asc, isNotNull, and } from 'drizzle-orm';
 import { env } from '$env/dynamic/private';
 import { fetchWeather } from '$lib/server/biteIndex';
 import { userFilter } from '$lib/server/scope';
+import { authEnabled as isAuthEnabled } from '$lib/server/auth';
 
 import { haversineMeters } from '$lib/server/haversine';
 
@@ -48,7 +49,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	nearbyCatches.sort((a, b) => new Date(b.caughtAt).getTime() - new Date(a.caughtAt).getTime());
 
 	const baseUrl = env.BASE_URL ?? 'http://localhost:5173';
-	const authEnabled = !!env.AUTH_PASSWORD;
+	const authEnabled = isAuthEnabled();
 	const shareUrl = found.shareToken ? `${baseUrl}/share/spots/${found.shareToken}` : null;
 
 	return { spot: found, nearbyCatches, weather, authEnabled, shareUrl };

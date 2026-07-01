@@ -1,9 +1,13 @@
 <script lang="ts">
 	import type { ActionData, PageData } from './$types';
 	import { enhance } from '$app/forms';
+	import { THEMES } from '$lib/themes';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 	const { t } = data;
+
+	let defaultMode = $state(data.defaultColorMode);
+	let defaultTheme = $state(data.defaultThemeName);
 
 	const MB = 1024 * 1024;
 	function mb(bytes: number | null): string {
@@ -72,8 +76,13 @@
 				<!-- Edit form -->
 				<form method="POST" action="?/updateUser" use:enhance style="display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; align-items:end; margin-bottom:12px;">
 					<input type="hidden" name="id" value={u.id} />
-					<div><label style={labelStyle} for="e_{u.id}">{t.adminEmail}</label><input id="e_{u.id}" name="email" type="email" value={u.email} disabled={u.isAdmin} style={inputStyle} /></div>
-					<div><label style={labelStyle} for="u_{u.id}">{t.adminUsername}</label><input id="u_{u.id}" name="username" type="text" value={u.username} disabled={u.isAdmin} style={inputStyle} /></div>
+					{#if u.isAdmin}
+						<!-- Admin identity is env-controlled: fixed username, no email; only quota is editable -->
+						<div><span style={labelStyle}>{t.adminUsername}</span><p style="margin:0; padding:8px 0; font-size:0.85rem; color:var(--of-text-2); font-family:'JetBrains Mono',monospace;">{u.username}</p></div>
+					{:else}
+						<div><label style={labelStyle} for="e_{u.id}">{t.adminEmail}</label><input id="e_{u.id}" name="email" type="email" value={u.email} style={inputStyle} /></div>
+						<div><label style={labelStyle} for="u_{u.id}">{t.adminUsername}</label><input id="u_{u.id}" name="username" type="text" value={u.username} style={inputStyle} /></div>
+					{/if}
 					<div><label style={labelStyle} for="q_{u.id}">{t.adminQuotaMb}</label><input id="q_{u.id}" name="quota_mb" type="number" min="0" value={quotaInput(u.quotaBytes)} placeholder={t.adminQuotaUnlimited} style={inputStyle} /></div>
 					{#if !u.isAdmin}
 						<div><label style={labelStyle} for="p_{u.id}">{t.adminResetPassword}</label><input id="p_{u.id}" name="password" type="text" placeholder="••••••" style={inputStyle} /></div>
@@ -114,6 +123,44 @@
 		{/each}
 	</section>
 
+	<!-- Default appearance (instance-wide default for the login screen + new users) -->
+	<section style="background:var(--of-bg-surface); border:1px solid var(--of-border-subtle); border-radius:16px; padding:20px; margin-top:24px;">
+		<h2 style="font-size:1rem; font-weight:700; color:var(--of-text); margin:0 0 4px;">{t.adminDefaultAppearance}</h2>
+		<p style="font-size:0.8rem; color:var(--of-text-4); margin:0 0 16px; line-height:1.5;">{t.adminDefaultAppearanceDesc}</p>
+
+		<!-- Default color mode -->
+		<p style="font-size:0.78rem; font-weight:600; color:var(--of-text-4); margin:0 0 8px; text-transform:uppercase; letter-spacing:0.05em;">{t.appearanceColorMode}</p>
+		<form method="POST" action="?/setDefaultMode" use:enhance style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px;">
+			{#each [{ value: 'dark', icon: '🌑', label: t.appearanceModeDark }, { value: 'light', icon: '☀️', label: t.appearanceModeLight }, { value: 'system', icon: '💻', label: t.appearanceModeSystem }] as opt}
+				<label style="cursor:pointer;">
+					<input type="radio" name="colorMode" value={opt.value} bind:group={defaultMode} class="sr-only" onchange={(e) => (e.currentTarget as HTMLInputElement).form?.requestSubmit()} />
+					<span style="display:flex; align-items:center; gap:8px; padding:9px 16px; border-radius:9px; font-size:0.85rem; font-weight:600; font-family:'DM Sans',sans-serif; border:1px solid {defaultMode === opt.value ? 'var(--of-accent-border)' : 'var(--of-border)'}; background:{defaultMode === opt.value ? 'var(--of-accent-bg-hover)' : 'var(--of-bg-elevated)'}; color:{defaultMode === opt.value ? 'var(--of-accent)' : 'var(--of-text-2)'};">
+						<span style="font-size:0.95rem; line-height:1;">{opt.icon}</span>{opt.label}
+					</span>
+				</label>
+			{/each}
+		</form>
+
+		<!-- Default theme -->
+		<p style="font-size:0.78rem; font-weight:600; color:var(--of-text-4); margin:0 0 8px; text-transform:uppercase; letter-spacing:0.05em;">{t.appearanceTheme}</p>
+		<form method="POST" action="?/setDefaultTheme" use:enhance style="display:flex; gap:8px; flex-wrap:wrap;">
+			{#each THEMES as theme}
+				{@const active = defaultTheme === theme.id}
+				<label style="cursor:pointer; flex:1 1 100px; min-width:100px; max-width:160px; display:flex;">
+					<input type="radio" name="themeName" value={theme.id} bind:group={defaultTheme} class="sr-only" onchange={(e) => (e.currentTarget as HTMLInputElement).form?.requestSubmit()} />
+					<div style="flex:1 1 100px; min-width:100px; max-width:160px; border-radius:12px; overflow:hidden; border:2px solid {active ? 'var(--of-accent-border)' : 'var(--of-border)'}; background:{active ? 'var(--of-accent-bg-hover)' : 'var(--of-bg-elevated)'};">
+						<div style="height:48px; background:{theme.bg}; display:flex; align-items:flex-end; padding:8px; gap:5px; border-bottom:1px solid {theme.border};">
+							<div style="width:13px; height:13px; border-radius:50%; background:{theme.surface}; border:1px solid {theme.border};"></div>
+							<div style="flex:1; height:7px; border-radius:4px; background:{theme.surface};"></div>
+							<div style="width:18px; height:13px; border-radius:4px; background:{theme.accent};"></div>
+						</div>
+						<div style="padding:7px 10px;"><p style="margin:0; font-size:0.78rem; font-weight:600; color:{active ? 'var(--of-accent)' : 'var(--of-text-2)'}; font-family:'DM Sans',sans-serif;">{theme.label}</p></div>
+					</div>
+				</label>
+			{/each}
+		</form>
+	</section>
+
 	<!-- Full backup & restore (all users) -->
 	<section style="background:var(--of-bg-surface); border:1px solid var(--of-border-subtle); border-radius:16px; padding:20px; margin-top:24px;">
 		<h2 style="font-size:1rem; font-weight:700; color:var(--of-text); margin:0 0 4px;">{t.adminBackupAllTitle}</h2>
@@ -124,7 +171,7 @@
 				<p style="font-weight:600; color:var(--of-text); margin:0 0 4px; font-size:0.9rem;">{t.adminBackupAllExportTitle}</p>
 				<p style="font-size:0.8rem; color:var(--of-text-4); margin:0;">{t.adminBackupAllExportDesc}</p>
 			</div>
-			<a href="/admin/export" download style="flex-shrink:0; display:inline-flex; align-items:center; gap:7px; background:var(--of-accent-solid); color:var(--of-ink); font-size:0.875rem; font-weight:700; padding:9px 18px; border-radius:9px; text-decoration:none; white-space:nowrap;">{t.adminBackupAllExportBtn}</a>
+			<a href="/settings/admin/export" download style="flex-shrink:0; display:inline-flex; align-items:center; gap:7px; background:var(--of-accent-solid); color:var(--of-ink); font-size:0.875rem; font-weight:700; padding:9px 18px; border-radius:9px; text-decoration:none; white-space:nowrap;">{t.adminBackupAllExportBtn}</a>
 		</div>
 
 		<div style="padding-top:16px;">

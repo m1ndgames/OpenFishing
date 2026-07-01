@@ -31,8 +31,6 @@
 <svelte:head><title>OpenFishing — {t.accountTitle}</title></svelte:head>
 
 <div style="max-width:560px;">
-	<h1 style="font-family:'Carter One',sans-serif; font-size:1.5rem; color:var(--of-text-bright); margin:0 0 20px;">{t.accountTitle}</h1>
-
 	{#if form?.error}
 		<div style="background:var(--of-danger-bg); border:1px solid var(--of-danger-border); color:var(--of-danger); font-size:0.84rem; padding:10px 14px; border-radius:9px; margin-bottom:16px;">{tr[form.error] ?? form.error}</div>
 	{/if}
@@ -41,25 +39,26 @@
 	{/if}
 
 	{#if acc.isAdmin}
-		<div style="background:var(--of-accent-glow); border:1px solid var(--of-accent-border); color:var(--of-accent); font-size:0.82rem; padding:10px 14px; border-radius:9px; margin-bottom:20px; line-height:1.5;">
-			{t.accountAdminNote}
-		</div>
-	{/if}
-
-	<!-- Profile -->
-	<section style={cardStyle}>
-		<h2 style="font-size:1rem; font-weight:700; color:var(--of-text); margin:0 0 14px;">{t.accountProfile}</h2>
-		<form method="POST" action="?/updateProfile" use:enhance style="display:flex; flex-direction:column; gap:14px;">
-			<div><label for="email" style={labelStyle}>{t.adminEmail}</label><input id="email" name="email" type="email" value={acc.email} disabled={acc.isAdmin} style={inputStyle} /></div>
-			<div><label for="username" style={labelStyle}>{t.adminUsername}</label><input id="username" name="username" type="text" value={acc.username} disabled={acc.isAdmin} style={inputStyle} /></div>
-			{#if !acc.isAdmin}
+		<!-- Admin: fully env-controlled identity, nothing to edit -->
+		<section style={cardStyle}>
+			<h2 style="font-size:1rem; font-weight:700; color:var(--of-text); margin:0 0 12px;">{t.accountProfile}</h2>
+			<div style="display:flex; flex-direction:column; gap:12px; margin-bottom:14px;">
+				<div><span style={labelStyle}>{t.adminUsername}</span><p style="margin:0; font-size:0.9rem; color:var(--of-text); font-family:'JetBrains Mono',monospace;">{acc.username}</p></div>
+			</div>
+			<p style="font-size:0.82rem; color:var(--of-text-4); margin:0; line-height:1.5;">{t.accountAdminIdentityNote}</p>
+		</section>
+	{:else}
+		<!-- Profile -->
+		<section style={cardStyle}>
+			<h2 style="font-size:1rem; font-weight:700; color:var(--of-text); margin:0 0 14px;">{t.accountProfile}</h2>
+			<form method="POST" action="?/updateProfile" use:enhance style="display:flex; flex-direction:column; gap:14px;">
+				<div><label for="email" style={labelStyle}>{t.adminEmail}</label><input id="email" name="email" type="email" value={acc.email} style={inputStyle} /></div>
+				<div><label for="username" style={labelStyle}>{t.adminUsername}</label><input id="username" name="username" type="text" value={acc.username} style={inputStyle} /></div>
 				<div><button type="submit" style={btnPrimary}>{t.accountSaveProfile}</button></div>
-			{/if}
-		</form>
-	</section>
+			</form>
+		</section>
 
-	<!-- Password -->
-	{#if !acc.isAdmin}
+		<!-- Password -->
 		<section style={cardStyle}>
 			<h2 style="font-size:1rem; font-weight:700; color:var(--of-text); margin:0 0 14px;">{t.accountChangePassword}</h2>
 			<form method="POST" action="?/changePassword" use:enhance style="display:flex; flex-direction:column; gap:14px;">
@@ -91,5 +90,15 @@
 				<button type="submit" style="font-size:0.8rem; font-weight:600; padding:8px 13px; border-radius:8px; cursor:pointer; border:1px solid var(--of-border); background:var(--of-bg-elevated); color:var(--of-text-2);">{t.adminRegenerateToken}</button>
 			</form>
 		</div>
+	</section>
+
+	<!-- Logout -->
+	<section style={cardStyle}>
+		<form method="POST" action="/logout">
+			<button type="submit" style="display:inline-flex; align-items:center; gap:8px; font-size:0.875rem; font-weight:700; padding:9px 18px; border-radius:9px; cursor:pointer; border:1px solid var(--of-danger-border); background:var(--of-danger-bg); color:var(--of-danger); font-family:'DM Sans',sans-serif;">
+				<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+				{t.navLogout}
+			</button>
+		</form>
 	</section>
 </div>
