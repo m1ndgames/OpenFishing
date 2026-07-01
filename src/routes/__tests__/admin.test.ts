@@ -163,6 +163,72 @@ describe('admin toggles & delete', () => {
 	});
 });
 
+describe('admin updateUser (regular user)', () => {
+	it('validates required fields for a non-admin user', async () => {
+		mockUserFindFirst.mockResolvedValue({ id: 'u1', isAdmin: false });
+		const res: any = await actions.updateUser({ request: form({ id: 'u1', email: '', username: '' }) } as any);
+		expect(res).toMatchObject({ status: 400, data: { error: 'userFieldsRequired' } });
+	});
+
+	it('validates email format for a non-admin user', async () => {
+		mockUserFindFirst.mockResolvedValue({ id: 'u1', isAdmin: false });
+		const res: any = await actions.updateUser({ request: form({ id: 'u1', email: 'noatsign', username: 'bob' }) } as any);
+		expect(res).toMatchObject({ status: 400, data: { error: 'invalidEmail' } });
+	});
+
+	it('rejects a duplicate email/username clash', async () => {
+		mockUserFindFirst
+			.mockResolvedValueOnce({ id: 'u1', isAdmin: false })
+			.mockResolvedValueOnce({ id: 'u2' }); // clash
+		const res: any = await actions.updateUser({ request: form({ id: 'u1', email: 'a@b.com', username: 'taken' }) } as any);
+		expect(res).toMatchObject({ status: 409, data: { error: 'userExists' } });
+	});
+
+	it('updates email, username, and quota for a regular user', async () => {
+		mockUserFindFirst
+			.mockResolvedValueOnce({ id: 'u1', isAdmin: false })
+			.mockResolvedValueOnce(undefined); // no clash
+		const res: any = await actions.updateUser({ request: form({ id: 'u1', email: 'new@b.com', username: 'newname', quota_mb: '100' }) } as any);
+		expect(mockUpdateSet).toHaveBeenCalledWith(expect.objectContaining({ email: 'new@b.com', username: 'newname', quotaBytes: 100 * 1024 * 1024 }));
+		expect(res).toMatchObject({ success: 'userUpdated' });
+	});
+
+	it('updates password when a new_password is provided', async () => {
+		mockUserFindFirst
+			.mockResolvedValueOnce({ id: 'u1', isAdmin: false })
+			.mockResolvedValueOnce(undefined); // no clash
+		await actions.updateUser({ request: form({ id: 'u1', email: 'a@b.com', username: 'bob', password: 'newpw' }) } as any);
+		const passwordUpdate = mockUpdateSet.mock.calls.find((c: any[]) => c[0].passwordHash !== undefined);
+		expect(passwordUpdate).toBeTruthy();
+	});
+});
+
+describe('admin toggleDisabled / regenerateToken / toggleChatbot not-found', () => {
+	it('returns 404 when target user is not found for toggleDisabled', async () => {
+		mockUserFindFirst.mockResolvedValue(undefined);
+		const res: any = await actions.toggleDisabled({ request: form({ id: 'missing' }) } as any);
+		expect(res).toMatchObject({ status: 404 });
+	});
+
+	it('returns 404 when target user is not found for regenerateToken', async () => {
+		mockUserFindFirst.mockResolvedValue(undefined);
+		const res: any = await actions.regenerateToken({ request: form({ id: 'missing' }) } as any);
+		expect(res).toMatchObject({ status: 404 });
+	});
+
+	it('returns 404 when target user is not found for toggleChatbot', async () => {
+		mockUserFindFirst.mockResolvedValue(undefined);
+		const res: any = await actions.toggleChatbot({ request: form({ id: 'missing' }) } as any);
+		expect(res).toMatchObject({ status: 404 });
+	});
+
+	it('returns 404 when target user is not found for deleteUser', async () => {
+		mockUserFindFirst.mockResolvedValue(undefined);
+		const res: any = await actions.deleteUser({ request: form({ id: 'missing' }) } as any);
+		expect(res).toMatchObject({ status: 404 });
+	});
+});
+
 describe('admin restoreAll', () => {
 	function fileForm(name: string | null) {
 		const file = name ? { name, size: 10, arrayBuffer: async () => new ArrayBuffer(10) } : null;
@@ -199,5 +265,11 @@ describe('admin restoreAll', () => {
 		const res: any = await actions.restoreAll(fileForm('personal.zip'));
 		expect(res).toMatchObject({ status: 400, data: { error: 'backupErrorExpectedAll' } });
 		expect(reprovisionAdmin).not.toHaveBeenCalled();
+	});
+
+	it('returns 409 for a schema mismatch (backupErrorSchema)', async () => {
+		parseBackupZip.mockImplementation(() => { throw new BackupError('backupErrorSchema'); });
+		const res: any = await actions.restoreAll(fileForm('old.zip'));
+		expect(res).toMatchObject({ status: 409, data: { error: 'backupErrorSchema' } });
 	});
 });

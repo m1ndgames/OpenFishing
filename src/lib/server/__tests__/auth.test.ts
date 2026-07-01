@@ -15,6 +15,9 @@ const {
 	resolveSessionUser,
 	generateApiToken,
 	findUserByIdentifier,
+	findUserByEmail,
+	generateResetToken,
+	hashResetToken,
 	toSessionUser
 } = await import('../auth');
 
@@ -117,5 +120,58 @@ describe('toSessionUser', () => {
 			id: 'u1', email: 'b@e.com', username: 'bob', isAdmin: true, disabled: false,
 			quotaBytes: 100, usedBytes: 5, chatbotEnabled: false, apiToken: 'tok'
 		});
+	});
+
+	it('does not expose passwordHash', () => {
+		const row = { id: 'u1', email: null, username: 'admin', passwordHash: 'secret', isAdmin: true, disabled: false, quotaBytes: null, usedBytes: 0, chatbotEnabled: true, apiToken: null } as any;
+		expect((toSessionUser(row) as any).passwordHash).toBeUndefined();
+	});
+});
+
+describe('findUserByEmail', () => {
+	it('returns undefined for blank or whitespace-only email', async () => {
+		expect(await findUserByEmail('')).toBeUndefined();
+		expect(await findUserByEmail('   ')).toBeUndefined();
+	});
+
+	it('finds a user by email (db result is returned)', async () => {
+		userRow = { id: 'u1', email: 'bob@example.com' };
+		expect(await findUserByEmail('BOB@EXAMPLE.COM')).toEqual(userRow);
+	});
+});
+
+describe('generateResetToken', () => {
+	it('returns a 64-char hex token and matching 64-char sha256 hash', () => {
+		const { token, hash } = generateResetToken();
+		expect(token).toHaveLength(64);
+		expect(hash).toHaveLength(64);
+		expect(/^[0-9a-f]+$/.test(token)).toBe(true);
+		expect(/^[0-9a-f]+$/.test(hash)).toBe(true);
+	});
+
+	it('hash matches hashResetToken(token)', () => {
+		const { token, hash } = generateResetToken();
+		expect(hashResetToken(token)).toBe(hash);
+	});
+
+	it('expiry is approximately 1 hour in the future', () => {
+		const before = Date.now();
+		const { expiry } = generateResetToken();
+		expect(expiry.getTime()).toBeGreaterThanOrEqual(before + 3_500_000);
+		expect(expiry.getTime()).toBeLessThanOrEqual(before + 3_700_000);
+	});
+
+	it('generates unique tokens on each call', () => {
+		expect(generateResetToken().token).not.toBe(generateResetToken().token);
+	});
+});
+
+describe('hashResetToken', () => {
+	it('produces the same hash for the same input', () => {
+		expect(hashResetToken('abc')).toBe(hashResetToken('abc'));
+	});
+
+	it('produces different hashes for different inputs', () => {
+		expect(hashResetToken('aaa')).not.toBe(hashResetToken('bbb'));
 	});
 });

@@ -6,9 +6,12 @@ vi.mock('@sveltejs/kit', () => ({
 	error: (status: number, msg?: string) => { throw { status, message: msg }; },
 }));
 
+class QuotaExceededError extends Error {}
+
 vi.mock('$lib/server/uploads', () => ({
 	saveUpload: vi.fn().mockResolvedValue('photo.jpg'),
 	deleteUpload: vi.fn().mockResolvedValue(undefined),
+	QuotaExceededError,
 }));
 
 vi.mock('$lib/server/biteIndex', () => ({
@@ -179,6 +182,46 @@ describe('catches/[id]/edit delete action', () => {
 		).rejects.toMatchObject({ status: 303 });
 		expect(deleteUpload).toHaveBeenCalledWith('a.jpg');
 		expect(deleteUpload).toHaveBeenCalledWith('b.jpg');
+	});
+});
+
+describe('catches/[id]/edit photo uploads', () => {
+	beforeEach(() => {
+		mockFindFirstCatch.mockResolvedValue({ ...existingCatch, photos: [] });
+		mockFindManyPhoto.mockResolvedValue([]);
+		mockUpdate.mockImplementation(() => makeChain());
+		mockDelete.mockImplementation(() => makeChain());
+		mockInsert.mockImplementation(() => makeChain());
+	});
+
+	it('saves a new photo and inserts a catchPhoto row', async () => {
+		const { saveUpload } = await import('$lib/server/uploads');
+		const photo = new File(['data'], 'fish.jpg', { type: 'image/jpeg' });
+		const fd = new FormData();
+		fd.append('species', 'Pike');
+		fd.append('lat', '52.52');
+		fd.append('lng', '13.40');
+		fd.append('new_photos', photo);
+		await expect(
+			editActions.update({ params: { id: 'catch-001' }, request: { formData: () => Promise.resolve(fd) } } as any)
+		).rejects.toMatchObject({ status: 303 });
+		expect(saveUpload).toHaveBeenCalled();
+		expect(mockInsert).toHaveBeenCalled();
+	});
+
+	it('returns 413 and cleans up on quota exceeded', async () => {
+		const { saveUpload, deleteUpload } = await import('$lib/server/uploads');
+		vi.mocked(saveUpload).mockRejectedValueOnce(new QuotaExceededError());
+		const photo = new File(['data'], 'fish.jpg', { type: 'image/jpeg' });
+		const fd = new FormData();
+		fd.append('species', 'Pike');
+		fd.append('lat', '52.52');
+		fd.append('lng', '13.40');
+		fd.append('new_photos', photo);
+		const result = await editActions.update({ params: { id: 'catch-001' }, request: { formData: () => Promise.resolve(fd) } } as any);
+		expect(result).toMatchObject({ status: 413, data: { error: 'quotaExceeded' } });
+		// deleteUpload called for any already-saved filenames (none in this case since first upload fails)
+		vi.mocked(saveUpload).mockResolvedValue('photo.jpg');
 	});
 });
 
