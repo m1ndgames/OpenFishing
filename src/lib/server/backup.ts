@@ -1,5 +1,5 @@
 import { readFileSync, existsSync, writeFileSync, mkdirSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, basename } from 'node:path';
 import AdmZip from 'adm-zip';
 import { eq, inArray, isNull } from 'drizzle-orm';
 import { db, client } from '$lib/server/db';
@@ -149,7 +149,7 @@ export function parseBackupZip(buffer: Buffer, expectedScope: BackupScope): Pars
 		mkdirSync(UPLOAD_DIR, { recursive: true });
 		for (const e of zip.getEntries()) {
 			if (e.entryName.startsWith('uploads/') && !e.isDirectory) {
-				const filename = e.entryName.replace('uploads/', '');
+				const filename = basename(e.entryName);
 				if (filename) writeFileSync(join(UPLOAD_DIR, filename), e.getData());
 			}
 		}
