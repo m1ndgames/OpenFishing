@@ -21,7 +21,7 @@
 	type Message = { role: 'user' | 'assistant'; content: string };
 	type Session = { sessionId: string; firstMessage: string | null; lastAt: number; count: number };
 
-	let { t }: { t: Translations } = $props();
+	let { t, demoMode = false }: { t: Translations; demoMode?: boolean } = $props();
 
 	let open = $state(false);
 	let messages = $state<Message[]>([]);
@@ -55,9 +55,15 @@
 		input = '';
 		errorMsg = '';
 		messages = [...messages, { role: 'user', content: text }];
-		loading = true;
 		await scrollToBottom();
 
+		if (demoMode) {
+			messages = [...messages, { role: 'assistant', content: t.chatbotDemoDisabled }];
+			await scrollToBottom();
+			return;
+		}
+
+		loading = true;
 		try {
 			const res = await fetch('/api/chat', {
 				method: 'POST',
@@ -99,6 +105,11 @@
 
 	async function openHistory() {
 		showHistory = true;
+		if (demoMode) {
+			sessions = [];
+			loadingHistory = false;
+			return;
+		}
 		loadingHistory = true;
 		try {
 			const res = await fetch('/api/chat');
@@ -111,6 +122,7 @@
 	}
 
 	async function loadSession(sid: string) {
+		if (demoMode) return;
 		try {
 			const res = await fetch(`/api/chat/${sid}`);
 			const data = await res.json();
@@ -125,6 +137,7 @@
 
 	async function deleteSession(sid: string, e: MouseEvent) {
 		e.stopPropagation();
+		if (demoMode) return;
 		await fetch(`/api/chat/${sid}`, { method: 'DELETE' });
 		sessions = sessions.filter((s) => s.sessionId !== sid);
 		if (sid === sessionId) newChat();

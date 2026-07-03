@@ -5,7 +5,7 @@
 	import { THEMES } from '$lib/themes';
 
 	let { data }: { data: PageData } = $props();
-	const { t, lang } = data;
+	const { t, lang, demoMode } = data;
 
 	let selectedMode = $state(data.colorMode);
 	let selectedTheme = $state(data.themeName);
@@ -72,7 +72,14 @@
 								value={opt.value}
 								bind:group={selectedMode}
 								class="sr-only"
-								onchange={(e) => (e.currentTarget as HTMLInputElement).form?.requestSubmit()}
+								onchange={(e) => {
+									const el = e.currentTarget as HTMLInputElement;
+									if (demoMode) {
+										document.documentElement.setAttribute('data-mode', el.value);
+										return;
+									}
+									el.form?.requestSubmit();
+								}}
 							/>
 							<span style="display:flex; align-items:center; gap:8px; padding:10px 18px; border-radius:10px; font-size:0.875rem; font-weight:600; font-family:'DM Sans',sans-serif; transition:all 0.15s; border:1px solid {selectedMode === opt.value ? 'var(--of-accent-border)' : 'var(--of-border)'}; background:{selectedMode === opt.value ? 'var(--of-accent-bg-hover)' : 'var(--of-bg-elevated)'}; color:{selectedMode === opt.value ? 'var(--of-accent)' : 'var(--of-text-2)'};">
 								<span style="font-size:1rem; line-height:1;">{opt.icon}</span>
@@ -114,7 +121,14 @@
 								value={theme.id}
 								bind:group={selectedTheme}
 								class="sr-only"
-								onchange={(e) => (e.currentTarget as HTMLInputElement).form?.requestSubmit()}
+								onchange={(e) => {
+									const el = e.currentTarget as HTMLInputElement;
+									if (demoMode) {
+										document.documentElement.setAttribute('data-theme', el.value);
+										return;
+									}
+									el.form?.requestSubmit();
+								}}
 							/>
 							<div style="
 								flex:1 1 100px; min-width:100px; max-width:160px; border-radius:12px; overflow:hidden;

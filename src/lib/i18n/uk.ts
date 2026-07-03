@@ -346,6 +346,7 @@
 	chatbotBack: 'Назад',
 	chatbotDeleteSession: 'Видалити сесію',
 	chatbotSend: 'Надіслати',
+	chatbotDemoDisabled: 'ШІ-чатбот вимкнено в цій демоверсії.',
 	loginShowPassword: 'Показати пароль',
 	loginHidePassword: 'Приховати пароль',
 

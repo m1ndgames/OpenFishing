@@ -346,6 +346,7 @@ export default {
 	chatbotBack: 'Zurück',
 	chatbotDeleteSession: 'Gespräch löschen',
 	chatbotSend: 'Senden',
+	chatbotDemoDisabled: 'Der KI-Chatbot ist in dieser Demo deaktiviert.',
 	loginShowPassword: 'Passwort anzeigen',
 	loginHidePassword: 'Passwort verbergen',
 

@@ -6,6 +6,7 @@ import { eq, like, and, desc, gte, lte, sql } from 'drizzle-orm';
 import { lure as lureTable, fishCatch as catchTable, spot as spotTable, rod as rodTable, reel as reelTable, fishingLine as lineTable, combo as comboTable, reelLineLog, chatMessage as chatMessageTable } from '$lib/server/db/schema';
 import { fetchWeather, type WeatherData } from '$lib/server/biteIndex';
 import { ownerId, userFilter } from '$lib/server/scope';
+import { translations, type Lang } from '$lib/i18n';
 
 const MOON_PHASES = ['New moon', 'Waxing crescent', 'First quarter', 'Waxing gibbous', 'Full moon', 'Waning gibbous', 'Last quarter', 'Waning crescent'];
 
@@ -373,6 +374,7 @@ async function executeTool(name: string, args: Record<string, unknown>, locals: 
 }
 
 export const GET: RequestHandler = async ({ locals }) => {
+	if (env.DEMO_MODE) return json([]);
 	if (!env.CHATBOT) error(503, 'Chatbot not configured');
 	if (locals.user && !locals.user.chatbotEnabled) error(403, 'Chatbot disabled for this user');
 
@@ -392,6 +394,10 @@ export const GET: RequestHandler = async ({ locals }) => {
 };
 
 export const POST: RequestHandler = async ({ request, cookies, locals }) => {
+	if (env.DEMO_MODE) {
+		const demoLang = (cookies.get('lang') ?? 'en') as Lang;
+		return json({ reply: (translations[demoLang] ?? translations.en).chatbotDemoDisabled });
+	}
 	if (!env.CHATBOT || !env.LITELLM_URL || !env.LITELLM_MODEL) {
 		error(503, 'Chatbot not configured');
 	}
