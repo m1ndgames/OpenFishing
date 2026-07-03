@@ -346,6 +346,7 @@
 	chatbotBack: 'Terug',
 	chatbotDeleteSession: 'Sessie verwijderen',
 	chatbotSend: 'Versturen',
+	chatbotDemoDisabled: 'De AI-chatbot is uitgeschakeld in deze demo.',
 	loginShowPassword: 'Wachtwoord tonen',
 	loginHidePassword: 'Wachtwoord verbergen',
 

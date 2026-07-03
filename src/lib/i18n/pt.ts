@@ -346,6 +346,7 @@
 	chatbotBack: 'Voltar',
 	chatbotDeleteSession: 'Eliminar sessão',
 	chatbotSend: 'Enviar',
+	chatbotDemoDisabled: 'O chatbot de IA está desativado nesta demonstração.',
 	loginShowPassword: 'Mostrar senha',
 	loginHidePassword: 'Ocultar senha',
 

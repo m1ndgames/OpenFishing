@@ -346,6 +346,7 @@ export default {
 	chatbotBack: 'Back',
 	chatbotDeleteSession: 'Delete session',
 	chatbotSend: 'Send',
+	chatbotDemoDisabled: 'The AI chatbot is disabled in this demo.',
 	loginShowPassword: 'Show password',
 	loginHidePassword: 'Hide password',
 

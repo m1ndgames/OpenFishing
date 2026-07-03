@@ -347,8 +347,8 @@
 	</nav>
 
 	<!-- AI Chatbot -->
-	{#if chatbotEnabled}
-		<Chatbot {t} />
+	{#if chatbotEnabled || demoMode}
+		<Chatbot {t} {demoMode} />
 	{/if}
 
 	<!-- Demo mode toast -->

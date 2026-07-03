@@ -2,8 +2,9 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
 	testDir: './e2e',
-	// The auth-enabled suite has its own config (playwright.auth.config.ts) + server.
-	testIgnore: '**/auth/**',
+	// The auth-enabled and demo-mode suites have their own configs (playwright.auth.config.ts,
+	// playwright.demo.config.ts) + servers.
+	testIgnore: ['**/auth/**', '**/demo/**'],
 	fullyParallel: false,
 	forbidOnly: !!process.env.CI,
 	retries: process.env.CI ? 1 : 0,
@@ -22,6 +23,7 @@ export default defineConfig({
 		env: {
 			DATABASE_URL: 'e2e/test.db',
 			UPLOAD_PATH: 'e2e/uploads',
+			ADMIN_PASSWORD: '',
 			AUTH_PASSWORD: '',
 			DEMO_MODE: '',
 			CHATBOT: '',
