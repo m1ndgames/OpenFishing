@@ -1,11 +1,43 @@
-name: Build & Push Docker Image (edge)
+name: Release
 
 on:
   push:
-    branches: [main]
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: read
 
 jobs:
-  build:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run check
+
+      - name: Test with coverage
+        run: npm run test:coverage
+
+      - name: Build
+        run: npm run build
+        env:
+          DATABASE_URL: /tmp/ci.db
+
+      - name: Security audit
+        run: npm audit --audit-level=high
+
+  build-and-push:
+    needs: verify
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -32,8 +64,10 @@ jobs:
         with:
           images: ghcr.io/m1ndgames/openfishing
           tags: |
-            type=sha,prefix=sha-
-            type=raw,value=edge
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=raw,value=latest
 
       - name: Build and push
         uses: docker/build-push-action@v7
@@ -48,7 +82,7 @@ jobs:
       - name: Scan image for vulnerabilities
         uses: aquasecurity/trivy-action@v0.36.0
         with:
-          image-ref: ghcr.io/m1ndgames/openfishing:edge
+          image-ref: ghcr.io/m1ndgames/openfishing:latest
           format: sarif
           output: trivy-results.sarif
           severity: CRITICAL,HIGH
@@ -59,4 +93,17 @@ jobs:
         if: always()
         with:
           sarif_file: trivy-results.sarif
-          category: docker-edge
+          category: docker-release
+
+  github-release:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
