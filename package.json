@@ -28,7 +28,7 @@
 	"devDependencies": {
 		"@playwright/test": "^1.61.1",
 		"@sveltejs/adapter-node": "^5.5.7",
-		"@sveltejs/kit": "^2.57.0",
+		"@sveltejs/kit": "^2.69.1",
 		"@sveltejs/vite-plugin-svelte": "^7.1.2",
 		"@tailwindcss/vite": "^4.3.1",
 		"@types/better-sqlite3": "^7.6.13",
