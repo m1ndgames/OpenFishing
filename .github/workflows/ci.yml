@@ -30,7 +30,7 @@ jobs:
         run: npm run test:coverage
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v7
         # Dependabot PRs run without repository secrets, so CODECOV_TOKEN is
         # empty and Codecov rejects the upload on this protected repo.
         continue-on-error: ${{ github.actor == 'dependabot[bot]' }}
@@ -70,7 +70,7 @@ jobs:
           UPLOAD_PATH: e2e/uploads
 
       - name: Upload Playwright report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: playwright-report
