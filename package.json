@@ -55,7 +55,7 @@
 		"marked": "^18.0.5",
 		"nodemailer": "^9.0.3",
 		"qrcode": "^1.5.4",
-		"sharp": "^0.35.2",
+		"sharp": "^0.35.3",
 		"swagger-ui-dist": "^5.32.8"
 	}
 }
