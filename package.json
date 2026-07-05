@@ -30,7 +30,7 @@
 		"@sveltejs/adapter-node": "^5.5.7",
 		"@sveltejs/kit": "^2.69.1",
 		"@sveltejs/vite-plugin-svelte": "^7.1.2",
-		"@tailwindcss/vite": "^4.3.1",
+		"@tailwindcss/vite": "^4.3.2",
 		"@types/better-sqlite3": "^7.6.13",
 		"@types/node": "^26",
 		"@types/nodemailer": "^8.0.1",
