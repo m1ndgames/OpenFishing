@@ -31,6 +31,9 @@ jobs:
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
+        # Dependabot PRs run without repository secrets, so CODECOV_TOKEN is
+        # empty and Codecov rejects the upload on this protected repo.
+        continue-on-error: ${{ github.actor == 'dependabot[bot]' }}
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage/coverage-final.json
