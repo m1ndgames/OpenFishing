@@ -52,7 +52,7 @@
 		"better-sqlite3": "^12.8.0",
 		"cropperjs": "^1.6.2",
 		"leaflet": "^1.9.4",
-		"marked": "^18.0.5",
+		"marked": "^18.0.6",
 		"nodemailer": "^9.0.3",
 		"qrcode": "^1.5.4",
 		"sharp": "^0.35.3",
