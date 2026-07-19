@@ -56,6 +56,6 @@
 		"nodemailer": "^9.0.3",
 		"qrcode": "^1.5.4",
 		"sharp": "^0.35.3",
-		"swagger-ui-dist": "^5.32.8"
+		"swagger-ui-dist": "^5.32.9"
 	}
 }
