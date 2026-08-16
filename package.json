@@ -53,7 +53,7 @@
 		"cropperjs": "^1.6.2",
 		"leaflet": "^1.9.4",
 		"marked": "^18.0.9",
-		"nodemailer": "^9.0.4",
+		"nodemailer": "^9.0.5",
 		"qrcode": "^1.5.4",
 		"sharp": "^0.35.3",
 		"swagger-ui-dist": "^5.32.13"
