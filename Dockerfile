@@ -1,4 +1,4 @@
-FROM node:22-alpine AS builder
+FROM node:25-alpine AS builder
 WORKDIR /app
 
 RUN apk add --no-cache python3 make g++
@@ -12,7 +12,7 @@ RUN npm prune --omit=dev
 
 # ---
 
-FROM node:22-alpine AS runner
+FROM node:25-alpine AS runner
 WORKDIR /app
 
 COPY --from=builder /app/build ./build
