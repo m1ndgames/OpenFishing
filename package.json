@@ -31,7 +31,7 @@
 		"@sveltejs/kit": "^2.70.2",
 		"@sveltejs/vite-plugin-svelte": "^7.3.0",
 		"@tailwindcss/vite": "^4.3.3",
-		"@types/better-sqlite3": "^7.6.13",
+		"@types/better-sqlite3": "^9.6.0",
 		"@types/node": "^26",
 		"@types/nodemailer": "^8.0.1",
 		"@types/qrcode": "^1.5.6",
