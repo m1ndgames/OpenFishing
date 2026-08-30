@@ -38,7 +38,7 @@
 		"@vitest/coverage-v8": "^4.1.11",
 		"drizzle-kit": "^0.31.10",
 		"drizzle-orm": "^0.45.2",
-		"svelte": "^5.56.9",
+		"svelte": "^5.56.10",
 		"svelte-check": "^4.7.6",
 		"tailwindcss": "^4.2.2",
 		"typescript": "^6.0.2",
