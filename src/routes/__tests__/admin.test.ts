@@ -18,7 +18,6 @@ class BackupError extends Error { constructor(public key: string) { super(key); 
 vi.mock('$lib/server/auth', () => ({
 	hashPassword: vi.fn(async () => 'hashed'),
 	generateApiToken: vi.fn(() => 'token123'),
-	DEFAULT_QUOTA_BYTES: 500 * 1024 * 1024,
 	reprovisionAdmin,
 }));
 vi.mock('$lib/server/backup', () => ({ parseBackupZip, restoreAllBackup, BackupError }));
@@ -91,14 +90,21 @@ describe('admin createUser', () => {
 		expect(res).toMatchObject({ status: 409, data: { error: 'userExists' } });
 	});
 
-	it('creates a user with a default quota', async () => {
+	it('creates a user with an unlimited quota when the quota field is blank', async () => {
 		mockUserFindFirst.mockResolvedValue(undefined);
-		const res: any = await actions.createUser({ request: form({ email: 'a@b.com', username: 'bob', password: 'pw' }) } as any);
+		const res: any = await actions.createUser({ request: form({ email: 'a@b.com', username: 'bob', password: 'pw', quota_mb: '' }) } as any);
 		expect(mockInsertValues).toHaveBeenCalledOnce();
 		const values = mockInsertValues.mock.calls[0][0] as any;
 		expect(values.email).toBe('a@b.com');
-		expect(values.quotaBytes).toBe(500 * 1024 * 1024);
+		expect(values.quotaBytes).toBeNull();
 		expect(res).toMatchObject({ success: 'userCreated' });
+	});
+
+	it('creates a user with an unlimited quota when the quota field is missing', async () => {
+		mockUserFindFirst.mockResolvedValue(undefined);
+		await actions.createUser({ request: form({ email: 'a@b.com', username: 'bob', password: 'pw' }) } as any);
+		const values = mockInsertValues.mock.calls[0][0] as any;
+		expect(values.quotaBytes).toBeNull();
 	});
 
 	it('converts a quota in MB to bytes', async () => {

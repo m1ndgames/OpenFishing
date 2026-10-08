@@ -19,8 +19,6 @@ const scrypt = promisify(_scrypt);
 
 const SESSION_COOKIE = 'of_session';
 const ADMIN_USERNAME = 'admin';
-/** Default upload quota for new users, in bytes (500 MB). */
-export const DEFAULT_QUOTA_BYTES = 500 * 1024 * 1024;
 
 export const SESSION_COOKIE_NAME = SESSION_COOKIE;
 

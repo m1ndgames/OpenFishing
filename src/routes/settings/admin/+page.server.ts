@@ -16,7 +16,7 @@ import {
 	combo
 } from '$lib/server/db/schema';
 import { asc, eq, inArray } from 'drizzle-orm';
-import { hashPassword, generateApiToken, DEFAULT_QUOTA_BYTES, reprovisionAdmin } from '$lib/server/auth';
+import { hashPassword, generateApiToken, reprovisionAdmin } from '$lib/server/auth';
 import { deleteUpload, getUsedBytes } from '$lib/server/uploads';
 import { parseBackupZip, restoreAllBackup, BackupError } from '$lib/server/backup';
 import { THEME_IDS } from '$lib/themes';
@@ -107,7 +107,7 @@ export const actions: Actions = {
 			email,
 			username,
 			passwordHash: await hashPassword(password),
-			quotaBytes: quotaBytes ?? DEFAULT_QUOTA_BYTES,
+			quotaBytes, // blank field → null → unlimited
 			apiToken: generateApiToken()
 		});
 		return { success: 'userCreated' };
