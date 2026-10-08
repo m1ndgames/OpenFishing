@@ -1,10 +1,10 @@
 import type { PageServerLoad, Actions } from './$types';
-import { db } from '$lib/server/db';
-import { lure } from '$lib/server/db/schema';
+import { db } from '#lib/server/db/index.js';
+import { lure } from '#lib/server/db/schema.js';
 import { and, eq } from 'drizzle-orm';
 import QRCode from 'qrcode';
-import { env } from '$env/dynamic/private';
-import { userFilter } from '$lib/server/scope';
+import { env } from '#lib/server/env.js';
+import { userFilter } from '#lib/server/scope.js';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	const unlabeled = await db.query.lure.findMany({

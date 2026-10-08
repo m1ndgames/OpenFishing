@@ -1,9 +1,9 @@
 import { json, error } from '@sveltejs/kit';
-import { db } from '$lib/server/db';
-import { fishCatch } from '$lib/server/db/schema';
+import { db } from '#lib/server/db/index.js';
+import { fishCatch } from '#lib/server/db/schema.js';
 import { and, eq } from 'drizzle-orm';
-import { env } from '$env/dynamic/private';
-import { userFilter } from '$lib/server/scope';
+import { env } from '#lib/server/env.js';
+import { userFilter } from '#lib/server/scope.js';
 
 export const POST = async ({ params, locals }) => {
 	const token = crypto.randomUUID();

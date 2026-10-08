@@ -1,10 +1,10 @@
 import type { LayoutServerLoad } from './$types';
-import { translations, defaultLang, SUPPORTED_LANGS, type Lang } from '$lib/i18n';
-import { env } from '$env/dynamic/private';
-import { db } from '$lib/server/db';
-import { appSetting, userSetting } from '$lib/server/db/schema';
+import { translations, defaultLang, SUPPORTED_LANGS, type Lang } from '#lib/i18n/index.js';
+import { env } from '#lib/server/env.js';
+import { db } from '#lib/server/db/index.js';
+import { appSetting, userSetting } from '#lib/server/db/schema.js';
 import { and, eq, inArray } from 'drizzle-orm';
-import { authEnabled } from '$lib/server/auth';
+import { authEnabled } from '#lib/server/auth.js';
 
 export const load: LayoutServerLoad = async ({ cookies, request, locals }) => {
 	const cookie = cookies.get('lang') ?? '';

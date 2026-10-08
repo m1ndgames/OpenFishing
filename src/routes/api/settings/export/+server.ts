@@ -1,6 +1,6 @@
 import type { RequestHandler } from './$types';
-import { ownerId } from '$lib/server/scope';
-import { buildBackup, packBackupZip } from '$lib/server/backup';
+import { ownerId } from '#lib/server/scope.js';
+import { buildBackup, packBackupZip } from '#lib/server/backup.js';
 
 export const GET: RequestHandler = ({ locals }) => {
 	const payload = buildBackup('user', ownerId(locals));

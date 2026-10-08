@@ -1,9 +1,9 @@
 import type { PageServerLoad } from './$types';
-import { db } from '$lib/server/db';
-import { fishCatch, spot } from '$lib/server/db/schema';
-import { userFilter } from '$lib/server/scope';
+import { db } from '#lib/server/db/index.js';
+import { fishCatch, spot } from '#lib/server/db/schema.js';
+import { userFilter } from '#lib/server/scope.js';
 
-import { haversineMeters } from '$lib/server/haversine';
+import { haversineMeters } from '#lib/server/haversine.js';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	const [catches, spots] = await Promise.all([

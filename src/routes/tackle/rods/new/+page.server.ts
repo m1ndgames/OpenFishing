@@ -1,8 +1,8 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
-import { db } from '$lib/server/db';
-import { rod } from '$lib/server/db/schema';
-import { ownerId } from '$lib/server/scope';
+import { db } from '#lib/server/db/index.js';
+import { rod } from '#lib/server/db/schema.js';
+import { ownerId } from '#lib/server/scope.js';
 
 export const actions: Actions = {
 	default: async ({ request, locals }) => {

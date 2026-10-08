@@ -1,11 +1,11 @@
 <script lang="ts">
 	import './layout.css';
-	import favicon from '$lib/assets/favicon.svg';
-	import logo from '$lib/assets/openfishing-logo.svg?raw';
-	import { page } from '$app/stores';
+	import favicon from '#lib/assets/favicon.svg';
+	import logo from '#lib/assets/openfishing-logo.svg?raw';
+	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 	import type { LayoutData } from './$types';
-	import Chatbot from '$lib/components/Chatbot.svelte';
+	import Chatbot from '#lib/components/Chatbot.svelte';
 
 	let { children, data }: { children: import('svelte').Snippet; data: LayoutData } = $props();
 	const { t, demoMode, chatbotEnabled } = data;
@@ -15,14 +15,14 @@
 		document.documentElement.setAttribute('data-theme', data.themeName);
 	});
 
-	const isLoginPage    = $derived(['/login', '/forgot-password', '/reset-password'].includes($page.url.pathname));
-	const isSharePage    = $derived($page.url.pathname.startsWith('/share/'));
-	const luresActive    = $derived($page.url.pathname === '/' || $page.url.pathname.startsWith('/lures'));
-	const spotsActive    = $derived($page.url.pathname.startsWith('/spots'));
-	const catchesActive  = $derived($page.url.pathname.startsWith('/catches'));
-	const statsActive    = $derived($page.url.pathname.startsWith('/stats'));
-	const tackleActive   = $derived($page.url.pathname.startsWith('/tackle'));
-	const settingsActive = $derived($page.url.pathname.startsWith('/settings') || $page.url.pathname === '/qr');
+	const isLoginPage    = $derived(['/login', '/forgot-password', '/reset-password'].includes(page.url.pathname));
+	const isSharePage    = $derived(page.url.pathname.startsWith('/share/'));
+	const luresActive    = $derived(page.url.pathname === '/' || page.url.pathname.startsWith('/lures'));
+	const spotsActive    = $derived(page.url.pathname.startsWith('/spots'));
+	const catchesActive  = $derived(page.url.pathname.startsWith('/catches'));
+	const statsActive    = $derived(page.url.pathname.startsWith('/stats'));
+	const tackleActive   = $derived(page.url.pathname.startsWith('/tackle'));
+	const settingsActive = $derived(page.url.pathname.startsWith('/settings') || page.url.pathname === '/qr');
 
 	let showAddMenu = $state(false);
 

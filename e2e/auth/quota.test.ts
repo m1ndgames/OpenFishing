@@ -30,7 +30,7 @@ test.describe('Upload quota enforcement', () => {
 		await page.waitForLoadState('networkidle');
 		await page.getByLabel(/name/i).fill('Quota Test Lure');
 		await page.locator('input[type="file"][accept="image/*"]:not([capture]):not([name])').setInputFiles('e2e/fixtures/test-photo.jpg');
-		await page.waitForSelector('.cropper-canvas', { state: 'visible', timeout: 30000 });
+		await page.waitForSelector('cropper-canvas', { state: 'visible', timeout: 30000 });
 		await page.getByRole('button', { name: 'Apply' }).click();
 		await expect(page.locator('img[alt="Preview"]')).toBeVisible({ timeout: 15000 });
 

@@ -1,10 +1,10 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { env } from '$env/dynamic/private';
-import { db } from '$lib/server/db';
+import { env } from '#lib/server/env.js';
+import { db } from '#lib/server/db/index.js';
 import { eq, asc, and } from 'drizzle-orm';
-import { chatMessage as chatMessageTable } from '$lib/server/db/schema';
-import { userFilter } from '$lib/server/scope';
+import { chatMessage as chatMessageTable } from '#lib/server/db/schema.js';
+import { userFilter } from '#lib/server/scope.js';
 
 export const GET: RequestHandler = async ({ params, locals }) => {
 	if (!env.CHATBOT) error(503, 'Chatbot not configured');

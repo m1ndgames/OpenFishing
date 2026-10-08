@@ -1,10 +1,10 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { db } from '$lib/server/db';
-import { spot, spotTag, spotPhoto } from '$lib/server/db/schema';
+import { db } from '#lib/server/db/index.js';
+import { spot, spotTag, spotPhoto } from '#lib/server/db/schema.js';
 import { eq, asc, and } from 'drizzle-orm';
-import { saveUpload, deleteUpload, QuotaExceededError } from '$lib/server/uploads';
-import { userFilter } from '$lib/server/scope';
+import { saveUpload, deleteUpload, QuotaExceededError } from '#lib/server/uploads.js';
+import { userFilter } from '#lib/server/scope.js';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const found = await db.query.spot.findFirst({

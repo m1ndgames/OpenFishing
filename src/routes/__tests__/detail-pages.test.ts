@@ -8,7 +8,7 @@ vi.mock('qrcode', () => ({
 	default: { toString: vi.fn().mockResolvedValue('<svg>qr</svg>') },
 }));
 
-vi.mock('$lib/server/biteIndex', () => ({
+vi.mock('#lib/server/biteIndex.js', () => ({
 	fetchWeather: vi.fn().mockResolvedValue({ biteIndex: 7.5, temperature: 18 }),
 }));
 
@@ -30,7 +30,7 @@ function makeChain(result: any = []) {
 	return self;
 }
 
-vi.mock('$lib/server/db', () => ({
+vi.mock('#lib/server/db/index.js', () => ({
 	db: {
 		query: {
 			lure: { findFirst: mockFindFirstLure },

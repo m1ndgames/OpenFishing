@@ -5,8 +5,8 @@ const findFirst = vi.fn(async () => undefined); // no admin exists yet
 const insertValues = vi.fn(() => ({ returning: async () => [{ id: 'admin-1' }] }));
 const updateSet = vi.fn(() => ({ where: async () => undefined }));
 
-vi.mock('$env/dynamic/private', () => ({ env: mockEnv }));
-vi.mock('$lib/server/db', () => ({
+vi.mock('#lib/server/env.js', () => ({ env: mockEnv }));
+vi.mock('#lib/server/db/index.js', () => ({
 	db: {
 		query: { user: { findFirst: findFirst } },
 		insert: () => ({ values: insertValues }),

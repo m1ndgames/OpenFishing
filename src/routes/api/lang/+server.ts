@@ -1,6 +1,6 @@
 import { redirect } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { SUPPORTED_LANGS, type Lang } from '$lib/i18n';
+import { SUPPORTED_LANGS, type Lang } from '#lib/i18n/index.js';
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
 	const data = await request.formData();

@@ -1,9 +1,9 @@
 import type { RequestHandler } from './$types';
-import { db } from '$lib/server/db';
-import { fishCatch } from '$lib/server/db/schema';
+import { db } from '#lib/server/db/index.js';
+import { fishCatch } from '#lib/server/db/schema.js';
 import { gte, lte, and } from 'drizzle-orm';
 import { asc } from 'drizzle-orm';
-import { userFilter } from '$lib/server/scope';
+import { userFilter } from '#lib/server/scope.js';
 
 function escapeCsv(value: string | number | boolean | null | undefined): string {
 	if (value === null || value === undefined) return '';

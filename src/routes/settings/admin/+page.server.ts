@@ -1,7 +1,7 @@
 import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { env } from '$env/dynamic/private';
-import { db } from '$lib/server/db';
+import { env } from '#lib/server/env.js';
+import { db } from '#lib/server/db/index.js';
 import {
 	user,
 	appSetting,
@@ -14,12 +14,12 @@ import {
 	reel,
 	fishingLine,
 	combo
-} from '$lib/server/db/schema';
+} from '#lib/server/db/schema.js';
 import { asc, eq, inArray } from 'drizzle-orm';
-import { hashPassword, generateApiToken, DEFAULT_QUOTA_BYTES, reprovisionAdmin } from '$lib/server/auth';
-import { deleteUpload, getUsedBytes } from '$lib/server/uploads';
-import { parseBackupZip, restoreAllBackup, BackupError } from '$lib/server/backup';
-import { THEME_IDS } from '$lib/themes';
+import { hashPassword, generateApiToken, reprovisionAdmin } from '#lib/server/auth.js';
+import { deleteUpload, getUsedBytes } from '#lib/server/uploads.js';
+import { parseBackupZip, restoreAllBackup, BackupError } from '#lib/server/backup.js';
+import { THEME_IDS } from '#lib/themes.js';
 
 const MB = 1024 * 1024;
 
@@ -107,7 +107,7 @@ export const actions: Actions = {
 			email,
 			username,
 			passwordHash: await hashPassword(password),
-			quotaBytes: quotaBytes ?? DEFAULT_QUOTA_BYTES,
+			quotaBytes, // blank field → null → unlimited
 			apiToken: generateApiToken()
 		});
 		return { success: 'userCreated' };

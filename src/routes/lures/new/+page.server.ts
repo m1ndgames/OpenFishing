@@ -1,10 +1,10 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { db } from '$lib/server/db';
-import { lure, tag } from '$lib/server/db/schema';
+import { db } from '#lib/server/db/index.js';
+import { lure, tag } from '#lib/server/db/schema.js';
 import { and, isNotNull, max } from 'drizzle-orm';
-import { saveUpload, QuotaExceededError } from '$lib/server/uploads';
-import { ownerId, userFilter } from '$lib/server/scope';
+import { saveUpload, QuotaExceededError } from '#lib/server/uploads.js';
+import { ownerId, userFilter } from '#lib/server/scope.js';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	const distinct = async <T>(col: Parameters<typeof db.selectDistinct>[0]) => {

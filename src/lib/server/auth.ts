@@ -1,8 +1,8 @@
 import { createHash, createHmac, randomBytes, scrypt as _scrypt, timingSafeEqual } from 'node:crypto';
 import { promisify } from 'node:util';
 import { eq, isNull, or } from 'drizzle-orm';
-import { env } from '$env/dynamic/private';
-import { db } from '$lib/server/db';
+import { env } from '#lib/server/env.js';
+import { db } from '#lib/server/db/index.js';
 import {
 	user,
 	lure,
@@ -13,14 +13,12 @@ import {
 	fishingLine,
 	combo,
 	chatMessage
-} from '$lib/server/db/schema';
+} from '#lib/server/db/schema.js';
 
 const scrypt = promisify(_scrypt);
 
 const SESSION_COOKIE = 'of_session';
 const ADMIN_USERNAME = 'admin';
-/** Default upload quota for new users, in bytes (500 MB). */
-export const DEFAULT_QUOTA_BYTES = 500 * 1024 * 1024;
 
 export const SESSION_COOKIE_NAME = SESSION_COOKIE;
 

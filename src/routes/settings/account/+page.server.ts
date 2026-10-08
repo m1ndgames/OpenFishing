@@ -1,10 +1,10 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { db } from '$lib/server/db';
-import { user } from '$lib/server/db/schema';
+import { db } from '#lib/server/db/index.js';
+import { user } from '#lib/server/db/schema.js';
 import { and, eq, ne, or } from 'drizzle-orm';
-import { hashPassword, verifyPassword, generateApiToken, SESSION_COOKIE_NAME } from '$lib/server/auth';
-import { getUsedBytes } from '$lib/server/uploads';
+import { hashPassword, verifyPassword, generateApiToken, SESSION_COOKIE_NAME } from '#lib/server/auth.js';
+import { getUsedBytes } from '#lib/server/uploads.js';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	if (!locals.user) redirect(303, '/');
