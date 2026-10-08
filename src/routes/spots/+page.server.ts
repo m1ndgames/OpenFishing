@@ -1,8 +1,8 @@
 import type { PageServerLoad } from './$types';
-import { db } from '$lib/server/db';
-import { spot, spotPhoto, fishCatch } from '$lib/server/db/schema';
+import { db } from '#lib/server/db/index.js';
+import { spot, spotPhoto, fishCatch } from '#lib/server/db/schema.js';
 import { and, asc, isNotNull } from 'drizzle-orm';
-import { userFilter } from '$lib/server/scope';
+import { userFilter } from '#lib/server/scope.js';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	const [spots, catches] = await Promise.all([

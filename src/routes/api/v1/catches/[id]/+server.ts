@@ -1,9 +1,9 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { db } from '$lib/server/db';
-import { fishCatch as fishCatchTable } from '$lib/server/db/schema';
+import { db } from '#lib/server/db/index.js';
+import { fishCatch as fishCatchTable } from '#lib/server/db/schema.js';
 import { and, eq } from 'drizzle-orm';
-import { userFilter } from '$lib/server/scope';
+import { userFilter } from '#lib/server/scope.js';
 
 export const GET: RequestHandler = async ({ params, locals }) => {
 	const fishCatch = await db.query.fishCatch.findFirst({

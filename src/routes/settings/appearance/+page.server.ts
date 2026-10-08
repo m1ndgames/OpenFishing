@@ -1,8 +1,8 @@
 import type { Actions, PageServerLoad } from './$types';
-import { db } from '$lib/server/db';
-import { appSetting, userSetting } from '$lib/server/db/schema';
+import { db } from '#lib/server/db/index.js';
+import { appSetting, userSetting } from '#lib/server/db/schema.js';
 import { eq } from 'drizzle-orm';
-import { THEME_IDS } from '$lib/themes';
+import { THEME_IDS } from '#lib/themes.js';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	let map: Record<string, string>;

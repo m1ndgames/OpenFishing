@@ -1,9 +1,9 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { db } from '$lib/server/db';
-import { user } from '$lib/server/db/schema';
+import { db } from '#lib/server/db/index.js';
+import { user } from '#lib/server/db/schema.js';
 import { and, eq, gt } from 'drizzle-orm';
-import { authEnabled, hashPassword, hashResetToken } from '$lib/server/auth';
+import { authEnabled, hashPassword, hashResetToken } from '#lib/server/auth.js';
 
 async function userForToken(token: string) {
 	if (!token) return undefined;

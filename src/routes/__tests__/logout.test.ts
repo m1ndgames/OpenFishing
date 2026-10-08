@@ -3,7 +3,7 @@ import { describe, it, expect, vi } from 'vitest';
 vi.mock('@sveltejs/kit', () => ({
 	redirect: (status: number, location: string) => { throw { status, location }; },
 }));
-vi.mock('$lib/server/auth', () => ({ SESSION_COOKIE_NAME: 'of_session' }));
+vi.mock('#lib/server/auth', () => ({ SESSION_COOKIE_NAME: 'of_session' }));
 
 const { load, actions } = await import('../logout/+page.server');
 

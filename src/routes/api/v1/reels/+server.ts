@@ -1,9 +1,9 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { db } from '$lib/server/db';
+import { db } from '#lib/server/db/index.js';
 import { desc } from 'drizzle-orm';
-import { reel, reelLineLog } from '$lib/server/db/schema';
-import { userFilter } from '$lib/server/scope';
+import { reel, reelLineLog } from '#lib/server/db/schema.js';
+import { userFilter } from '#lib/server/scope.js';
 
 export const GET: RequestHandler = async ({ locals }) => {
 	const [reels, allLogs] = await Promise.all([

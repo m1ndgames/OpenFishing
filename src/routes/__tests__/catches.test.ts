@@ -8,13 +8,13 @@ vi.mock('@sveltejs/kit', () => ({
 
 class QuotaExceededError extends Error {}
 
-vi.mock('$lib/server/uploads', () => ({
+vi.mock('#lib/server/uploads.js', () => ({
 	saveUpload: vi.fn().mockResolvedValue('photo.jpg'),
 	deleteUpload: vi.fn().mockResolvedValue(undefined),
 	QuotaExceededError,
 }));
 
-vi.mock('$lib/server/biteIndex', () => ({
+vi.mock('#lib/server/biteIndex.js', () => ({
 	fetchWeather: vi.fn().mockResolvedValue({ biteIndex: 7.5 }),
 }));
 
@@ -38,7 +38,7 @@ function makeChain(result: any = undefined) {
 	return self;
 }
 
-vi.mock('$lib/server/db', () => ({
+vi.mock('#lib/server/db/index.js', () => ({
 	db: {
 		query: {
 			fishCatch: { findFirst: mockFindFirstCatch },
@@ -141,7 +141,7 @@ describe('catches/[id]/edit update action', () => {
 	});
 
 	it('deletes removed photos', async () => {
-		const { deleteUpload } = await import('$lib/server/uploads');
+		const { deleteUpload } = await import('#lib/server/uploads.js');
 		mockFindFirstCatch.mockResolvedValue({
 			...existingCatch,
 			photos: [{ id: 'ph1', filename: 'old.jpg' }],
@@ -172,7 +172,7 @@ describe('catches/[id]/edit delete action', () => {
 	});
 
 	it('deletes all photos before deleting catch', async () => {
-		const { deleteUpload } = await import('$lib/server/uploads');
+		const { deleteUpload } = await import('#lib/server/uploads.js');
 		mockFindFirstCatch.mockResolvedValue({
 			...existingCatch,
 			photos: [{ id: 'ph1', filename: 'a.jpg' }, { id: 'ph2', filename: 'b.jpg' }],
@@ -195,7 +195,7 @@ describe('catches/[id]/edit photo uploads', () => {
 	});
 
 	it('saves a new photo and inserts a catchPhoto row', async () => {
-		const { saveUpload } = await import('$lib/server/uploads');
+		const { saveUpload } = await import('#lib/server/uploads.js');
 		const photo = new File(['data'], 'fish.jpg', { type: 'image/jpeg' });
 		const fd = new FormData();
 		fd.append('species', 'Pike');
@@ -210,7 +210,7 @@ describe('catches/[id]/edit photo uploads', () => {
 	});
 
 	it('returns 413 and cleans up on quota exceeded', async () => {
-		const { saveUpload, deleteUpload } = await import('$lib/server/uploads');
+		const { saveUpload, deleteUpload } = await import('#lib/server/uploads.js');
 		vi.mocked(saveUpload).mockRejectedValueOnce(new QuotaExceededError());
 		const photo = new File(['data'], 'fish.jpg', { type: 'image/jpeg' });
 		const fd = new FormData();

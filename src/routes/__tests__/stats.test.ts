@@ -15,7 +15,7 @@ function makeSelectChain(result: any[]) {
 	return chain;
 }
 
-vi.mock('$lib/server/db', () => ({
+vi.mock('#lib/server/db/index.js', () => ({
 	db: {
 		query: {
 			fishCatch: { findMany: mockFindMany },

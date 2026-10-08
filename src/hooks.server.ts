@@ -1,15 +1,16 @@
-import { redirect, type Handle } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
+import type { Handle } from '@sveltejs/kit/hooks';
 import { eq } from 'drizzle-orm';
-import { env } from '$env/dynamic/private';
-import { db } from '$lib/server/db';
-import { user } from '$lib/server/db/schema';
+import { env } from '#lib/server/env.js';
+import { db } from '#lib/server/db/index.js';
+import { user } from '#lib/server/db/schema.js';
 import {
 	SESSION_COOKIE_NAME,
 	ensureAdminUser,
 	getAdminPassword,
 	resolveSessionUser,
 	toSessionUser
-} from '$lib/server/auth';
+} from '#lib/server/auth.js';
 
 export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.user = null;

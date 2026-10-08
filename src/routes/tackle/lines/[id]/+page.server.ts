@@ -1,9 +1,9 @@
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { db } from '$lib/server/db';
-import { fishingLine, reelLineLog } from '$lib/server/db/schema';
+import { db } from '#lib/server/db/index.js';
+import { fishingLine, reelLineLog } from '#lib/server/db/schema.js';
 import { eq, desc, and } from 'drizzle-orm';
-import { userFilter } from '$lib/server/scope';
+import { userFilter } from '#lib/server/scope.js';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const found = await db.select().from(fishingLine).where(and(eq(fishingLine.id, params.id), userFilter(locals, fishingLine.userId))).limit(1);

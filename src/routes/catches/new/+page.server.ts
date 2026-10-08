@@ -1,11 +1,11 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { db } from '$lib/server/db';
-import { fishCatch, catchPhoto, lure, combo } from '$lib/server/db/schema';
-import { saveUpload, deleteUpload, QuotaExceededError } from '$lib/server/uploads';
+import { db } from '#lib/server/db/index.js';
+import { fishCatch, catchPhoto, lure, combo } from '#lib/server/db/schema.js';
+import { saveUpload, deleteUpload, QuotaExceededError } from '#lib/server/uploads.js';
 import { asc } from 'drizzle-orm';
-import { fetchWeather } from '$lib/server/biteIndex';
-import { ownerId, userFilter } from '$lib/server/scope';
+import { fetchWeather } from '#lib/server/biteIndex.js';
+import { ownerId, userFilter } from '#lib/server/scope.js';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	const [lures, combos] = await Promise.all([

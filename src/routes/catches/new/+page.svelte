@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import type { ActionData, PageData } from './$types';
-	import { readPhotoMeta, toDatetimeLocal } from '$lib/photoMeta';
+	import { readPhotoMeta, toDatetimeLocal } from '#lib/photoMeta.js';
 
 	let { form, data }: { form: ActionData; data: PageData } = $props();
 	const { t, lures, combos } = data;

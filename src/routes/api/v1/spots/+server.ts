@@ -1,8 +1,8 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { db } from '$lib/server/db';
-import { spot } from '$lib/server/db/schema';
-import { userFilter } from '$lib/server/scope';
+import { db } from '#lib/server/db/index.js';
+import { spot } from '#lib/server/db/schema.js';
+import { userFilter } from '#lib/server/scope.js';
 
 export const GET: RequestHandler = async ({ locals }) => {
 	const spots = await db.query.spot.findMany({

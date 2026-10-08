@@ -1,6 +1,6 @@
 import { redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { SESSION_COOKIE_NAME } from '$lib/server/auth';
+import { SESSION_COOKIE_NAME } from '#lib/server/auth.js';
 
 export const load: PageServerLoad = async () => {
 	redirect(303, '/');

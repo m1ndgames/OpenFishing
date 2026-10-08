@@ -107,7 +107,7 @@ test.describe('Add new lure', () => {
 		// Upload photo via the hidden file input (triggers CropModal)
 		await page.locator('input[type="file"][accept="image/*"]:not([capture]):not([name])').setInputFiles('e2e/fixtures/test-photo.jpg');
 		// Wait for CropperJS to fully initialize — image must load first, so allow extra time in CI
-		await page.waitForSelector('.cropper-canvas', { state: 'visible', timeout: 30000 });
+		await page.waitForSelector('cropper-canvas', { state: 'visible', timeout: 30000 });
 		// Confirm crop
 		await page.getByRole('button', { name: 'Apply' }).click();
 		// Wait for photo preview then save
@@ -116,6 +116,41 @@ test.describe('Add new lure', () => {
 		await expect(page).toHaveURL(/\/lures\//, { timeout: 15000 });
 		await expect(page.getByText('E2E Test Lure')).toBeVisible();
 	});
+
+	// cropperjs 2's $toCanvas() defaults to the on-screen selection size; CropModal must export
+	// at the photo's real resolution, keep 4:3, and never include area outside the photo.
+	for (const rotate of [false, true]) {
+		test(`crop exports full resolution 4:3 without black bars${rotate ? ' after rotating' : ''}`, async ({ page }) => {
+			await page.goto('/lures/new');
+			await page.waitForLoadState('networkidle');
+			await page.locator('input[type="file"][accept="image/*"]:not([capture]):not([name])').setInputFiles('e2e/fixtures/large-photo.png');
+			await page.waitForSelector('cropper-canvas', { state: 'visible', timeout: 30000 });
+			if (rotate) await page.getByTitle('Rotate right').click();
+			await page.getByRole('button', { name: 'Apply' }).click();
+
+			const preview = page.locator('img[alt="Preview"]');
+			await expect(preview).toBeVisible({ timeout: 15000 });
+			await expect.poll(() => preview.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);
+			const info = await preview.evaluate((img: HTMLImageElement) => {
+				const c = document.createElement('canvas');
+				c.width = img.naturalWidth; c.height = img.naturalHeight;
+				const ctx = c.getContext('2d')!;
+				ctx.drawImage(img, 0, 0);
+				const px = (x: number, y: number) => Array.from(ctx.getImageData(x, y, 1, 1).data.slice(0, 3));
+				const w = c.width - 2, h = c.height - 2;
+				return { width: img.naturalWidth, height: img.naturalHeight, corners: [px(1, 1), px(w, 1), px(1, h), px(w, h)] };
+			});
+			// 1600×1200 source at 95% coverage → ~1520 wide unrotated, ~1140 rotated (vs ~500 at screen size)
+			expect(info.width).toBeGreaterThan(1000);
+			expect(info.width / info.height).toBeCloseTo(4 / 3, 1);
+			// Fixture color is rgb(0,128,200); black corners would mean the crop left the photo
+			for (const [r, g, b] of info.corners) {
+				expect(r).toBeLessThan(40);
+				expect(g).toBeGreaterThan(100);
+				expect(b).toBeGreaterThan(160);
+			}
+		});
+	}
 });
 
 test.describe('Favourite toggle', () => {

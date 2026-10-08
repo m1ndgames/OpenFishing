@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer';
-import { env } from '$env/dynamic/private';
-import type { Translations } from '$lib/i18n';
+import { env } from '#lib/server/env.js';
+import type { Translations } from '#lib/i18n/index.js';
 
 /**
  * Whether outbound email (password reset) is configured. Requires at least an SMTP host

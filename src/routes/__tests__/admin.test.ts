@@ -6,7 +6,7 @@ const mockInsertValues = vi.fn(async () => undefined);
 const mockUpdateSet = vi.fn();
 const mockDeleteWhere = vi.fn(async () => undefined);
 
-vi.mock('$env/dynamic/private', () => ({ env: mockEnv }));
+vi.mock('#lib/server/env.js', () => ({ env: mockEnv }));
 vi.mock('@sveltejs/kit', () => ({
 	fail: (status: number, data: any) => ({ status, data }),
 }));
@@ -15,14 +15,14 @@ const parseBackupZip = vi.fn(() => ({ payload: {}, extractPhotos: vi.fn() }));
 const restoreAllBackup = vi.fn(() => ({ userCount: 2, lureCount: 3, spotCount: 1, catchCount: 1 }));
 class BackupError extends Error { constructor(public key: string) { super(key); } }
 
-vi.mock('$lib/server/auth', () => ({
+vi.mock('#lib/server/auth.js', () => ({
 	hashPassword: vi.fn(async () => 'hashed'),
 	generateApiToken: vi.fn(() => 'token123'),
 	reprovisionAdmin,
 }));
-vi.mock('$lib/server/backup', () => ({ parseBackupZip, restoreAllBackup, BackupError }));
-vi.mock('$lib/server/uploads', () => ({ deleteUpload: vi.fn(async () => undefined), getUsedBytes: vi.fn(async () => 0) }));
-vi.mock('$lib/server/db', () => ({
+vi.mock('#lib/server/backup.js', () => ({ parseBackupZip, restoreAllBackup, BackupError }));
+vi.mock('#lib/server/uploads.js', () => ({ deleteUpload: vi.fn(async () => undefined), getUsedBytes: vi.fn(async () => 0) }));
+vi.mock('#lib/server/db/index.js', () => ({
 	db: {
 		query: { user: { findFirst: mockUserFindFirst } },
 		select: () => ({ from: () => ({ where: async () => [], orderBy: async () => [] }) }),

@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { env } from '$env/dynamic/private';
+import { env } from '#lib/server/env.js';
 
 const spec = {
 	openapi: '3.0.3',

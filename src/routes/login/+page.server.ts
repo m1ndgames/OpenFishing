@@ -8,8 +8,8 @@ import {
 	resolveSessionUser,
 	sessionCookieValue,
 	verifyPassword
-} from '$lib/server/auth';
-import { mailConfigured } from '$lib/server/mail';
+} from '#lib/server/auth.js';
+import { mailConfigured } from '#lib/server/mail.js';
 
 export const load: PageServerLoad = async ({ cookies }) => {
 	if (!authEnabled()) redirect(303, '/');
