@@ -4,8 +4,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 // A real in-memory SQLite DB with the full schema, shared with the module under test.
-vi.mock('$env/dynamic/private', () => ({ env: { UPLOAD_PATH: mkdtempSync(join(tmpdir(), 'of-backup-')) } }));
-vi.mock('$lib/server/db', async () => {
+vi.mock('#lib/server/env.js', () => ({ env: { UPLOAD_PATH: mkdtempSync(join(tmpdir(), 'of-backup-')) } }));
+vi.mock('#lib/server/db/index.js', async () => {
 	const Database = (await import('better-sqlite3')).default;
 	const { drizzle } = await import('drizzle-orm/better-sqlite3');
 	const { migrate } = await import('drizzle-orm/better-sqlite3/migrator');
@@ -17,7 +17,7 @@ vi.mock('$lib/server/db', async () => {
 });
 
 import * as s from '../db/schema';
-const { db, client } = await import('$lib/server/db');
+const { db, client } = await import('#lib/server/db/index.js');
 const { buildBackup, packBackupZip, parseBackupZip, restoreUserBackup, restoreAllBackup, BackupError } = await import('../backup');
 const ctx = { client } as any;
 

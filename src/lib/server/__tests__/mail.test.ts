@@ -4,7 +4,7 @@ const mockEnv: Record<string, string | undefined> = {};
 const mockSendMail = vi.fn(async () => undefined);
 const mockCreateTransport = vi.fn(() => ({ sendMail: mockSendMail }));
 
-vi.mock('$env/dynamic/private', () => ({ env: mockEnv }));
+vi.mock('#lib/server/env.js', () => ({ env: mockEnv }));
 vi.mock('nodemailer', () => ({ default: { createTransport: mockCreateTransport } }));
 
 const { mailConfigured, sendPasswordResetEmail } = await import('../mail');

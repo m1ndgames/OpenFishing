@@ -2,10 +2,10 @@ import { readFileSync, existsSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join, basename } from 'node:path';
 import AdmZip from 'adm-zip';
 import { eq, inArray, isNull } from 'drizzle-orm';
-import { db, client } from '$lib/server/db';
-import * as s from '$lib/server/db/schema';
-import { getSchemaHash } from '$lib/server/db/schema-hash';
-import { UPLOAD_DIR } from '$lib/server/uploads';
+import { db, client } from '#lib/server/db/index.js';
+import * as s from '#lib/server/db/schema.js';
+import { getSchemaHash } from '#lib/server/db/schema-hash.js';
+import { UPLOAD_DIR } from '#lib/server/uploads.js';
 
 export type BackupScope = 'user' | 'all';
 

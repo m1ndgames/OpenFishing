@@ -4,8 +4,9 @@ import { fileURLToPath } from 'node:url';
 export default defineConfig({
 	resolve: {
 		alias: {
-			'$env/dynamic/private': new URL('./src/__mocks__/env.ts', import.meta.url).pathname,
-			'$lib': fileURLToPath(new URL('./src/lib', import.meta.url)),
+			// Must precede '#lib': the env wrapper imports $app/env/private, which only exists under the SvelteKit plugin
+			'#lib/server/env.js': fileURLToPath(new URL('./src/__mocks__/env.ts', import.meta.url)),
+			'#lib': fileURLToPath(new URL('./src/lib', import.meta.url)),
 		},
 	},
 	test: {

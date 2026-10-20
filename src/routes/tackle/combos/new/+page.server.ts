@@ -1,9 +1,9 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { db } from '$lib/server/db';
-import { combo, rod, reel } from '$lib/server/db/schema';
+import { db } from '#lib/server/db/index.js';
+import { combo, rod, reel } from '#lib/server/db/schema.js';
 import { asc } from 'drizzle-orm';
-import { ownerId, userFilter } from '$lib/server/scope';
+import { ownerId, userFilter } from '#lib/server/scope.js';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	const [rods, reels] = await Promise.all([

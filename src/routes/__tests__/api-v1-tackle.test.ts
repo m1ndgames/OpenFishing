@@ -37,7 +37,7 @@ function makeUpdateChain(result: any[] = []) {
 	return self;
 }
 
-vi.mock('$lib/server/db', () => ({
+vi.mock('#lib/server/db/index.js', () => ({
 	db: {
 		select: mockSelect,
 		update: mockUpdate,

@@ -2,8 +2,8 @@
 	import { tick } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { marked } from 'marked';
-	import type { Translations } from '$lib/i18n';
-	import icon from '$lib/assets/openfishing-mark.svg?raw';
+	import type { Translations } from '#lib/i18n/index.js';
+	import icon from '#lib/assets/openfishing-mark.svg?raw';
 
 	function renderMarkdown(text: string): string {
 		return marked.parse(text, { async: false }) as string;
@@ -15,7 +15,9 @@
 		const href = a.getAttribute('href');
 		if (!href?.startsWith('/')) return;
 		e.preventDefault();
-		goto(href, { invalidateAll: true });
+		// LLM-generated links can point at paths that don't match a route, which makes goto()
+		// reject in SvelteKit 3 — fall back to a regular navigation (shows the 404 page).
+		goto(href, { refreshAll: true }).catch(() => { window.location.href = href; });
 	}
 
 	type Message = { role: 'user' | 'assistant'; content: string };

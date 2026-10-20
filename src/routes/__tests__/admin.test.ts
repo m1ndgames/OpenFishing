@@ -6,7 +6,7 @@ const mockInsertValues = vi.fn(async () => undefined);
 const mockUpdateSet = vi.fn();
 const mockDeleteWhere = vi.fn(async () => undefined);
 
-vi.mock('$env/dynamic/private', () => ({ env: mockEnv }));
+vi.mock('#lib/server/env.js', () => ({ env: mockEnv }));
 vi.mock('@sveltejs/kit', () => ({
 	fail: (status: number, data: any) => ({ status, data }),
 }));
@@ -15,15 +15,14 @@ const parseBackupZip = vi.fn(() => ({ payload: {}, extractPhotos: vi.fn() }));
 const restoreAllBackup = vi.fn(() => ({ userCount: 2, lureCount: 3, spotCount: 1, catchCount: 1 }));
 class BackupError extends Error { constructor(public key: string) { super(key); } }
 
-vi.mock('$lib/server/auth', () => ({
+vi.mock('#lib/server/auth.js', () => ({
 	hashPassword: vi.fn(async () => 'hashed'),
 	generateApiToken: vi.fn(() => 'token123'),
-	DEFAULT_QUOTA_BYTES: 500 * 1024 * 1024,
 	reprovisionAdmin,
 }));
-vi.mock('$lib/server/backup', () => ({ parseBackupZip, restoreAllBackup, BackupError }));
-vi.mock('$lib/server/uploads', () => ({ deleteUpload: vi.fn(async () => undefined), getUsedBytes: vi.fn(async () => 0) }));
-vi.mock('$lib/server/db', () => ({
+vi.mock('#lib/server/backup.js', () => ({ parseBackupZip, restoreAllBackup, BackupError }));
+vi.mock('#lib/server/uploads.js', () => ({ deleteUpload: vi.fn(async () => undefined), getUsedBytes: vi.fn(async () => 0) }));
+vi.mock('#lib/server/db/index.js', () => ({
 	db: {
 		query: { user: { findFirst: mockUserFindFirst } },
 		select: () => ({ from: () => ({ where: async () => [], orderBy: async () => [] }) }),
@@ -91,14 +90,21 @@ describe('admin createUser', () => {
 		expect(res).toMatchObject({ status: 409, data: { error: 'userExists' } });
 	});
 
-	it('creates a user with a default quota', async () => {
+	it('creates a user with an unlimited quota when the quota field is blank', async () => {
 		mockUserFindFirst.mockResolvedValue(undefined);
-		const res: any = await actions.createUser({ request: form({ email: 'a@b.com', username: 'bob', password: 'pw' }) } as any);
+		const res: any = await actions.createUser({ request: form({ email: 'a@b.com', username: 'bob', password: 'pw', quota_mb: '' }) } as any);
 		expect(mockInsertValues).toHaveBeenCalledOnce();
 		const values = mockInsertValues.mock.calls[0][0] as any;
 		expect(values.email).toBe('a@b.com');
-		expect(values.quotaBytes).toBe(500 * 1024 * 1024);
+		expect(values.quotaBytes).toBeNull();
 		expect(res).toMatchObject({ success: 'userCreated' });
+	});
+
+	it('creates a user with an unlimited quota when the quota field is missing', async () => {
+		mockUserFindFirst.mockResolvedValue(undefined);
+		await actions.createUser({ request: form({ email: 'a@b.com', username: 'bob', password: 'pw' }) } as any);
+		const values = mockInsertValues.mock.calls[0][0] as any;
+		expect(values.quotaBytes).toBeNull();
 	});
 
 	it('converts a quota in MB to bytes', async () => {

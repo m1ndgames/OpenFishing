@@ -1,11 +1,11 @@
 import { mkdir, unlink, stat, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { env } from '$env/dynamic/private';
+import { env } from '#lib/server/env.js';
 import { and, eq, inArray, isNotNull } from 'drizzle-orm';
 import type { SQLiteColumn } from 'drizzle-orm/sqlite-core';
 import sharp from 'sharp';
-import { db } from '$lib/server/db';
-import { lure, spot, spotPhoto, fishCatch, catchPhoto } from '$lib/server/db/schema';
+import { db } from '#lib/server/db/index.js';
+import { lure, spot, spotPhoto, fishCatch, catchPhoto } from '#lib/server/db/schema.js';
 
 export const UPLOAD_DIR = env.UPLOAD_PATH ?? './uploads';
 

@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { join, extname } from 'node:path';
-import { UPLOAD_DIR } from '$lib/server/uploads';
+import { UPLOAD_DIR } from '#lib/server/uploads.js';
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 

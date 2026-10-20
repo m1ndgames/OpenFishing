@@ -3,8 +3,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 const mockEnv: Record<string, string | undefined> = { AUTH_PASSWORD: 'secret', ADMIN_EMAIL: undefined };
 let userRow: any = null;
 
-vi.mock('$env/dynamic/private', () => ({ env: mockEnv }));
-vi.mock('$lib/server/db', () => ({
+vi.mock('#lib/server/env.js', () => ({ env: mockEnv }));
+vi.mock('#lib/server/db/index.js', () => ({
 	db: { query: { user: { findFirst: vi.fn(async () => userRow) } } },
 }));
 

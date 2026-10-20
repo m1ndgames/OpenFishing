@@ -56,13 +56,16 @@
 		} else if (spotMarkers.length > 1) {
 			const group = L.featureGroup(spotMarkers);
 			mapInstance.fitBounds(group.getBounds().pad(0.2));
-		} else if (catches.length > 0) {
+		} else {
 			const validCatches = catches.filter(c => c.lat && c.lng);
 			if (validCatches.length === 1) {
 				mapInstance.setView([validCatches[0].lat!, validCatches[0].lng!], 13);
 			} else if (validCatches.length > 1) {
 				const latlngs = validCatches.map(c => [c.lat!, c.lng!]);
 				mapInstance.fitBounds(L.latLngBounds(latlngs as any).pad(0.2));
+			} else {
+				// Nothing to frame — fall back to a default view instead of a grey map
+				mapInstance.setView([51, 10], 5);
 			}
 		}
 

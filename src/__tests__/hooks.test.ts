@@ -7,16 +7,16 @@ const mockEnv: Record<string, string | undefined> = { AUTH_PASSWORD: undefined, 
 let sessionUser: any = null;
 let bearerUser: any = null;
 
-vi.mock('$env/dynamic/private', () => ({ env: mockEnv }));
+vi.mock('#lib/server/env.js', () => ({ env: mockEnv }));
 vi.mock('@sveltejs/kit', () => ({
 	redirect: (status: number, location: string) => {
 		throw { status, location };
 	},
 }));
-vi.mock('$lib/server/db', () => ({
+vi.mock('#lib/server/db/index.js', () => ({
 	db: { query: { user: { findFirst: vi.fn(async () => bearerUser) } } },
 }));
-vi.mock('$lib/server/auth', () => ({
+vi.mock('#lib/server/auth.js', () => ({
 	SESSION_COOKIE_NAME: 'of_session',
 	getAdminPassword: () => mockEnv.ADMIN_PASSWORD || mockEnv.AUTH_PASSWORD || undefined,
 	ensureAdminUser: vi.fn().mockResolvedValue(undefined),

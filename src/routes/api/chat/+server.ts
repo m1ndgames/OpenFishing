@@ -1,12 +1,12 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { env } from '$env/dynamic/private';
-import { db } from '$lib/server/db';
+import { env } from '#lib/server/env.js';
+import { db } from '#lib/server/db/index.js';
 import { eq, like, and, desc, gte, lte, sql } from 'drizzle-orm';
-import { lure as lureTable, fishCatch as catchTable, spot as spotTable, rod as rodTable, reel as reelTable, fishingLine as lineTable, combo as comboTable, reelLineLog, chatMessage as chatMessageTable } from '$lib/server/db/schema';
-import { fetchWeather, type WeatherData } from '$lib/server/biteIndex';
-import { ownerId, userFilter } from '$lib/server/scope';
-import { translations, type Lang } from '$lib/i18n';
+import { lure as lureTable, fishCatch as catchTable, spot as spotTable, rod as rodTable, reel as reelTable, fishingLine as lineTable, combo as comboTable, reelLineLog, chatMessage as chatMessageTable } from '#lib/server/db/schema.js';
+import { fetchWeather, type WeatherData } from '#lib/server/biteIndex.js';
+import { ownerId, userFilter } from '#lib/server/scope.js';
+import { translations, type Lang } from '#lib/i18n/index.js';
 
 const MOON_PHASES = ['New moon', 'Waxing crescent', 'First quarter', 'Waxing gibbous', 'Full moon', 'Waning gibbous', 'Last quarter', 'Waning crescent'];
 

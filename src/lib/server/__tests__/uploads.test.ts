@@ -11,7 +11,7 @@ const stat = vi.fn(async () => statSize);
 // Each db.select(...).from(...).where(...) resolves the next queued result.
 let selectQueue: any[][] = [];
 
-vi.mock('$env/dynamic/private', () => ({ env: mockEnv }));
+vi.mock('#lib/server/env.js', () => ({ env: mockEnv }));
 vi.mock('node:fs/promises', () => ({ writeFile, mkdir, unlink, stat }));
 vi.mock('sharp', () => {
 	const chain: any = {
@@ -22,7 +22,7 @@ vi.mock('sharp', () => {
 	};
 	return { default: () => chain };
 });
-vi.mock('$lib/server/db', () => ({
+vi.mock('#lib/server/db/index.js', () => ({
 	db: { select: () => ({ from: () => ({ where: async () => selectQueue.shift() ?? [] }) }) }
 }));
 

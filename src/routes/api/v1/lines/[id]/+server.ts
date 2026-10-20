@@ -1,9 +1,9 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { db } from '$lib/server/db';
+import { db } from '#lib/server/db/index.js';
 import { and, eq } from 'drizzle-orm';
-import { fishingLine } from '$lib/server/db/schema';
-import { userFilter } from '$lib/server/scope';
+import { fishingLine } from '#lib/server/db/schema.js';
+import { userFilter } from '#lib/server/scope.js';
 
 export const GET: RequestHandler = async ({ params, locals }) => {
 	const found = await db.select().from(fishingLine).where(and(eq(fishingLine.id, params.id), userFilter(locals, fishingLine.userId))).limit(1);

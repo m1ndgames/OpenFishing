@@ -1,9 +1,9 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { db } from '$lib/server/db';
-import { lure } from '$lib/server/db/schema';
+import { db } from '#lib/server/db/index.js';
+import { lure } from '#lib/server/db/schema.js';
 import { and, eq } from 'drizzle-orm';
-import { userFilter } from '$lib/server/scope';
+import { userFilter } from '#lib/server/scope.js';
 
 export const POST: RequestHandler = async ({ params, locals }) => {
 	const existing = await db.query.lure.findFirst({

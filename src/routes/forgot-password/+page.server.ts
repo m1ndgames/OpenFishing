@@ -1,12 +1,12 @@
 import { redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { env } from '$env/dynamic/private';
-import { db } from '$lib/server/db';
-import { user } from '$lib/server/db/schema';
+import { env } from '#lib/server/env.js';
+import { db } from '#lib/server/db/index.js';
+import { user } from '#lib/server/db/schema.js';
 import { eq } from 'drizzle-orm';
-import { authEnabled, findUserByEmail, generateResetToken } from '$lib/server/auth';
-import { mailConfigured, sendPasswordResetEmail } from '$lib/server/mail';
-import { translations, defaultLang, SUPPORTED_LANGS, type Lang } from '$lib/i18n';
+import { authEnabled, findUserByEmail, generateResetToken } from '#lib/server/auth.js';
+import { mailConfigured, sendPasswordResetEmail } from '#lib/server/mail.js';
+import { translations, defaultLang, SUPPORTED_LANGS, type Lang } from '#lib/i18n/index.js';
 
 function guard() {
 	if (!authEnabled() || !mailConfigured()) redirect(303, '/login');

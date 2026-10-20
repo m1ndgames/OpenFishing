@@ -1,8 +1,8 @@
 ﻿<script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import type { PageData } from './$types';
-	import favicon from '$lib/assets/favicon.svg';
-	import mark from '$lib/assets/openfishing-mark.svg?raw';
+	import favicon from '#lib/assets/favicon.svg';
+	import mark from '#lib/assets/openfishing-mark.svg?raw';
 	import 'leaflet/dist/leaflet.css';
 
 	let { data }: { data: PageData } = $props();

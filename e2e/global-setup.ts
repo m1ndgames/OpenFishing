@@ -6,6 +6,7 @@ import { createHash } from 'node:crypto';
 import { deflateSync } from 'node:zlib';
 import * as schema from '../src/lib/server/db/schema';
 import { LURE_IDS, SPOT_IDS, CATCH_IDS } from './fixtures';
+import { buildGpsJpeg } from './exif-jpeg';
 
 function pngChunk(type: string, data: Buffer): Buffer {
 	const len = Buffer.alloc(4); len.writeUInt32BE(data.length, 0);
@@ -52,6 +53,10 @@ export default async function globalSetup() {
 	mkdirSync('e2e/fixtures', { recursive: true });
 	// Generate a valid 50×50 solid-color PNG using raw PNG encoding (no native deps)
 	writeFileSync('e2e/fixtures/test-photo.jpg', buildPng(50, 50, 0, 128, 200));
+	// Large 4:3 photo for the crop-resolution test (cropperjs must export at natural size)
+	writeFileSync('e2e/fixtures/large-photo.png', buildPng(1600, 1200, 0, 128, 200));
+	// JPEG with EXIF GPS (52.52 N, 13.405 E) + DateTimeOriginal, for the location-from-photo tests (#37)
+	writeFileSync('e2e/fixtures/gps-photo.jpg', buildGpsJpeg(52.52, 13.405, '2026:06:15 07:30:00'));
 
 	const sqlite = new Database('e2e/test.db');
 	const db = drizzle(sqlite, { schema });

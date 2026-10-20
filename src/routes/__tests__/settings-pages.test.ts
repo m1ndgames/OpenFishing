@@ -8,11 +8,11 @@ vi.mock('qrcode', () => ({
 	default: { toString: vi.fn().mockResolvedValue('<svg>qr</svg>') },
 }));
 
-vi.mock('$lib/server/db/schema-hash', () => ({
+vi.mock('#lib/server/db/schema-hash.js', () => ({
 	getSchemaHash: vi.fn().mockReturnValue('abc123def456'),
 }));
 
-vi.mock('$lib/server/uploads', () => ({
+vi.mock('#lib/server/uploads.js', () => ({
 	UPLOAD_DIR: '/tmp/uploads',
 }));
 
@@ -66,7 +66,7 @@ const mockClient = {
 	prepare: vi.fn().mockReturnValue({ run: vi.fn() }),
 };
 
-vi.mock('$lib/server/db', () => ({
+vi.mock('#lib/server/db/index.js', () => ({
 	db: {
 		select: mockSelect,
 		update: mockUpdate,

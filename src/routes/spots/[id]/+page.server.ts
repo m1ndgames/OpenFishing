@@ -1,14 +1,14 @@
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { db } from '$lib/server/db';
-import { spot, spotPhoto, fishCatch, catchPhoto } from '$lib/server/db/schema';
+import { db } from '#lib/server/db/index.js';
+import { spot, spotPhoto, fishCatch, catchPhoto } from '#lib/server/db/schema.js';
 import { eq, asc, isNotNull, and } from 'drizzle-orm';
-import { env } from '$env/dynamic/private';
-import { fetchWeather } from '$lib/server/biteIndex';
-import { userFilter } from '$lib/server/scope';
-import { authEnabled as isAuthEnabled } from '$lib/server/auth';
+import { env } from '#lib/server/env.js';
+import { fetchWeather } from '#lib/server/biteIndex.js';
+import { userFilter } from '#lib/server/scope.js';
+import { authEnabled as isAuthEnabled } from '#lib/server/auth.js';
 
-import { haversineMeters } from '$lib/server/haversine';
+import { haversineMeters } from '#lib/server/haversine.js';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const [found, allSpots, allCatches] = await Promise.all([

@@ -68,4 +68,41 @@ test.describe('Add new spot', () => {
 		await page.getByRole('button', { name: 'Save Spot' }).click();
 		await expect(page.getByText('E2E Test Spot')).toBeVisible();
 	});
+
+	test('map loads tiles even without geolocation permission (#104)', async ({ page, context }) => {
+		// Before the fix the map only got a view once geolocation succeeded, so a denied /
+		// unavailable / ignored permission left it grey with no tiles at all.
+		await context.clearPermissions();
+		await page.goto('/spots/new');
+		await expect(page.locator('.leaflet-tile').first()).toBeAttached({ timeout: 15000 });
+	});
+
+	test('places the marker from the photo GPS (#37)', async ({ page }) => {
+		await page.goto('/spots/new');
+		await page.waitForLoadState('networkidle');
+		await page.locator('input[type="file"][name="photos"]').setInputFiles('e2e/fixtures/gps-photo.jpg');
+		await expect(page.locator('input[name="lat"]')).toHaveValue(/^52\.5/, { timeout: 10000 });
+		await expect(page.locator('input[name="lng"]')).toHaveValue(/^13\.40/);
+		await expect(page.getByText('52.520000, 13.405000')).toBeVisible();
+		await expect(page.getByText('Location taken from photo')).toBeVisible();
+	});
+
+	test('photo GPS does not override a placed marker but can be applied (#37)', async ({ page, context }) => {
+		await context.clearPermissions();
+		await page.goto('/spots/new');
+		await page.waitForLoadState('networkidle');
+		// Click the map (default view centered on 51, 10) to place a marker manually
+		await page.locator('.leaflet-container').click();
+		await expect(page.locator('input[name="lat"]')).not.toHaveValue('');
+		const manualLat = await page.locator('input[name="lat"]').inputValue();
+
+		await page.locator('input[type="file"][name="photos"]').setInputFiles('e2e/fixtures/gps-photo.jpg');
+		const usePhoto = page.getByRole('button', { name: 'Use photo location' });
+		await expect(usePhoto).toBeVisible({ timeout: 10000 });
+		await expect(page.locator('input[name="lat"]')).toHaveValue(manualLat);
+
+		await usePhoto.click();
+		await expect(page.locator('input[name="lat"]')).toHaveValue(/^52\.5/);
+		await expect(usePhoto).toBeHidden();
+	});
 });

@@ -9,13 +9,13 @@ vi.mock('@sveltejs/kit', () => ({
 	fail: (status: number, data: any) => ({ status, data }),
 	redirect: (status: number, location: string) => { throw { status, location }; },
 }));
-vi.mock('$lib/server/auth', () => ({
+vi.mock('#lib/server/auth.js', () => ({
 	hashPassword: vi.fn(async () => 'hashed'),
 	verifyPassword: vi.fn(async () => verifyResult),
 	generateApiToken: vi.fn(() => 'newtoken'),
 	SESSION_COOKIE_NAME: 'of_session',
 }));
-vi.mock('$lib/server/db', () => ({
+vi.mock('#lib/server/db/index.js', () => ({
 	db: {
 		query: { user: { findFirst: mockUserFindFirst } },
 		update: () => ({ set: (v: any) => { mockUpdateSet(v); return { where: async () => undefined }; } }),

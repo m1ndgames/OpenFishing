@@ -15,7 +15,7 @@ Optional multi-user auth via the `ADMIN_PASSWORD` env var (the old `AUTH_PASSWOR
 - **Password reset**: when SMTP is configured (`mailConfigured()`, `src/lib/server/mail.ts` via nodemailer), `/login` shows a "Forgot password?" link → `/forgot-password` (email → emailed reset link, generic response to avoid enumeration) → `/reset-password?token=…`. Tokens are random, stored **hashed** (`user.resetTokenHash`) with a 1-hour expiry (`user.resetTokenExpiry`). The admin has no email so it can't self-reset (its password is env-controlled anyway). Both routes are bypassed by the auth hook and disabled when SMTP is unset.
 - **Data scoping**: server loads/actions filter by `userFilter(locals, table.userId)` and stamp `ownerId(locals)` on inserts (`src/lib/server/scope.ts`). Both are null-safe: in open mode (auth disabled, `locals.user` null) they apply no filter and stamp `null`, preserving single-tenant behaviour. Detail/edit reads verify ownership (404 otherwise). `/share/*` lookups stay owner-independent (by token).
 - **REST API**: `/api/v1/*` authenticates with a **per-user** `Authorization: Bearer <user.apiToken>` and returns only that user's data.
-- **Quotas**: per-user total upload storage (`user.quotaBytes`, MB; null = unlimited). Usage is computed on demand from photo files on disk via `getUsedBytes(userId)` (`src/lib/server/uploads.ts`) — no stored counter to drift; `saveUpload(file, owner)` enforces the quota before writing. The `user.usedBytes` column is dead/unused.
+- **Quotas**: per-user total upload storage (`user.quotaBytes`, MB; null = unlimited — a blank quota field in the admin create/edit forms stores null, there is no implicit default). Usage is computed on demand from photo files on disk via `getUsedBytes(userId)` (`src/lib/server/uploads.ts`) — no stored counter to drift; `saveUpload(file, owner)` enforces the quota before writing. The `user.usedBytes` column is dead/unused.
 - **Appearance + language**: color mode, theme, and language switcher live on `/settings/appearance`. Color mode/theme are per-user (`userSetting` table, composite PK `(userId, key)`) when logged in, falling back to the global `appSetting` in open mode.
 - **Chatbot**: per-user `user.chatbotEnabled` flag gates the widget and `/api/chat` (only meaningful when the global `CHATBOT` env is on).
 
@@ -23,7 +23,8 @@ Share links allow individual lures, spots, and catches to be shared publicly eve
 
 ## Tech Stack
 
-- **SvelteKit** — full-stack (UI + server routes, no separate backend)
+- **SvelteKit 3** — full-stack (UI + server routes, no separate backend). There is **no `svelte.config.js`**: Kit/adapter/compiler options live in the `sveltekit({...})` plugin call in `vite.config.ts`, and `tsconfig.json` extends `$app/tsconfig`. Import shared code via the **`#lib` subpath import** declared in `package.json` `imports` — with an explicit extension (`#lib/server/db/index.js`, `#lib/themes.js`, `#lib/components/X.svelte`); `$lib` no longer exists. Use `$app/state` (`$app/stores` is removed). Env vars: see **Configuration** (declare in `src/env.ts`; `$env/*` is gone). `json()` from `@sveltejs/kit` still works but is deprecated (prefer `Response.json()` in new code).
+- **cropperjs 2** — lure photo cropping (`src/lib/components/CropModal.svelte`). Built from custom elements, so it must be **dynamically imported in `onMount`** (it extends `HTMLElement` at import time and breaks SSR). `$toCanvas()` defaults to the on-screen size — always pass a width derived from the image transform to export at full resolution.
 - **TailwindCSS v4** — styling (no config file, imported via `@tailwindcss/vite`)
 - **Drizzle ORM** — database via `better-sqlite3`
 - **Leaflet.js** — interactive maps (dynamic import inside `onMount`)
@@ -63,8 +64,8 @@ Tests live in `src/**/__tests__/*.test.ts`, discovered by the `src/**/*.test.ts`
 
 **Mocking conventions** — follow the patterns in existing test files rather than inventing new ones:
 
-- **`$lib/server/db`** — always mocked with `vi.mock('$lib/server/db', () => ({ db: { query: {...}, select, update, insert, delete }, client: mockClient }))`. Build chainable query stubs with a local `makeChain(result)` helper (see any existing test for the shape).
-- **`$env/dynamic/private`** — aliased to `src/__mocks__/env.ts` in `vitest.config.ts`. Import it and mutate `env` directly in tests: `mockEnv.env.AUTH_PASSWORD = 'secret'`. Reset in `beforeEach`.
+- **`#lib/server/db`** — always mocked with `vi.mock('#lib/server/db/index.js', () => ({ db: { query: {...}, select, update, insert, delete }, client: mockClient }))`. Build chainable query stubs with a local `makeChain(result)` helper (see any existing test for the shape).
+- **`#lib/server/env.js`** (the env wrapper) — aliased to `src/__mocks__/env.ts` in `vitest.config.ts` (the real module imports `$app/env/private`, which only exists under the SvelteKit plugin). Mock it with `vi.mock('#lib/server/env.js', () => ({ env: mockEnv }))` or rely on the alias. Import it and mutate `env` directly in tests: `mockEnv.env.AUTH_PASSWORD = 'secret'`. Reset in `beforeEach`.
 - **`@sveltejs/kit` helpers** — mock `redirect` to `throw { status, location }`, `fail` to return `{ status, data }`, `error` to `throw { status, message }`, `json` to return a real `Response`.
 - **Constructor mocks** (e.g., AdmZip) — use `vi.hoisted()` so the instance is created before module imports are resolved.
 - **Module import order** — all `vi.mock(...)` calls must appear before `await import(...)` statements; Vitest hoists mocks automatically, but top-level awaited imports run after hoisting.
@@ -218,13 +219,17 @@ Shared logic lives in `src/lib/server/backup.ts` (`buildBackup`, `packBackupZip`
 
 ### File uploads
 
-Photos are saved to `UPLOAD_PATH` (env var, defaults to `./uploads`) and served through the `/uploads/[filename]` server route. Images are auto-rotated and resized to max 1920×1920 JPEG via `sharp`. The filename stored in the DB is just the basename (UUID + `.jpg`). Must be a Docker volume in production.
+Photos are saved to `UPLOAD_PATH` (env var, defaults to `./uploads`) and served through the `/uploads/[filename]` server route. Images are auto-rotated and resized to max 1920×1920 JPEG via `sharp`. The filename stored in the DB is just the basename (UUID + `.jpg`). Must be a Docker volume in production. The `sharp` re-encode drops all EXIF, so stored photos (and share pages) never leak GPS.
+
+**Photo EXIF prefill** — `/catches/new` and `/spots/new` read EXIF in the browser when photos are added (`readPhotoMeta()` in `src/lib/photoMeta.ts`, lazily importing exifr's `lite` bundle; typings via `src/lib/exifr-lite.d.ts`). Photo GPS places the map marker and the capture time (`DateTimeOriginal` → `CreateDate`) fills the catch's "Caught at" — each **only if the user hasn't set that field yet**; otherwise a "Use photo location" / "Use photo time" button offers it. `0,0` / out-of-range coords are ignored. Mobile OS photo pickers may strip GPS before the browser sees the file, in which case nothing is prefilled. E2E fixture `e2e/fixtures/gps-photo.jpg` is generated by `e2e/exif-jpeg.ts` (hand-built EXIF APP1 — don't import `sharp` in Playwright-side code: it crashes Node 22's loader with "Unexpected module status 3").
 
 ### Leaflet maps
 
 Leaflet is always dynamically imported inside `onMount` (`const L = (await import('leaflet')).default`). The map element (`bind:this={mapEl}`) must have only a static `style="height:Xpx;"` — never reactive styles on the same element, as Svelte mutating the element Leaflet tracks causes tile offset corruption. Wrap it in a parent div if border/radius styling is needed.
 
 Always call `requestAnimationFrame(() => mapInstance.invalidateSize())` after `setView` to fix tile rendering when the element was not visible at mount time.
+
+Always give a map a view **synchronously at mount** (the "add" forms use `setView([51, 10], 5)`) and let geolocation only pan afterwards. A map whose only `setView` is inside a geolocation callback stays grey with no tiles whenever permission is denied, the origin is plain HTTP, or the prompt is never answered (issue #104). The automatic locate-on-mount must not pan once a marker is placed (`lat !== null`).
 
 ### Select / dropdown styling
 
@@ -292,7 +297,7 @@ Floating chat widget (`src/lib/components/Chatbot.svelte`) rendered in `+layout.
 
 **Frontend** — `src/lib/components/Chatbot.svelte`:
 - Assistant messages are rendered as markdown via `marked`. Styled with `.md-bubble` global CSS (headers in cyan, bold, lists, inline code, links).
-- Lure links generated by the LLM (`[Name](/lures/ID)`) are intercepted via an `onclick` delegate on the messages container and navigated with `goto(href, { invalidateAll: true })` — ensures SvelteKit re-runs the load function even when navigating between two lure detail pages (same route, different param).
+- Lure links generated by the LLM (`[Name](/lures/ID)`) are intercepted via an `onclick` delegate on the messages container and navigated with `goto(href, { refreshAll: true })` — ensures SvelteKit re-runs the load function even when navigating between two lure detail pages (same route, different param). A `.catch()` falls back to `window.location.href`, because SvelteKit 3's `goto` rejects paths that match no route (LLM links can be hallucinated).
 
 **Frontend context injection** — when the chat panel opens, the component requests browser geolocation (`navigator.geolocation.getCurrentPosition`). On each message send, `context: { datetime, lat?, lng? }` is included in the POST body. The server fetches weather if coordinates are available.
 
@@ -336,11 +341,14 @@ Drizzle migrations run automatically on startup in production (`NODE_ENV=product
 
 ## Configuration
 
+**Every environment variable must be declared in `src/env.ts`** (`defineEnvVars`). SvelteKit 3 exposes only declared variables — an undeclared one is `undefined` at runtime. Declare optional variables with the `optional(...)` helper there (pass-through schema): without a schema SvelteKit treats an unset variable as an error and refuses to start. Server code reads them as `env.X` via `import { env } from '#lib/server/env.js'` (a wrapper around `$app/env/private`). All are dynamic, i.e. read at server start, so the Docker image stays configurable per deployment. The adapter-node `ORIGIN` variable no longer exists (`paths.origin` in `vite.config.ts` replaces it); behind a proxy the origin is derived from the `Host` header (`https` by default) or `PROTOCOL_HEADER`/`HOST_HEADER`.
+
 | Variable | Default | Description |
 |---|---|---|
 | `DATABASE_URL` | `local.db` | Path to SQLite file |
 | `UPLOAD_PATH` | `./uploads` | Directory for lure/spot/catch photos |
 | `BASE_URL` | `http://localhost:5173` | Public base URL — used to generate QR code links |
+| `TZ` | _(system; UTC in Docker)_ | Server timezone (IANA name). The catch form's `datetime-local` value has no offset and is parsed with `new Date()` server-side, so it's interpreted in this zone — a mismatch shifts saved catch times (issue #88). Example files default to `Europe/Berlin`. |
 | `ADMIN_PASSWORD` | _(unset)_ | If set, enables multi-user login and is the admin account's password (re-synced every startup; admin username is always `admin`, no email). Leave unset for fully open, single-tenant access. The old `AUTH_PASSWORD` name is still honored as a deprecated fallback. |
 | `SMTP_HOST` / `SMTP_PORT` / `SMTP_SECURE` / `SMTP_USER` / `SMTP_PASS` / `SMTP_FROM` | _(unset)_ | SMTP config for "forgot password" reset emails (`src/lib/server/mail.ts`, nodemailer). Needs at least `SMTP_HOST` + `SMTP_FROM`; otherwise the feature is hidden. Reset links use `BASE_URL`. |
 | `DEMO_MODE` | _(unset)_ | If set to any value, enables read-only demo mode. All writes are blocked server-side; the UI shows a banner and a toast on submit attempts. Language switching still works. |

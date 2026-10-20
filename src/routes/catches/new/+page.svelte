@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import type { ActionData, PageData } from './$types';
+	import { readPhotoMeta, toDatetimeLocal } from '#lib/photoMeta.js';
 
 	let { form, data }: { form: ActionData; data: PageData } = $props();
 	const { t, lures, combos } = data;
@@ -8,6 +9,8 @@
 	let mapEl: HTMLElement;
 	let mapInstance: any = null;
 	let marker: any = null;
+	let L: any = null;
+	let pinIcon: any = null;
 	let lat = $state<number | null>(null);
 	let lng = $state<number | null>(null);
 	let locating = $state(false);
@@ -16,7 +19,14 @@
 	let photoInput: HTMLInputElement;
 	let photoPreviews = $state<string[]>([]);
 	let photoFiles = $state<File[]>([]);
-	let defaultDatetime = $state('');
+	let caughtAt = $state('');
+	let dateTouched = $state(false);
+	// Location + capture time read from an added photo's EXIF. Each is auto-applied only while
+	// the user hasn't set that field themselves; otherwise a "Use photo …" button offers it (#37).
+	let photoCoords = $state<{ lat: number; lng: number; file: File } | null>(null);
+	let photoTakenAt = $state<{ value: string; file: File } | null>(null);
+	let locationFromPhoto = $state(false);
+	let timeFromPhoto = $state(false);
 	let catchAndRelease = $state(false);
 	let presentation = $state('');
 	let speciesValue = $state('');
@@ -24,14 +34,12 @@
 	let identifyResult = $state<{ species: string | null; confidence: number | null; note: string } | null>(null);
 
 	onMount(async () => {
-		const now = new Date();
-		const pad = (n: number) => String(n).padStart(2, '0');
-		defaultDatetime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+		caughtAt = toDatetimeLocal(new Date());
 
-		const L = (await import('leaflet')).default;
+		L = (await import('leaflet')).default;
 		await import('leaflet/dist/leaflet.css');
 
-		const pinIcon = L.divIcon({
+		pinIcon = L.divIcon({
 			html: `<svg width="28" height="38" viewBox="0 0 28 38" fill="none"><path d="M14 0C6.268 0 0 6.268 0 14c0 10.5 14 24 14 24S28 24.5 28 14C28 6.268 21.732 0 14 0z" fill="var(--of-accent-solid)"/><circle cx="14" cy="14" r="5" fill="var(--of-ink)"/></svg>`,
 			className: '', iconSize: [28, 38], iconAnchor: [14, 38]
 		});
@@ -42,38 +50,35 @@
 			maxZoom: 19
 		}).addTo(mapInstance);
 
+		// Default view up front so the map never stays grey while geolocation is pending,
+		// denied, or the permission prompt is ignored (#104).
+		mapInstance.setView([51, 10], 5);
 		requestAnimationFrame(() => mapInstance.invalidateSize());
 
-		mapInstance.on('click', (e: any) => placeMarker(L, pinIcon, e.latlng.lat, e.latlng.lng));
+		mapInstance.on('click', (e: any) => placeMarker(e.latlng.lat, e.latlng.lng));
 
-		// Auto-locate on mount (non-explicit: just pan, don't place marker)
+		// Auto-locate on mount (non-explicit: just pan, don't place marker — and never pan
+		// away from a marker that's already placed, e.g. from photo GPS)
 		if (navigator.geolocation) {
 			locating = true;
 			navigator.geolocation.getCurrentPosition(
 				(pos) => {
 					locating = false;
-					mapInstance.setView([pos.coords.latitude, pos.coords.longitude], 14);
+					if (lat === null) mapInstance.setView([pos.coords.latitude, pos.coords.longitude], 14);
 				},
-				() => { locating = false; mapInstance.setView([51, 10], 5); },
+				() => { locating = false; },
 				{ timeout: 8000 }
 			);
-		} else {
-			mapInstance.setView([51, 10], 5);
 		}
 	});
 
-	async function handleLocateClick() {
-		if (!navigator.geolocation) return;
-		const L = (await import('leaflet')).default;
-		const pinIcon = L.divIcon({
-			html: `<svg width="28" height="38" viewBox="0 0 28 38" fill="none"><path d="M14 0C6.268 0 0 6.268 0 14c0 10.5 14 24 14 24S28 24.5 28 14C28 6.268 21.732 0 14 0z" fill="var(--of-accent-solid)"/><circle cx="14" cy="14" r="5" fill="var(--of-ink)"/></svg>`,
-			className: '', iconSize: [28, 38], iconAnchor: [14, 38]
-		});
+	function handleLocateClick() {
+		if (!navigator.geolocation || !mapInstance) return;
 		locating = true;
 		navigator.geolocation.getCurrentPosition(
 			(pos) => {
 				locating = false;
-				placeMarker(L, pinIcon, pos.coords.latitude, pos.coords.longitude);
+				placeMarker(pos.coords.latitude, pos.coords.longitude);
 				mapInstance.setView([pos.coords.latitude, pos.coords.longitude], 15);
 			},
 			() => { locating = false; },
@@ -81,25 +86,64 @@
 		);
 	}
 
-	function placeMarker(L: any, icon: any, la: number, ln: number) {
+	function placeMarker(la: number, ln: number) {
 		lat = la; lng = ln;
 		locationError = false;
+		locationFromPhoto = false;
 		if (marker) marker.remove();
-		marker = L.marker([la, ln], { icon }).addTo(mapInstance);
+		marker = L.marker([la, ln], { icon: pinIcon }).addTo(mapInstance);
+	}
+
+	function usePhotoLocation() {
+		if (!photoCoords || !mapInstance) return;
+		placeMarker(photoCoords.lat, photoCoords.lng);
+		mapInstance.setView([photoCoords.lat, photoCoords.lng], 15);
+		locationFromPhoto = true;
+	}
+
+	function usePhotoTime() {
+		if (!photoTakenAt) return;
+		caughtAt = photoTakenAt.value;
+		timeFromPhoto = true;
+	}
+
+	function handleDateInput() {
+		dateTouched = true;
+		timeFromPhoto = false;
+	}
+
+	async function readMetaFromPhotos(files: File[]) {
+		for (const file of files) {
+			if (photoCoords && photoTakenAt) return;
+			const meta = await readPhotoMeta(file);
+			if (!photoCoords && meta.lat !== null && meta.lng !== null) {
+				photoCoords = { lat: meta.lat, lng: meta.lng, file };
+				if (lat === null) usePhotoLocation();
+			}
+			if (!photoTakenAt && meta.takenAt) {
+				photoTakenAt = { value: toDatetimeLocal(meta.takenAt), file };
+				if (!dateTouched) usePhotoTime();
+			}
+		}
 	}
 
 	function handlePhotoChange(e: Event) {
 		const files = Array.from((e.target as HTMLInputElement).files ?? []);
+		const added: File[] = [];
 		for (const file of files) {
 			if (!photoFiles.find(f => f.name === file.name && f.size === file.size)) {
 				photoFiles = [...photoFiles, file];
 				photoPreviews = [...photoPreviews, URL.createObjectURL(file)];
+				added.push(file);
 			}
 		}
 		photoInput.value = '';
+		readMetaFromPhotos(added);
 	}
 
 	function removePhoto(i: number) {
+		if (photoCoords?.file === photoFiles[i]) photoCoords = null;
+		if (photoTakenAt?.file === photoFiles[i]) photoTakenAt = null;
 		URL.revokeObjectURL(photoPreviews[i]);
 		photoPreviews = photoPreviews.filter((_, idx) => idx !== i);
 		photoFiles = photoFiles.filter((_, idx) => idx !== i);
@@ -211,8 +255,23 @@
 
 		<!-- Date & Species -->
 		<div>
-			<label style={labelStyle} for="caught_at">{t.catchDateLabel}</label>
-			<input id="caught_at" name="caught_at" type="datetime-local" value={defaultDatetime}
+			<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+				<label style="font-size:0.78rem; font-weight:500; color:var(--of-text-3); text-transform:uppercase; letter-spacing:0.06em; margin:0;" for="caught_at">{t.catchDateLabel}</label>
+				{#if photoTakenAt && !timeFromPhoto}
+					<button type="button" onclick={usePhotoTime}
+						style="display:flex; align-items:center; gap:5px; font-size:0.75rem; font-weight:600; color:var(--of-accent); background:none; border:none; cursor:pointer; padding:0; font-family:'DM Sans',sans-serif;"
+					>
+						<svg width="12" height="12" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;">
+							<circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/>
+							<path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+						</svg>
+						{t.usePhotoTime}
+					</button>
+				{:else if timeFromPhoto}
+					<span style="font-size:0.75rem; color:var(--of-accent);">{t.photoTimeApplied}</span>
+				{/if}
+			</div>
+			<input id="caught_at" name="caught_at" type="datetime-local" bind:value={caughtAt} oninput={handleDateInput}
 				style={inputStyle} onfocus={focusInput} onblur={blurInput} />
 		</div>
 
@@ -281,17 +340,31 @@
 		<!-- Catch location map -->
 		<div>
 			<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
-				<p style="{labelStyle}{locationError ? 'color:var(--of-danger);' : ''}">{t.spotLocationLabel} <span style="color:var(--of-danger);">*</span></p>
-				<button type="button" onclick={handleLocateClick}
-					style="display:flex; align-items:center; gap:6px; font-size:0.75rem; font-weight:600; color:{locating ? 'var(--of-text-3)' : 'var(--of-accent)'}; background:none; border:none; cursor:pointer; padding:0; font-family:'DM Sans',sans-serif;"
-					disabled={locating}
-				>
-					<svg width="13" height="13" viewBox="0 0 24 24" fill="none">
-						<circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/>
-						<path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-					</svg>
-					{locating ? t.spotLocating : t.spotUseMyLocation}
-				</button>
+				<p style="{labelStyle}flex-shrink:0;{locationError ? 'color:var(--of-danger);' : ''}">{t.spotLocationLabel} <span style="color:var(--of-danger);">*</span></p>
+				<div style="display:flex; align-items:center; gap:6px 14px; flex-wrap:wrap; justify-content:flex-end;">
+					{#if photoCoords && !locationFromPhoto}
+						<button type="button" onclick={usePhotoLocation}
+							style="display:flex; align-items:center; gap:6px; font-size:0.75rem; font-weight:600; color:var(--of-accent); background:none; border:none; cursor:pointer; padding:0; font-family:'DM Sans',sans-serif;"
+						>
+							<svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+								<rect x="3" y="6" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.8"/>
+								<circle cx="12" cy="13" r="3.5" stroke="currentColor" stroke-width="1.8"/>
+								<path d="M8 6l1.5-2h5L16 6" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+							</svg>
+							{t.usePhotoLocation}
+						</button>
+					{/if}
+					<button type="button" onclick={handleLocateClick}
+						style="display:flex; align-items:center; gap:6px; font-size:0.75rem; font-weight:600; color:{locating ? 'var(--of-text-3)' : 'var(--of-accent)'}; background:none; border:none; cursor:pointer; padding:0; font-family:'DM Sans',sans-serif;"
+						disabled={locating}
+					>
+						<svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+							<circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/>
+							<path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+						</svg>
+						{locating ? t.spotLocating : t.spotUseMyLocation}
+					</button>
+				</div>
 			</div>
 
 			{#if locationError}
@@ -303,9 +376,12 @@
 			</div>
 
 			{#if lat !== null}
-				<p style="font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:var(--of-text-3); margin:6px 0 0; text-align:right;">
-					{lat.toFixed(6)}, {lng?.toFixed(6)}
-				</p>
+				<div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin:6px 0 0;">
+					<span style="font-size:0.75rem; color:var(--of-accent);">{locationFromPhoto ? t.photoLocationApplied : ''}</span>
+					<p style="font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:var(--of-text-3); margin:0; text-align:right;">
+						{lat.toFixed(6)}, {lng?.toFixed(6)}
+					</p>
+				</div>
 			{:else}
 				<p style="font-size:0.78rem; color:var(--of-text-4); margin:6px 0 0; text-align:center;">{t.spotClickToPlace}</p>
 			{/if}

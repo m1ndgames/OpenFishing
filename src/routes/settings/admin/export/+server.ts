@@ -1,5 +1,5 @@
 import type { RequestHandler } from './$types';
-import { buildBackup, packBackupZip } from '$lib/server/backup';
+import { buildBackup, packBackupZip } from '#lib/server/backup.js';
 
 // Admin-only (the /admin prefix is gated in hooks.server.ts). Full backup of every
 // user's data plus the user accounts themselves.
