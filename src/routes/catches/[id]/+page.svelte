@@ -102,7 +102,7 @@
 				<img
 					src="/uploads/{photo.filename}"
 					alt="{c.species ?? 'catch'} photo {i + 1}"
-					style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; transition:opacity 0.3s; opacity:{i === currentPhoto ? '1' : '0'}; pointer-events:{i === currentPhoto ? 'auto' : 'none'};"
+					style="position:absolute; inset:0; width:100%; height:100%; object-fit:contain; transition:opacity 0.3s; opacity:{i === currentPhoto ? '1' : '0'}; pointer-events:{i === currentPhoto ? 'auto' : 'none'};"
 				/>
 			{/each}
 
