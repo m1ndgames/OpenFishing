@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { ActionData, PageData } from './$types';
 	import { enhance } from '$app/forms';
-	import { THEMES } from '$lib/themes';
+	import { THEMES } from '#lib/themes.js';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 	const { t } = data;

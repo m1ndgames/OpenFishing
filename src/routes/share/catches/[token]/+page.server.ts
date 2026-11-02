@@ -1,7 +1,7 @@
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { db } from '$lib/server/db';
-import { fishCatch, catchPhoto } from '$lib/server/db/schema';
+import { db } from '#lib/server/db/index.js';
+import { fishCatch, catchPhoto } from '#lib/server/db/schema.js';
 import { eq, asc } from 'drizzle-orm';
 
 export const load: PageServerLoad = async ({ params }) => {

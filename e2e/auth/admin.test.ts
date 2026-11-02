@@ -34,6 +34,27 @@ test.describe('Admin backend', () => {
 		expect(emails).toContain('carol@example.com');
 	});
 
+	test('a user created with a blank quota is unlimited (#38)', async ({ page }) => {
+		await login(page, ADMIN.username, ADMIN.password);
+		await page.goto('/settings/admin');
+		await page.waitForLoadState('networkidle');
+
+		await page.locator('#c_email').fill('dave@example.com');
+		await page.locator('#c_username').fill('dave');
+		await page.locator('#c_password').fill('davepass123');
+		// Quota left blank → placeholder says "Unlimited", so the user must be unlimited
+		await Promise.all([
+			page.waitForResponse((r) => r.url().includes('/admin') && r.request().method() === 'POST'),
+			page.getByRole('button', { name: 'Create', exact: true }).click()
+		]);
+		await page.waitForLoadState('networkidle');
+
+		const card = page.locator('section > div').filter({ has: page.getByText('dave', { exact: true }) });
+		await expect(card.getByText(/\/ ∞ MB/)).toBeVisible();
+		// The edit form's quota input stays empty (= unlimited), not prefilled with 500
+		await expect(card.locator('input[name="quota_mb"]')).toHaveValue('');
+	});
+
 	test('non-admin (bob) is redirected away from /admin', async ({ page }) => {
 		await login(page, BOB.email, BOB.password);
 		await page.goto('/settings/admin');

@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import type { ActionData, PageData } from './$types';
-	import logo from '$lib/assets/openfishing-logo.svg?raw';
+	import logo from '#lib/assets/openfishing-logo.svg?raw';
 
 	let { form, data }: { form: ActionData; data: PageData } = $props();
 	const { t } = data;
 
 	let showPassword = $state(false);
-	const justReset = $derived($page.url.searchParams.has('reset'));
+	const justReset = $derived(page.url.searchParams.has('reset'));
 </script>
 
 <svelte:head>

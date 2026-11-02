@@ -31,7 +31,7 @@ function makeChain(result: any = []) {
 	return self;
 }
 
-vi.mock('$lib/server/db', () => ({
+vi.mock('#lib/server/db/index.js', () => ({
 	db: {
 		query: {
 			lure: { findMany: mockLureFindMany, findFirst: mockLureFindFirst },

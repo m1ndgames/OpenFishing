@@ -71,4 +71,39 @@ test.describe('Add new catch', () => {
 		await expect(page.getByText('Zander')).toBeVisible();
 		await expect(page).toHaveURL(/\/catches\//);
 	});
+
+	test('fills location and time from the photo EXIF and saves (#37)', async ({ page, context }) => {
+		await context.clearPermissions();
+		await page.goto('/catches/new');
+		await page.waitForLoadState('networkidle');
+		await page.locator('input[type="file"][name="photos"]').setInputFiles('e2e/fixtures/gps-photo.jpg');
+
+		await expect(page.locator('input[name="lat"]')).toHaveValue(/^52\.5/, { timeout: 10000 });
+		await expect(page.locator('input[name="lng"]')).toHaveValue(/^13\.40/);
+		await expect(page.getByText('Location taken from photo')).toBeVisible();
+		await expect(page.locator('#caught_at')).toHaveValue('2026-06-15T07:30');
+		await expect(page.getByText('Time taken from photo')).toBeVisible();
+
+		// The EXIF-tagged JPEG goes through the normal upload path
+		await page.getByLabel(/species/i).fill('Perch');
+		await page.getByRole('button', { name: 'Log Catch' }).click();
+		await expect(page).toHaveURL(/\/catches\/[0-9a-f-]{36}$/);
+		await expect(page.getByText('Perch').first()).toBeVisible();
+	});
+
+	test('photo time does not override a date the user entered but can be applied (#37)', async ({ page, context }) => {
+		await context.clearPermissions();
+		await page.goto('/catches/new');
+		await page.waitForLoadState('networkidle');
+		await page.locator('#caught_at').fill('2026-01-01T10:00');
+		await page.locator('input[type="file"][name="photos"]').setInputFiles('e2e/fixtures/gps-photo.jpg');
+
+		const usePhotoTime = page.getByRole('button', { name: 'Use photo time' });
+		await expect(usePhotoTime).toBeVisible({ timeout: 10000 });
+		await expect(page.locator('#caught_at')).toHaveValue('2026-01-01T10:00');
+
+		await usePhotoTime.click();
+		await expect(page.locator('#caught_at')).toHaveValue('2026-06-15T07:30');
+		await expect(usePhotoTime).toBeHidden();
+	});
 });

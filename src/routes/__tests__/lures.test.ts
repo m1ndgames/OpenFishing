@@ -7,7 +7,7 @@ vi.mock('@sveltejs/kit', () => ({
 	error: (status: number, msg?: string) => { throw { status, message: msg }; },
 }));
 
-vi.mock('$lib/server/uploads', () => ({
+vi.mock('#lib/server/uploads.js', () => ({
 	saveUpload: vi.fn().mockResolvedValue('photo-uuid.jpg'),
 	deleteUpload: vi.fn().mockResolvedValue(undefined),
 }));
@@ -31,7 +31,7 @@ function makeChain(result: any = undefined) {
 	return self;
 }
 
-vi.mock('$lib/server/db', () => ({
+vi.mock('#lib/server/db/index.js', () => ({
 	db: {
 		query: {
 			lure: { findFirst: mockFindFirst },
@@ -49,7 +49,7 @@ const { load: editLoad, actions: editActions } =
 const { load: newLoad, actions: newActions } =
 	await import('../lures/new/+page.server');
 
-import { saveUpload, deleteUpload } from '$lib/server/uploads';
+import { saveUpload, deleteUpload } from '#lib/server/uploads.js';
 
 const existingLure = {
 	id: 'lure-001',

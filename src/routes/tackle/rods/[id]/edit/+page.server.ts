@@ -1,9 +1,9 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { db } from '$lib/server/db';
-import { rod } from '$lib/server/db/schema';
+import { db } from '#lib/server/db/index.js';
+import { rod } from '#lib/server/db/schema.js';
 import { and, eq } from 'drizzle-orm';
-import { userFilter } from '$lib/server/scope';
+import { userFilter } from '#lib/server/scope.js';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const found = await db.select().from(rod).where(and(eq(rod.id, params.id), userFilter(locals, rod.userId))).limit(1);

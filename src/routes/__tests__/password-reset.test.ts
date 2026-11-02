@@ -8,25 +8,25 @@ const userFindFirst = vi.fn();
 let mailOn = true;
 let authOn = true;
 
-vi.mock('$env/dynamic/private', () => ({ env: mockEnv }));
+vi.mock('#lib/server/env.js', () => ({ env: mockEnv }));
 vi.mock('@sveltejs/kit', () => ({
 	fail: (status: number, data: any) => ({ status, data }),
 	redirect: (status: number, location: string) => { throw { status, location }; },
 }));
-vi.mock('$lib/server/db', () => ({
+vi.mock('#lib/server/db/index.js', () => ({
 	db: {
 		query: { user: { findFirst: userFindFirst } },
 		update: () => ({ set: updateSet }),
 	},
 }));
-vi.mock('$lib/server/auth', () => ({
+vi.mock('#lib/server/auth.js', () => ({
 	authEnabled: () => authOn,
 	findUserByEmail,
 	generateResetToken: () => ({ token: 'raw-token', hash: 'hashed-token', expiry: new Date(Date.now() + 3600_000) }),
 	hashResetToken: (t: string) => `hashed:${t}`,
 	hashPassword: async (p: string) => `scrypt:${p}`,
 }));
-vi.mock('$lib/server/mail', () => ({
+vi.mock('#lib/server/mail.js', () => ({
 	mailConfigured: () => mailOn,
 	sendPasswordResetEmail: sendMail,
 }));

@@ -19,7 +19,7 @@ function makeChain(result: any = []) {
 
 const mockSelect = vi.fn(() => makeChain([]));
 
-vi.mock('$lib/server/db', () => ({
+vi.mock('#lib/server/db/index.js', () => ({
 	db: {
 		select: mockSelect,
 		query: {},

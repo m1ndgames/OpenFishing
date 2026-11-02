@@ -8,7 +8,7 @@ vi.mock('@sveltejs/kit', () => ({
 
 class QuotaExceededError extends Error {}
 
-vi.mock('$lib/server/uploads', () => ({
+vi.mock('#lib/server/uploads.js', () => ({
 	saveUpload: vi.fn().mockResolvedValue('photo.jpg'),
 	deleteUpload: vi.fn().mockResolvedValue(undefined),
 	QuotaExceededError,
@@ -32,7 +32,7 @@ function makeChain(result: any = undefined) {
 	return self;
 }
 
-vi.mock('$lib/server/db', () => ({
+vi.mock('#lib/server/db/index.js', () => ({
 	db: {
 		query: {
 			spot: { findFirst: mockFindFirstSpot },
@@ -137,7 +137,7 @@ describe('spots/[id]/edit update action', () => {
 	});
 
 	it('deletes removed photos', async () => {
-		const { deleteUpload } = await import('$lib/server/uploads');
+		const { deleteUpload } = await import('#lib/server/uploads.js');
 		mockFindFirstSpot.mockResolvedValue({
 			...existingSpot,
 			photos: [{ id: 'ph1', filename: 'old.jpg' }],
@@ -168,7 +168,7 @@ describe('spots/[id]/edit delete action', () => {
 	});
 
 	it('deletes all photos before deleting spot', async () => {
-		const { deleteUpload } = await import('$lib/server/uploads');
+		const { deleteUpload } = await import('#lib/server/uploads.js');
 		mockFindFirstSpot.mockResolvedValue({
 			...existingSpot,
 			photos: [{ id: 'ph1', filename: 'a.jpg' }],
@@ -190,7 +190,7 @@ describe('spots/[id]/edit photo uploads', () => {
 	});
 
 	it('saves a new photo and inserts a spotPhoto row', async () => {
-		const { saveUpload } = await import('$lib/server/uploads');
+		const { saveUpload } = await import('#lib/server/uploads.js');
 		const photo = new File(['data'], 'lake.jpg', { type: 'image/jpeg' });
 		const fd = new FormData();
 		fd.append('name', 'My Lake');
@@ -205,7 +205,7 @@ describe('spots/[id]/edit photo uploads', () => {
 	});
 
 	it('returns 413 and cleans up on quota exceeded', async () => {
-		const { saveUpload } = await import('$lib/server/uploads');
+		const { saveUpload } = await import('#lib/server/uploads.js');
 		vi.mocked(saveUpload).mockRejectedValueOnce(new QuotaExceededError());
 		const photo = new File(['data'], 'lake.jpg', { type: 'image/jpeg' });
 		const fd = new FormData();

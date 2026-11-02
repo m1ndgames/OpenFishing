@@ -1,9 +1,9 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { db } from '$lib/server/db';
-import { spot, spotTag, spotPhoto } from '$lib/server/db/schema';
-import { saveUpload, deleteUpload, QuotaExceededError } from '$lib/server/uploads';
-import { ownerId } from '$lib/server/scope';
+import { db } from '#lib/server/db/index.js';
+import { spot, spotTag, spotPhoto } from '#lib/server/db/schema.js';
+import { saveUpload, deleteUpload, QuotaExceededError } from '#lib/server/uploads.js';
+import { ownerId } from '#lib/server/scope.js';
 
 export const load: PageServerLoad = async () => {
 	return {};

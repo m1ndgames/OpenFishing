@@ -1,7 +1,7 @@
 ﻿<script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import type { ActionData, PageData } from './$types';
-	import TagInput from '$lib/components/TagInput.svelte';
+	import TagInput from '#lib/components/TagInput.svelte';
 	import 'leaflet/dist/leaflet.css';
 
 	let { form, data }: { form: ActionData; data: PageData } = $props();

@@ -12,7 +12,7 @@ vi.mock('@sveltejs/kit', () => ({
 	redirect: (status: number, location: string) => { throw { status, location }; },
 	fail: (status: number, data: any) => ({ status, data }),
 }));
-vi.mock('$lib/server/auth', () => ({
+vi.mock('#lib/server/auth.js', () => ({
 	SESSION_COOKIE_NAME: 'of_session',
 	authEnabled: () => authOn,
 	ensureAdminUser: mockEnsureAdminUser,
@@ -21,7 +21,7 @@ vi.mock('$lib/server/auth', () => ({
 	sessionCookieValue: vi.fn(() => 'u1.sig'),
 	verifyPassword: mockVerifyPassword,
 }));
-vi.mock('$lib/server/mail', () => ({
+vi.mock('#lib/server/mail.js', () => ({
 	mailConfigured: () => mailOn,
 }));
 

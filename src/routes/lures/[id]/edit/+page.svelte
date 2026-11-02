@@ -1,7 +1,7 @@
 ﻿<script lang="ts">
 	import type { ActionData, PageData } from './$types';
-	import TagInput from '$lib/components/TagInput.svelte';
-	import CropModal from '$lib/components/CropModal.svelte';
+	import TagInput from '#lib/components/TagInput.svelte';
+	import CropModal from '#lib/components/CropModal.svelte';
 
 	let { form, data }: { form: ActionData; data: PageData } = $props();
 	const { lure, suggestions, t } = data;

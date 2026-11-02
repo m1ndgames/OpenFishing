@@ -1,12 +1,12 @@
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { db } from '$lib/server/db';
-import { fishCatch, catchPhoto, lure as lureTable } from '$lib/server/db/schema';
+import { db } from '#lib/server/db/index.js';
+import { fishCatch, catchPhoto, lure as lureTable } from '#lib/server/db/schema.js';
 import { eq, desc, asc, and } from 'drizzle-orm';
 import QRCode from 'qrcode';
-import { env } from '$env/dynamic/private';
-import { userFilter } from '$lib/server/scope';
-import { authEnabled as isAuthEnabled } from '$lib/server/auth';
+import { env } from '#lib/server/env.js';
+import { userFilter } from '#lib/server/scope.js';
+import { authEnabled as isAuthEnabled } from '#lib/server/auth.js';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const [lure, lureCatches] = await Promise.all([

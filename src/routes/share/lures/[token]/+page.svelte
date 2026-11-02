@@ -1,7 +1,7 @@
 ﻿<script lang="ts">
 	import type { PageData } from './$types';
-	import favicon from '$lib/assets/favicon.svg';
-	import mark from '$lib/assets/openfishing-mark.svg?raw';
+	import favicon from '#lib/assets/favicon.svg';
+	import mark from '#lib/assets/openfishing-mark.svg?raw';
 
 	let { data }: { data: PageData } = $props();
 	const { t, lure } = data;

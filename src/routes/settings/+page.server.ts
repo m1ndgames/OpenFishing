@@ -1,11 +1,11 @@
 import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { db, client } from '$lib/server/db';
-import { lure, spot, fishCatch } from '$lib/server/db/schema';
-import { getSchemaHash } from '$lib/server/db/schema-hash';
+import { db, client } from '#lib/server/db/index.js';
+import { lure, spot, fishCatch } from '#lib/server/db/schema.js';
+import { getSchemaHash } from '#lib/server/db/schema-hash.js';
 import { count } from 'drizzle-orm';
-import { ownerId, userFilter } from '$lib/server/scope';
-import { parseBackupZip, restoreUserBackup, BackupError } from '$lib/server/backup';
+import { ownerId, userFilter } from '#lib/server/scope.js';
+import { parseBackupZip, restoreUserBackup, BackupError } from '#lib/server/backup.js';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	const [[{ lureCount }], [{ spotCount }], [{ catchCount }]] = await Promise.all([

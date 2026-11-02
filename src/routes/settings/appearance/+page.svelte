@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import type { PageData } from './$types';
-	import { THEMES } from '$lib/themes';
+	import { THEMES } from '#lib/themes.js';
 
 	let { data }: { data: PageData } = $props();
 	const { t, lang, demoMode } = data;
@@ -27,7 +27,7 @@
 		<div style="padding:20px;">
 			<p style="font-weight:600; color:var(--of-text); margin:0 0 16px; font-size:0.925rem;">{t.settingsLanguage}</p>
 			<form method="POST" action="/api/lang">
-				<input type="hidden" name="redirect" value={$page.url.pathname} />
+				<input type="hidden" name="redirect" value={page.url.pathname} />
 				<select name="lang" onchange={(e) => (e.currentTarget as HTMLSelectElement).form?.submit()}
 					style="font-size:0.875rem; border:1px solid var(--of-border); border-radius:9px; padding:8px 12px; background:var(--of-bg-elevated); color:var(--of-text-2); cursor:pointer; outline:none; min-width:160px;">
 					<option value="en" selected={lang === 'en'}>🇬🇧 English</option>
