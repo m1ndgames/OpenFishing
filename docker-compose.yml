@@ -9,7 +9,7 @@ services:
     environment:
       - DATABASE_URL=/app/data/openfishing.db
       - UPLOAD_PATH=/app/uploads
-      - BASE_URL=https://fishing.yourdomain.com
+      - BASE_URL=https://fishing.yourdomain.com   # the URL users actually open — use http:// if you run without TLS, or form submissions are rejected as cross-site
       - TZ=Europe/Berlin                     # set to YOUR timezone (e.g. America/New_York, Asia/Hong_Kong) — otherwise catch times are shifted
       - ADMIN_PASSWORD=your_secure_password  # omit to disable auth (admin login password; AUTH_PASSWORD still works as a deprecated fallback)
     #  - SMTP_HOST=smtp.example.com           # SMTP for "forgot password" emails (needs SMTP_HOST + SMTP_FROM)

@@ -339,15 +339,31 @@ Read-only JSON API at `/api/v1/`. Auth handled in `src/hooks.server.ts` separate
 
 Drizzle migrations run automatically on startup in production (`NODE_ENV=production`). Multi-statement `.sql` migration files must use `-->statement-breakpoint` as a separator (required by `better-sqlite3`).
 
+### Request origin & CSRF
+
+SvelteKit's CSRF origin check stays **on**; what broke in 1.1.0 was the origin it compares against. adapter-node assumes the scheme is `https` when no `PROTOCOL_HEADER` is present, so a plain-HTTP instance compared the browser's `Origin: http://host:3000` against its own `https://host:3000` and rejected every form POST with *"Cross-site POST form submissions are forbidden"* (issue #114).
+
+`server/index.js` is the production entry point (`CMD` in the Dockerfile) and fixes this at runtime:
+
+1. Derives the scheme from `BASE_URL` via `schemeFromBaseUrl()` in `server/origin.js`.
+2. Sets `PROTOCOL_HEADER=x-forwarded-proto`, then dynamically imports `build/index.js` — the env var must be set first, because adapter-node's handler reads it once at module load.
+3. `prependListener('request', …)` on the adapter's exported `server`, **overwriting** `x-forwarded-proto` on every request so a client-supplied header can't move our origin. Only the **scheme** is injected; the host still comes from the real `Host` header, so reaching the instance by both IP and hostname keeps working (plain `ORIGIN` in 1.0 could not do this).
+4. Logs a `BASE_URL` hint, **once per process**, when an unsafe method gets a `403` and the request's `Origin` differs from the derived origin only in scheme (so auth/demo-mode 403s don't spam the log). Also warns at startup when `BASE_URL` is unset.
+
+`PROTOCOL_HEADER` set by the operator disables steps 2–4 — a reverse proxy that reports the scheme is authoritative. With `BASE_URL` unset, behaviour is unchanged (`https` assumed), so TLS-fronted deployments are unaffected.
+
+`server/` is plain ESM JavaScript outside the Kit build (the Dockerfile copies it alongside `build/`), and is excluded from `tsconfig.json`. Its pure helpers are unit tested in `server/__tests__/origin.test.ts` — `vitest.config.ts` includes `server/**/*.test.ts` for this. **Not E2E-testable**: Kit skips CSRF checks outside production, and the E2E suites run the Vite dev server.
+
+
 ## Configuration
 
-**Every environment variable must be declared in `src/env.ts`** (`defineEnvVars`). SvelteKit 3 exposes only declared variables — an undeclared one is `undefined` at runtime. Declare optional variables with the `optional(...)` helper there (pass-through schema): without a schema SvelteKit treats an unset variable as an error and refuses to start. Server code reads them as `env.X` via `import { env } from '#lib/server/env.js'` (a wrapper around `$app/env/private`). All are dynamic, i.e. read at server start, so the Docker image stays configurable per deployment. The adapter-node `ORIGIN` variable no longer exists (`paths.origin` in `vite.config.ts` replaces it); behind a proxy the origin is derived from the `Host` header (`https` by default) or `PROTOCOL_HEADER`/`HOST_HEADER`.
+**Every environment variable must be declared in `src/env.ts`** (`defineEnvVars`). SvelteKit 3 exposes only declared variables — an undeclared one is `undefined` at runtime. Declare optional variables with the `optional(...)` helper there (pass-through schema): without a schema SvelteKit treats an unset variable as an error and refuses to start. Server code reads them as `env.X` via `import { env } from '#lib/server/env.js'` (a wrapper around `$app/env/private`). All are dynamic, i.e. read at server start, so the Docker image stays configurable per deployment. The adapter-node `ORIGIN` variable no longer exists, and its replacement `paths.origin` is baked into the build, so it cannot configure a prebuilt image. adapter-node derives the origin from the `Host` header with the scheme taken from `PROTOCOL_HEADER`/`HOST_HEADER` and assumed to be **`https`** otherwise — which breaks SvelteKit's CSRF origin check on plain-HTTP deployments (issue #114). **The production entry point is therefore `server/index.js`, not `build/index.js`** (see **Request origin & CSRF**).
 
 | Variable | Default | Description |
 |---|---|---|
 | `DATABASE_URL` | `local.db` | Path to SQLite file |
 | `UPLOAD_PATH` | `./uploads` | Directory for lure/spot/catch photos |
-| `BASE_URL` | `http://localhost:5173` | Public base URL — used to generate QR code links |
+| `BASE_URL` | `http://localhost:5173` | Public base URL — the URL users actually open. Used for QR code and password-reset links, **and to derive the scheme the app is served over** (see **Request origin & CSRF**). Must be an `http://` URL on deployments without TLS. |
 | `TZ` | _(system; UTC in Docker)_ | Server timezone (IANA name). The catch form's `datetime-local` value has no offset and is parsed with `new Date()` server-side, so it's interpreted in this zone — a mismatch shifts saved catch times (issue #88). Example files default to `Europe/Berlin`. |
 | `ADMIN_PASSWORD` | _(unset)_ | If set, enables multi-user login and is the admin account's password (re-synced every startup; admin username is always `admin`, no email). Leave unset for fully open, single-tenant access. The old `AUTH_PASSWORD` name is still honored as a deprecated fallback. |
 | `SMTP_HOST` / `SMTP_PORT` / `SMTP_SECURE` / `SMTP_USER` / `SMTP_PASS` / `SMTP_FROM` | _(unset)_ | SMTP config for "forgot password" reset emails (`src/lib/server/mail.ts`, nodemailer). Needs at least `SMTP_HOST` + `SMTP_FROM`; otherwise the feature is hidden. Reset links use `BASE_URL`. |
@@ -356,4 +372,5 @@ Drizzle migrations run automatically on startup in production (`NODE_ENV=product
 | `LITELLM_URL` | _(unset)_ | Base URL of the LiteLLM proxy (e.g. `http://litellm:4000`). |
 | `LITELLM_MODEL` | _(unset)_ | Model name to use — must match a `model_name` entry in `litellm.config.yaml`. |
 | `LITELLM_VISION_MODEL` | _(unset)_ | Optional separate vision-capable model for fish/lure identification. Falls back to `LITELLM_MODEL` if unset. |
+| `PROTOCOL_HEADER` / `HOST_HEADER` | _(unset)_ | adapter-node vars for a reverse proxy that reports the scheme/host itself (e.g. `PROTOCOL_HEADER=x-forwarded-proto`). Setting `PROTOCOL_HEADER` makes the proxy authoritative and disables the `BASE_URL`-derived scheme entirely. |
 | `BODY_SIZE_LIMIT` | `104857600` | Max upload size in bytes (set in Dockerfile) |

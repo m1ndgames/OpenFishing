@@ -11,9 +11,11 @@ export default defineConfig({
 				// Force runes mode for the project, except for libraries. Can be removed in svelte 6.
 				runes: ({ filename }) => filename.split(/[/\\]/).includes('node_modules') ? undefined : true
 			},
-			// Behind a reverse proxy the request origin comes from the Host header (https by
-			// default) or the PROTOCOL_HEADER / HOST_HEADER env vars. adapter-node has no
-			// `trustProxy` option — the one configured previously was silently ignored.
+			// The request origin comes from the Host header, with the scheme taken from
+			// PROTOCOL_HEADER / HOST_HEADER and assumed to be `https` otherwise. `paths.origin`
+			// is baked into the build, so it can't configure a prebuilt image — instead
+			// `server/index.js` (the production entry point) derives the scheme from BASE_URL at
+			// runtime and feeds it to the adapter. adapter-node has no `trustProxy` option.
 			adapter: adapter()
 		})
 	]
