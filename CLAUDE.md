@@ -28,7 +28,7 @@ Share links allow individual lures, spots, and catches to be shared publicly eve
 - **TailwindCSS v4** — styling (no config file, imported via `@tailwindcss/vite`)
 - **Drizzle ORM** — database via `better-sqlite3`
 - **Leaflet.js** — interactive maps (dynamic import inside `onMount`)
-- **Docker** — deployment; `ghcr.io/m1ndgames/openfishing:latest` built via GitHub Actions on push to `main`
+- **Docker** — deployment to `ghcr.io/m1ndgames/openfishing`. Every push to `main` publishes `:edge` + `:sha-<commit>` (`docker.yml`); `:latest` + `:X.Y.Z`/`:X.Y`/`:X` move only when a `vX.Y.Z` tag is pushed (`release.yml`, cut with `npm version` + `git push --follow-tags`)
 
 ## Commands
 
