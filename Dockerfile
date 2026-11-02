@@ -19,6 +19,7 @@ COPY --from=builder /app/build ./build
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/drizzle ./drizzle
+COPY --from=builder /app/server ./server
 
 RUN mkdir -p /app/data /app/uploads
 
@@ -29,4 +30,4 @@ ENV BODY_SIZE_LIMIT=104857600
 ENV DATABASE_URL=/app/data/openfishing.db
 ENV UPLOAD_PATH=/app/uploads
 
-CMD ["node", "build/index.js"]
+CMD ["node", "server/index.js"]
