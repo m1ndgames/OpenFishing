@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 let authOn = true;
 let mailOn = false;
+let oidcOn = false;
 const mockEnsureAdminUser = vi.fn(async () => undefined);
 const mockResolveSession = vi.fn(async () => null as any);
 const mockFindUser = vi.fn(async () => undefined as any);
@@ -24,6 +25,10 @@ vi.mock('#lib/server/auth.js', () => ({
 vi.mock('#lib/server/mail.js', () => ({
 	mailConfigured: () => mailOn,
 }));
+vi.mock('#lib/server/oidc.js', () => ({
+	oidcEnabled: () => oidcOn,
+	oidcProviderName: () => 'Authelia',
+}));
 
 const { load, actions } = await import('../login/+page.server');
 
@@ -40,6 +45,7 @@ function form(entries: Record<string, string> = {}) {
 beforeEach(() => {
 	authOn = true;
 	mailOn = false;
+	oidcOn = false;
 	mockEnsureAdminUser.mockClear();
 	mockResolveSession.mockReset().mockResolvedValue(null);
 	mockFindUser.mockReset().mockResolvedValue(undefined);
@@ -67,6 +73,15 @@ describe('login load', () => {
 		mailOn = true;
 		const result = await load({ cookies: cookies() } as any);
 		expect(result).toMatchObject({ mailEnabled: true });
+	});
+
+	it('returns oidc: null when OIDC is not configured', async () => {
+		expect(await load({ cookies: cookies() } as any)).toMatchObject({ oidc: null });
+	});
+
+	it('returns the provider name when OIDC is configured', async () => {
+		oidcOn = true;
+		expect(await load({ cookies: cookies() } as any)).toMatchObject({ oidc: { name: 'Authelia' } });
 	});
 
 	it('calls ensureAdminUser on each load', async () => {

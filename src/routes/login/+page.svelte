@@ -8,6 +8,14 @@
 
 	let showPassword = $state(false);
 	const justReset = $derived(page.url.searchParams.has('reset'));
+	const oidcErrorKey = $derived(
+		({
+			denied: 'loginOidcDenied',
+			no_account: 'loginOidcNoAccount',
+			disabled: 'loginOidcDisabled',
+			failed: 'loginOidcFailed'
+		} as const)[page.url.searchParams.get('oidc_error') as 'denied' | 'no_account' | 'disabled' | 'failed'] ?? null
+	);
 </script>
 
 <svelte:head>
@@ -31,6 +39,12 @@
 			{#if justReset}
 				<div style="background:var(--of-success-bg); border:1px solid var(--of-success-border); color:var(--of-success); font-size:0.875rem; padding:10px 14px; border-radius:9px;">
 					{t.resetSuccess}
+				</div>
+			{/if}
+
+			{#if oidcErrorKey}
+				<div data-testid="oidc-error" style="background:var(--of-danger-bg); border:1px solid var(--of-danger-border); color:var(--of-danger); font-size:0.875rem; padding:10px 14px; border-radius:9px;">
+					{t[oidcErrorKey]}
 				</div>
 			{/if}
 
@@ -96,6 +110,19 @@
 			>
 				{t.loginSubmit}
 			</button>
+
+			{#if data.oidc}
+				<div style="display:flex; align-items:center; gap:12px; color:var(--of-text-4); font-size:0.78rem; text-transform:uppercase; letter-spacing:0.06em;">
+					<span style="flex:1; height:1px; background:var(--of-border-subtle);"></span>{t.loginOidcDivider}<span style="flex:1; height:1px; background:var(--of-border-subtle);"></span>
+				</div>
+				<!-- Plain link, not enhance(): the flow leaves the app for the identity provider. -->
+				<a
+					href="/login/oidc"
+					data-sveltekit-reload
+					data-testid="oidc-login"
+					style="display:block; text-align:center; background:var(--of-bg-elevated); color:var(--of-text); border:1px solid var(--of-border); font-size:0.875rem; font-weight:600; padding:11px; border-radius:9px; text-decoration:none; font-family:'DM Sans',sans-serif;"
+				>{t.loginOidcButton.replace('{provider}', data.oidc.name)}</a>
+			{/if}
 
 			{#if data.mailEnabled}
 				<a href="/forgot-password" style="text-align:center; font-size:0.8rem; color:var(--of-text-4); text-decoration:none;"

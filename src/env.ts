@@ -23,6 +23,14 @@ export const variables = defineEnvVars({
 	ADMIN_PASSWORD: optional('Enables multi-user login; the admin account password'),
 	AUTH_PASSWORD: optional('Deprecated fallback name for ADMIN_PASSWORD'),
 
+	OIDC_ISSUER: optional('OIDC issuer URL (enables "Sign in with OIDC"; requires ADMIN_PASSWORD)'),
+	OIDC_CLIENT_ID: optional('OIDC client ID'),
+	OIDC_CLIENT_SECRET: optional('OIDC client secret'),
+	OIDC_SCOPES: optional('Space-separated OIDC scopes (default: "openid profile email")'),
+	OIDC_PROVIDER_NAME: optional('Label for the login button (default: "SSO")'),
+	OIDC_AUTO_CREATE: optional('Set to "false" to stop creating accounts on first OIDC login'),
+	OIDC_ALLOW_HTTP: optional('Set to "true" to allow a plain-HTTP issuer (development only)'),
+
 	SMTP_HOST: optional('SMTP server for password-reset emails'),
 	SMTP_PORT: optional('SMTP port (default: 587; 465 implies TLS)'),
 	SMTP_SECURE: optional('Set to "true" for implicit TLS'),

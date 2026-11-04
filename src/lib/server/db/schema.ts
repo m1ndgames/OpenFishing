@@ -1,4 +1,4 @@
-import { integer, sqliteTable, text, real, primaryKey } from 'drizzle-orm/sqlite-core';
+import { integer, sqliteTable, text, real, primaryKey, uniqueIndex } from 'drizzle-orm/sqlite-core';
 import { relations } from 'drizzle-orm';
 
 // ── Tables ────────────────────────────────────────────────────────────────────
@@ -18,9 +18,13 @@ export const user = sqliteTable('user', {
 	apiToken: text('api_token').unique(),
 	resetTokenHash: text('reset_token_hash'),
 	resetTokenExpiry: integer('reset_token_expiry', { mode: 'timestamp' }),
+	// OIDC identity link: the provider's issuer URL + the stable `sub` claim. Both null for
+	// password-only users. A user can be linked to at most one OIDC identity.
+	oidcIssuer: text('oidc_issuer'),
+	oidcSubject: text('oidc_subject'),
 	createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
 	updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date())
-});
+}, (t) => [uniqueIndex('user_oidc_identity_idx').on(t.oidcIssuer, t.oidcSubject)]);
 
 export const userSetting = sqliteTable('user_setting', {
 	userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),

@@ -82,6 +82,15 @@ describe('hooks — auth enabled', () => {
 		expect(resolve).toHaveBeenCalledOnce();
 	});
 
+	it.each(['/login/oidc', '/login/oidc/callback'])('always allows %s through (unauthenticated OIDC flow)', async (path) => {
+		await handle({ event: makeEvent(path), resolve });
+		expect(resolve).toHaveBeenCalledOnce();
+	});
+
+	it('does not exempt other /login/* paths', async () => {
+		await expect(handle({ event: makeEvent('/login/other'), resolve })).rejects.toMatchObject({ status: 303, location: '/login' });
+	});
+
 	it('always allows /logout through', async () => {
 		await handle({ event: makeEvent('/logout'), resolve });
 		expect(resolve).toHaveBeenCalledOnce();

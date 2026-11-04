@@ -12,6 +12,13 @@ services:
       - BASE_URL=https://fishing.yourdomain.com   # the URL users actually open — use http:// if you run without TLS, or form submissions are rejected as cross-site
       - TZ=Europe/Berlin                     # set to YOUR timezone (e.g. America/New_York, Asia/Hong_Kong) — otherwise catch times are shifted
       - ADMIN_PASSWORD=your_secure_password  # omit to disable auth (admin login password; AUTH_PASSWORD still works as a deprecated fallback)
+      # Optional OIDC login (Authelia, Keycloak, Authentik, ...). Needs ADMIN_PASSWORD and a correct BASE_URL.
+      # Register ${BASE_URL}/login/oidc/callback as the redirect URI at your provider.
+      # - OIDC_ISSUER=https://auth.example.com
+      # - OIDC_CLIENT_ID=openfishing
+      # - OIDC_CLIENT_SECRET=change_me
+      # - OIDC_PROVIDER_NAME=Authelia   # login button label
+      # - OIDC_AUTO_CREATE=true         # false = only pre-existing users may sign in
     #  - SMTP_HOST=smtp.example.com           # SMTP for "forgot password" emails (needs SMTP_HOST + SMTP_FROM)
     #  - SMTP_PORT=587
     #  - SMTP_USER=apikey

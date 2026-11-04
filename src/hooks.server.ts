@@ -35,6 +35,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	// Login, logout, password-reset and share pages are always accessible
 	if (event.url.pathname === '/login') return resolve(event);
+	if (event.url.pathname === '/login/oidc' || event.url.pathname === '/login/oidc/callback') return resolve(event);
 	if (event.url.pathname === '/logout') return resolve(event);
 	if (event.url.pathname === '/forgot-password') return resolve(event);
 	if (event.url.pathname === '/reset-password') return resolve(event);

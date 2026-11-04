@@ -141,6 +141,13 @@
       "when": 1782853240062,
       "tag": "0019_perfect_paladin",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "6",
+      "when": 1793758095659,
+      "tag": "0020_oidc_identity",
+      "breakpoints": true
     }
   ]
 }

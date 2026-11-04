@@ -10,6 +10,7 @@ import {
 	verifyPassword
 } from '#lib/server/auth.js';
 import { mailConfigured } from '#lib/server/mail.js';
+import { oidcEnabled, oidcProviderName } from '#lib/server/oidc.js';
 
 export const load: PageServerLoad = async ({ cookies }) => {
 	if (!authEnabled()) redirect(303, '/');
@@ -18,7 +19,7 @@ export const load: PageServerLoad = async ({ cookies }) => {
 	const current = await resolveSessionUser(cookies.get(SESSION_COOKIE_NAME));
 	if (current) redirect(303, '/');
 
-	return { mailEnabled: mailConfigured() };
+	return { mailEnabled: mailConfigured(), oidc: oidcEnabled() ? { name: oidcProviderName() } : null };
 };
 
 export const actions: Actions = {
