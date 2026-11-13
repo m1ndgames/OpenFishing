@@ -1,5 +1,5 @@
-import { mkdir, unlink, stat, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { mkdir, unlink, stat, writeFile, readFile, rename } from 'node:fs/promises';
+import { join, parse } from 'node:path';
 import { env } from '#lib/server/env.js';
 import { and, eq, inArray, isNotNull } from 'drizzle-orm';
 import type { SQLiteColumn } from 'drizzle-orm/sqlite-core';
@@ -59,11 +59,62 @@ export async function getUsedBytes(userId: string | null): Promise<number> {
 	return total;
 }
 
-export async function deleteUpload(filename: string): Promise<void> {
+/** Widths `/uploads/<file>?w=` serves; anything else gets the original. */
+// 1280 serves the detail pages on 2x/3x phones, which would otherwise pick the 1920px original.
+export const THUMB_WIDTHS = [160, 320, 640, 1280] as const;
+export type ThumbWidth = (typeof THUMB_WIDTHS)[number];
+
+export function isThumbWidth(w: number): w is ThumbWidth {
+	return (THUMB_WIDTHS as readonly number[]).includes(w);
+}
+
+/**
+ * Downscaled copies live in a hidden cache dir next to the originals. They are
+ * derived data: not referenced from the DB, so backups and quota usage ignore them,
+ * and a missing one is simply regenerated on the next request.
+ */
+export const THUMB_DIR = join(UPLOAD_DIR, '.thumbs');
+
+export function thumbPath(filename: string, width: ThumbWidth): string {
+	return join(THUMB_DIR, `${parse(filename).name}-${width}.webp`);
+}
+
+/**
+ * The WebP thumbnail for `filename` at `width`, created (and cached) on first request.
+ * Throws if the original doesn't exist.
+ */
+export async function getThumbnail(filename: string, width: ThumbWidth): Promise<Buffer> {
+	const cached = thumbPath(filename, width);
 	try {
-		await unlink(join(UPLOAD_DIR, filename));
+		return await readFile(cached);
 	} catch {
-		// File already gone — not an error
+		// Not generated yet
+	}
+	const original = await readFile(join(UPLOAD_DIR, filename));
+	const output = await sharp(original)
+		.rotate()
+		.resize(width, width, { fit: 'inside', withoutEnlargement: true })
+		.webp({ quality: 75 })
+		.toBuffer();
+	try {
+		await mkdir(THUMB_DIR, { recursive: true });
+		// Write-then-rename so a concurrent request never reads a half-written file.
+		const tmp = `${cached}.${crypto.randomUUID()}.tmp`;
+		await writeFile(tmp, output);
+		await rename(tmp, cached);
+	} catch (e) {
+		console.error(`[uploads] could not cache thumbnail ${cached}:`, e); // still serve it
+	}
+	return output;
+}
+
+export async function deleteUpload(filename: string): Promise<void> {
+	for (const path of [join(UPLOAD_DIR, filename), ...THUMB_WIDTHS.map((w) => thumbPath(filename, w))]) {
+		try {
+			await unlink(path);
+		} catch {
+			// File already gone (or thumbnail never generated) — not an error
+		}
 	}
 }
 

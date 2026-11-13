@@ -34,7 +34,7 @@ Share links allow individual lures, spots, and catches to be shared publicly eve
 
 ```bash
 npm install            # Install dependencies
-npm run dev            # Start dev server
+npm run dev            # Start dev server (NO_AUTORELOAD=1 disables watch/HMR so the auth session survives edits; restart to pick up changes)
 npm run build          # Build for production
 npm run preview        # Preview production build
 npm run check          # Svelte type-check
@@ -115,6 +115,7 @@ Tests live in `e2e/*.test.ts`. Config: `playwright.config.ts`.
 | `/catches/new` | Add catch form (map + GPS) |
 | `/catches/[id]` | Catch detail view (map, photos, lure + spot links) |
 | `/catches/[id]/edit` | Edit / delete catch |
+| `/tackle` | Tackle bag: Rods / Reels / Lines / Combos tabs. The tab is a `?tab=` link (Settings-style sub-nav, `aria-current`), so tackle detail/new pages and delete redirects return to `/tackle?tab=<kind>`. Items are link rows in one panel, like `/spots` |
 | `/settings/qr` | Print QR labels for unlabeled lures |
 | `/settings/appearance` | Color mode (Dark / Light / System) + theme picker; persisted via `appSetting` table |
 | `/uploads/[filename]` | Serve uploaded photos from `UPLOAD_PATH` |
@@ -178,6 +179,28 @@ Tags are stored in separate tag tables (one row per tag). Species is stored as a
 
 `lightConditions` is an integer 0–10 (0 = Night, 10 = Clear). Displayed using translation keys `lightConditions_0` … `lightConditions_10`. Edited via a labeled range slider in the lure forms. Stored as `null` when not set.
 
+### Catch form & catch detail
+
+- **Shared form data**: `/catches/new` and `/catches/[id]/edit` both load via `loadCatchFormData(locals)` (`src/lib/server/catchForm.ts`): lures, combos, `quickLureIds` (recent catches' lures first, then favourites, lost excluded — ranking in `rankQuickLures`, `src/lib/catchForm.ts`), `presentationCounts` (retrieve chips ordered by use via `sortByUsage`), `lastLocation` (last catch, else first spot) for the initial map view, and `spots` for the "Use a saved spot" select.
+- **Lure picker**: `src/lib/components/LurePicker.svelte` — tiles (`role="group"`, `aria-pressed`) for the quick lures plus a full `<select name="lure_id">` bound to the same value.
+- **Progressive disclosure**: combo, retrieve style, notes and C&R live in `<details class="of-more">` (CSS in `layout.css`); the summary line shows what is set. The edit form opens it when any of those has a value. Length/weight use `.of-grid-pair` (never collapses).
+- **After save**: the create action redirects to `/catches/<id>?saved=1`; the detail page shows a `role="status"` "Catch logged · + Log another" banner once and drops the query with `goto(url, { shallow: true, replace: true })`.
+- **Highlights**: the detail load computes `highlights` with `catchHighlights()` (`src/lib/catchHighlights.ts`): `personalBest` (`'length' | 'weight' | null`, needs ≥ 2 catches of the species, ties count) and `lureCatchNumber` ("Fish no. N on this lure", counted by `caughtAt`).
+
+### Detail pages
+
+Lure, catch and spot detail pages share one structure: a header row with a back link to the list and a **secondary** Edit button (no solid Edit at the bottom), one column on phones with the subject first (fish photo / lure well + 2rem plate / spot facts + conditions), two columns ≥ 960px (max 1040px). In the two-column layout the facts block beside the photo/map (`.of-lure-info`, `.of-catch-info`, `.of-spot-info`) drops its panel frame and reads as plain text next to the one framed object, so unequal column heights don't look like a misfit; phones keep it boxed. The spot conditions card stays framed (it's a data block). Catch history under a lure or spot is a `<ul>` of `<a>` rows (44px min) — never a click-handler `<tr>` table. On the spot page the bite index is the headline of the conditions card (not a nested panel); the moon phase is an SVG from `moonLitPath()` (`src/lib/moonPhase.ts`). The `/spots` list is also link rows, and its map layer toggles carry `aria-pressed`.
+
+### Page data & overlays
+
+- **Never copy `data` once.** Read page data with `const { t, lure } = $derived(data)`, and wrap anything computed from it in `$derived(...)`. A plain `const { … } = data` keeps the first entry's values when SvelteKit reuses the component for a same-route hop (lure → lure via a chatbot link). Local editable copies (form fields seeded from the entry, share URLs, optimistic toggles, settings radios) use **writable `$derived`** (`let lat = $derived(c.lat)`): they reset on navigation, can still be assigned or `bind:`-ed, and objects must be reassigned, not mutated (`$derived` isn't deeply reactive). `npm run check` flags violations as `state_referenced_locally`. Regression tests: `Same-route navigation` in `e2e/navigation.test.ts`.
+- **Form messages**: `{#if form?.error}` banners carry `role="alert"`, success/sent banners `role="status"`, so screen readers announce the server's answer.
+- **Overlays** (bite-info popup, `CropModal`, chatbot panel) use `use:modal={{ onClose, trap }}` from `src/lib/modal.ts`: Escape closes, focus moves in on open and back to the opener on close, `trap: true` keeps Tab inside (set it for full-screen modals, not for the chatbot side panel). The panel carries `role="dialog"` + `aria-labelledby`/`aria-label`; the click-to-close backdrop is a separate `aria-hidden` sibling, never a click handler on the dialog's parent.
+
+### Page titles, headings, focus
+
+`+layout.svelte` sets `<title>` for every page inside the chrome from `pageTitle(pathname, t, page.data)` (`src/lib/pageTitle.ts`: section name, or the entity's name on detail pages, `· OpenFishing` suffix) — don't add `<svelte:head><title>` to individual app pages (login/share pages still set their own). Every page has exactly one `<h1>`; list pages whose title is the active nav item use `class="sr-only"`, and `settings/+layout.svelte` renders one for the active tab (except Admin, which has a visible h1). A "Skip to content" link (`.of-skip`) targets `<main id="main" tabindex="-1">`. `layout.css` defines the global keyboard focus ring and a themed `::placeholder` (`--of-text-4`). The footer is hidden on `/new` and `/edit` routes.
+
 ### Spot ↔ Catch relationship
 
 Spots and catches are **not** linked by a foreign key. Instead, the relationship is computed at query time using the Haversine formula:
@@ -192,12 +215,20 @@ This approach avoids storing a redundant FK while still supporting the "no spot 
 
 The layout (`src/routes/+layout.svelte`) renders the full nav chrome for all routes **except** `/login` and `/share/*`, which are detected via `$page.url.pathname` and render `{@render children()}` directly (share pages include their own minimal OpenFishing header). The nav has:
 - **Desktop**: SVG wordmark logo (`src/lib/assets/openfishing-logo.svg`) + section links (Lures | Tackle | Spots | Catches | Stats | Settings) + "Add" dropdown + language switcher
-- **Mobile**: Top bar (logo + Add dropdown + lang) + fixed bottom tab bar
+- **Mobile**: Top bar (logo + Settings gear + Add dropdown) + fixed bottom tab bar with **five** tabs (Lures, Spots, Catches, Stats, Tackle). Settings moved to the top bar because six tabs clipped long translations ("Einstellungen", "Statistiques"); tab labels wrap/hyphenate via `.of-tab-label`, and the layout sets `<html lang>` from `data.lang`.
+
+**Field-use layer** (`src/routes/layout.css`) — touch/phone-width rules that pages opt into with classes; they apply only under `(pointer: coarse)` or below 768px and use `!important` to beat inline styles. Global: text inputs/selects/textareas get 16px text (stops iOS focus zoom) and 44px min-height; `form button[type=submit]` gets 44px. Opt-in: `.of-panel` (16px padding on phones), `.of-actions` (sticky save row above the tab bar — long field forms only: catch/spot/lure new+edit), `.of-primary` (the form's main submit: full width, 48px), `.of-touch` (44px min-height), `.of-chip` (36px filter chips), `.of-linkbtn` (text-link buttons: 44px tap area, no layout change), `.of-tap` / `.of-hit` (invisible hit area for in-flow / absolutely-positioned small controls), `.of-grid-4` (stat tiles, 2 columns ≤ 480px). New form pages should use these instead of per-page media queries. Instructions that name the input ("Click"/"Tap") render both variants with `.of-when-mouse` / `.of-when-touch` (CSS picks one by `pointer: coarse`, no hydration flash). Toggle buttons (chips, Catch & Release) carry `aria-pressed`; selected/hover tints use tokens (`--of-accent-bg-hover`, `--of-danger-bg-hover`, `--of-success-bg-hover`, `--of-warning-bg-hover`), never raw `rgba()` — Ocean's cyan leaks into the other themes otherwise.
 
 **SVG assets** — three files handle branding:
-- `src/lib/assets/openfishing-logo.svg` — the wordmark (path-based, `fill: currentColor` via CSS class). Imported `?raw` in the layout and login page; injected with `{@html logo.replace('<svg ', '<svg height="Npx" ')}` (nav) or `style="width:100%;display:block;"` (login). Color set on the parent element (`color:var(--of-accent)`), so it adapts to the active theme.
+- `src/lib/assets/openfishing-logo.svg` — the wordmark (single path with `fill="currentColor"` as an attribute — no `<style>` block, which would leak to the whole page once injected with `{@html}`, and no `id`, since the nav renders it twice). Imported `?raw` in the layout and login page; injected with `{@html logo.replace('<svg ', '<svg height="Npx" ')}` (nav) or `style="width:100%;display:block;"` (login). Color set on the parent element (`color:var(--of-accent)`), so it adapts to the active theme.
 - `src/lib/assets/openfishing-mark.svg` — the square icon (`fill="currentColor"` directly on the path). Used inside the app (chatbot header/empty-state, share page headers) where it must follow the theme accent. Also imported `?raw` and injected with explicit `width`/`height` attributes.
 - `src/lib/assets/favicon.svg` — identical path to `openfishing-mark.svg` but with a **hardcoded `#175b68` fill** (CSS variables and `currentColor` don't work when a browser loads an SVG as an external favicon resource). Linked as `<link rel="icon" type="image/svg+xml">` in the layout `<svelte:head>`.
+
+**Fonts** — DM Sans and JetBrains Mono are **self-hosted** variable WOFF2 files in `static/fonts/` (OFL licences alongside), declared by `@font-face` blocks at the top of `layout.css`; the layout preloads the DM Sans latin file. No Google Fonts requests (privacy + offline LAN installs) — don't add `<link>`s to fonts.googleapis.com, including on share pages.
+
+**Busy indicators** — spinners and typing dots carry `.of-busy`; under `prefers-reduced-motion` it swaps rotation/bounce for a slow opacity fade (`of-busy-fade`), so the "working" signal survives without motion. The chatbot is lazy-loaded (`{#await import(...)}` in the layout), so its code and `marked` only load when it's enabled.
+
+**Type & radius tokens** — `layout.css` `:root` defines `--of-fs-headline` (1.5rem, page h1), `--of-fs-section` (1rem, panel h2 / empty states), `--of-fs-figure` (2rem mono: the number a page is about) and `--of-fs-figure-sm` (1.5rem, stat tiles), plus radii `--of-radius-control-sm` (8px) and `--of-radius-subpanel` (12px). Use them instead of new literal sizes; the scale is documented in `DESIGN.md` (frontmatter + Typography/Shapes), which the impeccable detector reads.
 
 **Responsive form grids** — `src/routes/layout.css` defines three global utility classes: `.of-grid-2` (2-col, 16px gap), `.of-grid-2-sm` (2-col, 12px gap), `.of-grid-3` (3-col 1fr/1fr/0.65fr, 16px gap). A `@media (max-width: 480px)` block collapses `.of-grid-2` and `.of-grid-2-sm` to 1-col, and `.of-grid-3` to 2-col. Used on all form field pair grids across lure, catch, and tackle forms.
 
@@ -207,7 +238,7 @@ The language switcher is a `<select>` with flag emoji options, posting to `/api/
 
 Translations live in `src/lib/i18n/{en,de,fr,es,it,nl,pl,pt,uk}.ts` (9 files). The layout server (`src/routes/+layout.server.ts`) reads the `lang` cookie (falling back to `Accept-Language` header) and returns `{ t, lang }`, which SvelteKit merges into every page's `data` prop automatically.
 
-When adding new UI strings, add keys to **all 9 language files**. The server-side AI endpoints (`/api/chat`, `/api/identify-fish`, `/api/identify-lure`) also read the `lang` cookie and inject a language instruction into their prompts so AI responses are in the user's language.
+When adding new UI strings, add keys to **all 9 language files**. That includes `placeholder`, `alt`, `title` and `aria-label` text (form examples use `ph*` keys, e.g. `phLureBrand`); only brand/model names inside an example stay untranslated. The server-side AI endpoints (`/api/chat`, `/api/identify-fish`, `/api/identify-lure`) also read the `lang` cookie and inject a language instruction into their prompts so AI responses are in the user's language.
 
 ### Backup & restore
 
@@ -221,6 +252,8 @@ Shared logic lives in `src/lib/server/backup.ts` (`buildBackup`, `packBackupZip`
 
 Photos are saved to `UPLOAD_PATH` (env var, defaults to `./uploads`) and served through the `/uploads/[filename]` server route. Images are auto-rotated and resized to max 1920×1920 JPEG via `sharp`. The filename stored in the DB is just the basename (UUID + `.jpg`). Must be a Docker volume in production. The `sharp` re-encode drops all EXIF, so stored photos (and share pages) never leak GPS.
 
+**Thumbnails** — `/uploads/<file>?w=160|320|640` serves a downscaled WebP, built on first request by `getThumbnail()` (`src/lib/server/uploads.ts`) and cached in `UPLOAD_DIR/.thumbs/<name>-<w>.webp` (write-then-rename). Other widths, or a file sharp can't decode, fall back to the original (logged once per file). Thumbnails are derived data: not in the DB, so backups and quota usage ignore them, `deleteUpload()` removes them with the original, and a missing one is just rebuilt — existing photos need no migration. Build URLs with `photoUrl(file, w)` from `src/lib/photo.ts`: the lure grid and `/catches` cards use `gridSrcset()` + `GRID_SIZES`/`CARD_SIZES`, small row/tile images use `THUMB_SMALL` (160), and detail/share pages keep the original (the photo is the subject there).
+
 **Photo EXIF prefill** — `/catches/new` and `/spots/new` read EXIF in the browser when photos are added (`readPhotoMeta()` in `src/lib/photoMeta.ts`, lazily importing exifr's `lite` bundle; typings via `src/lib/exifr-lite.d.ts`). Photo GPS places the map marker and the capture time (`DateTimeOriginal` → `CreateDate`) fills the catch's "Caught at" — each **only if the user hasn't set that field yet**; otherwise a "Use photo location" / "Use photo time" button offers it. `0,0` / out-of-range coords are ignored. Mobile OS photo pickers may strip GPS before the browser sees the file, in which case nothing is prefilled. E2E fixture `e2e/fixtures/gps-photo.jpg` is generated by `e2e/exif-jpeg.ts` (hand-built EXIF APP1 — don't import `sharp` in Playwright-side code: it crashes Node 22's loader with "Unexpected module status 3").
 
 ### Leaflet maps
@@ -228,6 +261,10 @@ Photos are saved to `UPLOAD_PATH` (env var, defaults to `./uploads`) and served 
 Leaflet is always dynamically imported inside `onMount` (`const L = (await import('leaflet')).default`). The map element (`bind:this={mapEl}`) must have only a static `style="height:Xpx;"` — never reactive styles on the same element, as Svelte mutating the element Leaflet tracks causes tile offset corruption. Wrap it in a parent div if border/radius styling is needed.
 
 Always call `requestAnimationFrame(() => mapInstance.invalidateSize())` after `setView` to fix tile rendering when the element was not visible at mount time.
+
+Add the base layer with `addBaseTiles(L, mapInstance, data.mapTiles)` (`#lib/mapTiles.js`) — never a literal tile URL. Create maps with `zoomControl: false` and call `addMapControls(L, mapInstance, t)` right after: it adds the zoom buttons with translated names (`mapZoomIn`/`mapZoomOut` — Leaflet's own control is hard-wired to English) and replaces Leaflet's English-tooltip credit with `LEAFLET_PREFIX`. `+layout.server.ts` resolves `mapTiles` from `MAP_TILE_URL`/`MAP_TILE_ATTRIBUTION` (default: OpenStreetMap). Pins that only show a location (detail pages, form markers) spread `...STATIC_PIN` (`keyboard:false, interactive:false`) so they aren't unnamed tab stops; clickable pins (the `/spots` map) get `alt`/`title` set to the spot name.
+
+Always call `setupMapGestures(mapInstance, mapEl, t.mapTwoFingerHint)` (`#lib/mapGestures.js`) right after `L.map(...)`. On touch devices (`pointer: coarse`) it disables Leaflet's one-finger `dragging`, so a one-finger swipe over the map scrolls the page instead of trapping it, and two fingers pan and zoom (Leaflet's pinch handler follows the fingers' midpoint). Taps still fire `click`, so tap-to-place works, and a one-finger drag shows a brief "Use two fingers" overlay (`.of-map-hint` in `layout.css`). It does nothing on mouse devices and cleans up on the map's `unload`. `.leaflet-container` is isolated (`isolation: isolate`) so map panes never draw over the fixed tab bar or sticky save bars. On touch, zoom buttons are enlarged to 44px (`.leaflet-container.leaflet-touch .leaflet-bar a` — the extra class is needed because `leaflet.css` loads after `layout.css`). Note: a synthesized touch *scroll* doesn't move the page in headless Chromium even on plain content, so E2E tests assert `touch-action` and that touch events aren't `preventDefault`ed instead.
 
 Always give a map a view **synchronously at mount** (the "add" forms use `setView([51, 10], 5)`) and let geolocation only pan afterwards. A map whose only `setView` is inside a geolocation callback stays grey with no tiles whenever permission is denied, the origin is plain HTTP, or the prompt is never answered (issue #104). The automatic locate-on-mount must not pan once a marker is placed (`lat !== null`).
 
@@ -251,7 +288,7 @@ Custom CSS token `--of-badge-num-text`: cyan (`var(--of-accent-hover)`) in dark 
 
 The overview page (`/`) loads all lures once from the server and filters client-side using Svelte 5 `$derived`. Filters use an include/exclude chip model (`ChipFilter = Record<string, 'include' | 'exclude'>`): clicking once includes (cyan), again excludes (red strikethrough), again clears. Active filters: type, running depth, light conditions, fish species, size range (min/max), weight range (min/max), favourites toggle, has-catch toggle. The filter panel is toggled via a pill button that turns cyan when filters are active. Pagination default is 12 per page. Do not move filtering to the server.
 
-The lure grid uses `grid-auto-rows: minmax(295px, auto)` so all cards in a row share a consistent minimum height regardless of content. A wrapper div carries a derived `min-height` that accounts for the current page size, preventing the pagination bar from jumping when the last page has fewer cards. Cards are flex-column; a `flex:1` spacer pins the tag row to the card bottom. Tags on cards are capped at 2 visible; additional tags show a `+N` overflow chip.
+The overview is a "tackle box": `.of-lure-grid` (scoped CSS in `src/routes/+page.svelte`) is 2 → 3 → 4 columns (base / 768px / 1280px), so phones show two lures across. Each `a.of-lure-card` is a recessed 4:3 photo well over a label strip (name with the catch-count pill `.of-lure-caught` right, then brand; tags hidden ≤ 480px, capped at 2 + `+N`). The `#0001` plate is a small badge top-left on the photo (`.of-lure-badges`, with the `×N` amount beside it), deliberately not a headline in the strip — a row of accent numbers out-shouted the lures. Photo badges sit on a fixed dark scrim (`.of-lure-scrim`); their ink is fixed light, except the plate, which uses `--of-badge-num-text` (accent in dark mode, white in light). The List view keeps the plate inline. A Box / List switch (`.of-seg`, `aria-pressed`) toggles to dense `a.of-lure-row` rows; the choice is remembered per browser via `src/lib/lureView.ts` (guarded localStorage, defaults to box). The load returns `catchCounts: Record<lureId, n>` (grouped count) alongside `lureIdsWithCatches`. On ≥ 1280px a wrapper (`.of-lure-wrap`, `--grid-min`) reserves height per page size so pagination doesn't jump. Filter chips carry `aria-pressed`, `data-mode` (`include`/`exclude`/`off`) and a visually hidden "(excluded)" suffix; their hint titles are i18n keys (`filterHint*`).
 
 ### Favourites
 
@@ -337,7 +374,7 @@ Read-only JSON API at `/api/v1/`. Auth handled in `src/hooks.server.ts` separate
 
 ### Migrations
 
-Drizzle migrations run automatically on startup in production (`NODE_ENV=production`). Multi-statement `.sql` migration files must use `-->statement-breakpoint` as a separator (required by `better-sqlite3`).
+Drizzle migrations run automatically on startup in production (`NODE_ENV=production`), but **not during `vite build`** (guarded by `building` from `$app/env` in `src/lib/server/db/index.ts`) — the build imports the db module and would otherwise migrate the build machine's `DATABASE_URL`. Multi-statement `.sql` migration files must use `-->statement-breakpoint` as a separator (required by `better-sqlite3`).
 
 ### Request origin & CSRF
 
@@ -373,4 +410,5 @@ SvelteKit's CSRF origin check stays **on**; what broke in 1.1.0 was the origin i
 | `LITELLM_MODEL` | _(unset)_ | Model name to use — must match a `model_name` entry in `litellm.config.yaml`. |
 | `LITELLM_VISION_MODEL` | _(unset)_ | Optional separate vision-capable model for fish/lure identification. Falls back to `LITELLM_MODEL` if unset. |
 | `PROTOCOL_HEADER` / `HOST_HEADER` | _(unset)_ | adapter-node vars for a reverse proxy that reports the scheme/host itself (e.g. `PROTOCOL_HEADER=x-forwarded-proto`). Setting `PROTOCOL_HEADER` makes the proxy authoritative and disables the `BASE_URL`-derived scheme entirely. |
+| `MAP_TILE_URL` / `MAP_TILE_ATTRIBUTION` | _(OpenStreetMap)_ | Leaflet tile template (`{z}/{x}/{y}`) and its attribution for every map, e.g. a self-hosted or commercial tile server. With `MAP_TILE_URL` unset both fall back to OSM (the attribution is ignored); with a custom URL, set the provider's attribution yourself. |
 | `BODY_SIZE_LIMIT` | `104857600` | Max upload size in bytes (set in Dockerfile) |

@@ -19,7 +19,8 @@ const mockLureFindMany = vi.fn();
 const mockCatchFindMany = vi.fn();
 
 function makeChain(result: any = []) {
-	const terminal = {
+	const terminal: any = {
+		groupBy: vi.fn(() => terminal),
 		returning: vi.fn(() => Promise.resolve(result)),
 		then: (fn: any, rej: any) => Promise.resolve(result).then(fn, rej),
 		catch: (fn: any) => Promise.resolve(result).catch(fn),
@@ -50,6 +51,7 @@ vi.mock('#lib/server/db/index.js', () => ({
 		},
 		update: mockUpdate,
 		selectDistinct: mockSelectDistinct,
+		select: mockSelectDistinct,
 	},
 }));
 
@@ -201,11 +203,13 @@ describe('lures overview / load', () => {
 		const result = await luresOverviewLoad({ locals: { user: null } } as any);
 		expect(result.lures).toEqual([]);
 		expect(result.lureIdsWithCatches).toEqual([]);
+		expect(result.catchCounts).toEqual({});
 	});
 
-	it('builds lureIdsWithCatches set from catch rows', async () => {
-		mockSelectDistinct.mockImplementation(() => makeChain([{ lureId: 'l1' }, { lureId: 'l2' }]));
+	it('builds catch counts and lureIdsWithCatches from grouped rows', async () => {
+		mockSelectDistinct.mockImplementation(() => makeChain([{ lureId: 'l1', n: 3 }, { lureId: 'l2', n: 1 }, { lureId: null, n: 9 }]));
 		const result = await luresOverviewLoad({ locals: { user: null } } as any);
+		expect(result.catchCounts).toEqual({ l1: 3, l2: 1 });
 		expect(result.lureIdsWithCatches).toContain('l1');
 		expect(result.lureIdsWithCatches).toContain('l2');
 	});

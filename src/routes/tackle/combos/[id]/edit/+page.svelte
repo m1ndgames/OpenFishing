@@ -1,33 +1,36 @@
 ﻿<script lang="ts">
 	import type { ActionData, PageData } from './$types';
 	let { form, data }: { form: ActionData; data: PageData } = $props();
-	const { t, combo: c, rods, reels } = data;
+	const { t, combo: c, rods, reels } = $derived(data);
 
 	const inputStyle = "width:100%; padding:9px 12px; background:var(--of-bg-elevated); border:1px solid var(--of-border); border-radius:9px; color:var(--of-text); font-size:0.875rem; outline:none; box-sizing:border-box; font-family:'DM Sans',sans-serif; transition:border-color 0.15s;";
-	const labelStyle = "display:block; font-size:0.78rem; font-weight:500; color:var(--of-text-3); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.06em;";
+	const labelStyle = "display:block; font-size:0.8125rem; font-weight:500; color:var(--of-text-2); margin-bottom:6px; ";
 	function focusInput(e: FocusEvent) { const el = e.target as HTMLElement; el.style.borderColor='var(--of-accent-solid)'; el.style.boxShadow='0 0 0 3px var(--of-accent-glow)'; }
 	function blurInput(e: FocusEvent) { const el = e.target as HTMLElement; el.style.borderColor='var(--of-border)'; el.style.boxShadow='none'; }
 </script>
 
 <div style="max-width:520px; margin:0 auto;">
-	<a href="/tackle/combos/{c.id}" style="display:inline-flex; align-items:center; gap:6px; color:var(--of-text-4); font-size:0.8rem; text-decoration:none; margin-bottom:20px;"
+	<a href="/tackle/combos/{c.id}" class="of-tap" style="display:inline-flex; align-items:center; gap:6px; color:var(--of-text-3); font-size:0.8125rem; text-decoration:none; margin-bottom:20px;"
 		onmouseenter={function(e){(e.currentTarget as HTMLElement).style.color='var(--of-accent)';}}
-		onmouseleave={function(e){(e.currentTarget as HTMLElement).style.color='var(--of-text-4)';}}
-	>{t.back}</a>
+		onmouseleave={function(e){(e.currentTarget as HTMLElement).style.color='var(--of-text-3)';}}
+	>
+		<svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M9 2L4 7L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+		{t.back}
+	</a>
 
 	{#if form?.error}
-		<div style="background:var(--of-danger-bg); border:1px solid var(--of-danger-border); border-radius:9px; padding:10px 14px; margin-bottom:16px; color:var(--of-danger); font-size:0.875rem;">{t[form.error as keyof typeof t] ?? form.error}</div>
+		<div role="alert" style="background:var(--of-danger-bg); border:1px solid var(--of-danger-border); border-radius:9px; padding:10px 14px; margin-bottom:16px; color:var(--of-danger); font-size:0.875rem;">{t[form.error as keyof typeof t] ?? form.error}</div>
 	{/if}
 
-	<form method="POST" action="?/update" style="background:var(--of-bg-surface); border:1px solid var(--of-border-subtle); border-radius:16px; padding:24px 28px; display:flex; flex-direction:column; gap:20px;">
-		<h1 style="font-family:'Carter One',sans-serif; font-size:1.4rem; color:var(--of-text-bright); margin:0;">{t.comboEditTitle}</h1>
+	<form method="POST" action="?/update" class="of-panel" style="background:var(--of-bg-surface); border:1px solid var(--of-border-subtle); border-radius:16px; padding:24px 28px; display:flex; flex-direction:column; gap:20px;">
+		<h1 style="font-family:'DM Sans',sans-serif; font-size:var(--of-fs-headline); color:var(--of-text-bright); margin:0;">{t.comboEditTitle}</h1>
 		<div>
-			<label style={labelStyle}>{t.comboName} *</label>
-			<input name="name" type="text" value={c.name} required style={inputStyle} onfocus={focusInput} onblur={blurInput} />
+			<label style={labelStyle} for="name">{t.comboName} <span style="color:var(--of-danger);">*</span></label>
+			<input id="name" name="name" type="text" value={c.name} required style={inputStyle} onfocus={focusInput} onblur={blurInput} />
 		</div>
 		<div>
-			<label style={labelStyle}>{t.comboRod}</label>
-			<select name="rod_id" style="{inputStyle} appearance:none;">
+			<label style={labelStyle} for="rod_id">{t.comboRod}</label>
+			<select id="rod_id" name="rod_id" style="{inputStyle} appearance:none;">
 				<option value="" selected={!c.rodId}>{t.comboSelectNone}</option>
 				{#each rods as r}
 					<option value={r.id} selected={c.rodId === r.id}>{r.brand ? `${r.brand} ${r.model}` : r.model}{r.type ? ` (${r.type})` : ''}</option>
@@ -35,8 +38,8 @@
 			</select>
 		</div>
 		<div>
-			<label style={labelStyle}>{t.comboReel}</label>
-			<select name="reel_id" style="{inputStyle} appearance:none;">
+			<label style={labelStyle} for="reel_id">{t.comboReel}</label>
+			<select id="reel_id" name="reel_id" style="{inputStyle} appearance:none;">
 				<option value="" selected={!c.reelId}>{t.comboSelectNone}</option>
 				{#each reels as r}
 					<option value={r.id} selected={c.reelId === r.id}>{r.brand ? `${r.brand} ${r.model}` : r.model}{r.size ? ` #${r.size}` : ''}</option>
@@ -44,24 +47,24 @@
 			</select>
 		</div>
 		<div>
-			<label style={labelStyle}>{t.comboTerminalTackle}</label>
-			<textarea name="terminal_tackle" rows="3" placeholder={t.comboTerminalTacklePlaceholder} style="{inputStyle} resize:vertical;" onfocus={focusInput} onblur={blurInput}>{c.terminalTackle ?? ''}</textarea>
+			<label style={labelStyle} for="terminal_tackle">{t.comboTerminalTackle}</label>
+			<textarea id="terminal_tackle" name="terminal_tackle" rows="3" placeholder={t.comboTerminalTacklePlaceholder} style="{inputStyle} resize:vertical;" onfocus={focusInput} onblur={blurInput}>{c.terminalTackle ?? ''}</textarea>
 		</div>
 		<div>
-			<label style={labelStyle}>{t.comboNotes}</label>
-			<textarea name="notes" rows="2" style="{inputStyle} resize:vertical;" onfocus={focusInput} onblur={blurInput}>{c.notes ?? ''}</textarea>
+			<label style={labelStyle} for="notes">{t.comboNotes}</label>
+			<textarea id="notes" name="notes" rows="2" style="{inputStyle} resize:vertical;" onfocus={focusInput} onblur={blurInput}>{c.notes ?? ''}</textarea>
 		</div>
-		<button type="submit"
-			style="background:var(--of-accent-solid); color:var(--of-ink); font-size:0.875rem; font-weight:700; padding:11px 24px; border-radius:9px; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; transition:background 0.15s; align-self:flex-start;"
+		<button type="submit" class="of-primary"
+			style="background:var(--of-accent-solid); color:var(--of-ink); font-size:0.875rem; font-weight:600; padding:11px 24px; border-radius:9px; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; transition:background 0.15s; align-self:flex-start;"
 			onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-accent)';}}
 			onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-accent-solid)';}}
 		>{t.comboSaveChanges}</button>
 	</form>
 
-	<div style="margin-top:16px; padding:20px 28px; background:var(--of-bg-surface); border:1px solid var(--of-border-subtle); border-radius:16px;">
+	<div class="of-panel" style="margin-top:16px; padding:20px 28px; background:var(--of-bg-surface); border:1px solid var(--of-border-subtle); border-radius:16px;">
 		<form method="POST" action="?/delete">
 			<button type="submit"
-				style="background:var(--of-danger-bg); color:var(--of-danger); border:1px solid var(--of-danger-border); font-size:0.875rem; font-weight:600; padding:9px 20px; border-radius:9px; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.15s;"
+				style="background:var(--of-danger-bg); color:var(--of-danger); border:1px solid var(--of-danger-border); font-size:0.875rem; font-weight:600; padding:9px 20px; border-radius:9px; cursor:pointer; font-family:'DM Sans',sans-serif; transition:var(--of-transition);"
 				onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-danger-bg)'; (e.currentTarget as HTMLElement).style.borderColor='var(--of-danger-border)';}}
 				onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-danger-bg)'; (e.currentTarget as HTMLElement).style.borderColor='var(--of-danger-border)';}}
 				onclick={(e) => { if (!confirm(t.comboDeleteConfirm)) e.preventDefault(); }}

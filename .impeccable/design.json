@@ -1,0 +1,153 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-13T00:00:00Z",
+  "title": "Design System: OpenFishing",
+  "extensions": {
+    "colorMeta": {
+      "wake-cyan": { "role": "primary", "displayName": "Wake Cyan", "canonical": "#22d3ee", "tonalRamp": ["#083344", "#155e75", "#0e7490", "#0891b2", "#06b6d4", "#22d3ee", "#67e8f9", "#cffafe"] },
+      "wake-cyan-solid": { "role": "primary", "displayName": "Wake Cyan Solid", "canonical": "#06b6d4", "tonalRamp": ["#083344", "#155e75", "#0e7490", "#0891b2", "#06b6d4", "#22d3ee", "#67e8f9", "#cffafe"] },
+      "wake-cyan-glint": { "role": "primary", "displayName": "Wake Glint", "canonical": "#67e8f9", "tonalRamp": ["#083344", "#155e75", "#0e7490", "#0891b2", "#06b6d4", "#22d3ee", "#67e8f9", "#cffafe"] },
+      "harbor-teal": { "role": "primary", "displayName": "Harbor Teal (light-mode accent)", "canonical": "#0c627a", "tonalRamp": ["#082f3b", "#0b4757", "#0c627a", "#16809c", "#3fa3bd", "#7cc4d6", "#b7e0ea", "#e6f5f9"] },
+      "forrest-accent": { "role": "secondary", "displayName": "Forrest Reed", "canonical": "#4ade80", "tonalRamp": ["#052e16", "#14532d", "#166534", "#16a34a", "#22c55e", "#4ade80", "#86efac", "#dcfce7"] },
+      "sunset-accent": { "role": "secondary", "displayName": "Sunset Ember", "canonical": "#fb923c", "tonalRamp": ["#431407", "#7c2d12", "#9a3412", "#ea580c", "#f97316", "#fb923c", "#fdba74", "#ffedd5"] },
+      "dusk-accent": { "role": "secondary", "displayName": "Dusk Violet", "canonical": "#a78bfa", "tonalRamp": ["#2e1065", "#4c1d95", "#5b21b6", "#7c3aed", "#8b5cf6", "#a78bfa", "#c4b5fd", "#ede9fe"] },
+      "abyss": { "role": "neutral", "displayName": "Abyss", "canonical": "#060d17", "tonalRamp": ["#030a12", "#060d17", "#0b1a2c", "#132841", "#243f5e", "#3d6a84", "#8ab8cc", "#c2dce8"] },
+      "night-water": { "role": "neutral", "displayName": "Night Water", "canonical": "#0b1a2c", "tonalRamp": ["#030a12", "#060d17", "#0b1a2c", "#132841", "#243f5e", "#3d6a84", "#8ab8cc", "#c2dce8"] },
+      "raised-water": { "role": "neutral", "displayName": "Raised Water", "canonical": "#0f2238", "tonalRamp": ["#030a12", "#060d17", "#0b1a2c", "#132841", "#243f5e", "#3d6a84", "#8ab8cc", "#c2dce8"] },
+      "rope-line": { "role": "neutral", "displayName": "Rope Line", "canonical": "#243f5e", "tonalRamp": ["#030a12", "#060d17", "#0b1a2c", "#132841", "#243f5e", "#3d6a84", "#8ab8cc", "#c2dce8"] },
+      "foam-bright": { "role": "neutral", "displayName": "Foam Bright", "canonical": "#e0eaf8", "tonalRamp": ["#3d6a84", "#5d8fa8", "#6b9ebb", "#84aabd", "#98c0d2", "#c2dce8", "#e0eaf8", "#f4f8fd"] },
+      "foam": { "role": "neutral", "displayName": "Foam", "canonical": "#c2dce8", "tonalRamp": ["#3d6a84", "#5d8fa8", "#6b9ebb", "#84aabd", "#98c0d2", "#c2dce8", "#e0eaf8", "#f4f8fd"] },
+      "fog": { "role": "neutral", "displayName": "Fog", "canonical": "#6b9ebb", "tonalRamp": ["#3d6a84", "#5d8fa8", "#6b9ebb", "#84aabd", "#98c0d2", "#c2dce8", "#e0eaf8", "#f4f8fd"] },
+      "shallows": { "role": "neutral", "displayName": "Shallows (light base)", "canonical": "#eaf3f8", "tonalRamp": ["#0a1e2e", "#1a3448", "#325061", "#7aaec4", "#aacad9", "#cde0ec", "#eaf3f8", "#ffffff"] },
+      "hook-red": { "role": "semantic", "displayName": "Hook Red", "canonical": "#f87171", "tonalRamp": ["#450a0a", "#7f1d1d", "#b11d1d", "#dc2626", "#ef4444", "#f87171", "#fca5a5", "#fee2e2"] },
+      "reed-green": { "role": "semantic", "displayName": "Reed Green", "canonical": "#4ade80", "tonalRamp": ["#052e16", "#0e682f", "#15803d", "#16a34a", "#22c55e", "#4ade80", "#86efac", "#dcfce7"] },
+      "hook-amber": { "role": "semantic", "displayName": "Hook Amber", "canonical": "#fbbf24", "tonalRamp": ["#451a03", "#934407", "#b45309", "#d97706", "#f59e0b", "#fbbf24", "#fde68a", "#fef3c7"] }
+    },
+    "typographyMeta": {
+      "headline": { "displayName": "Headline", "purpose": "Page titles (h1); detail pages may go to 1.5–1.6rem." },
+      "title": { "displayName": "Title", "purpose": "Lure names on cards, section headings in panels; truncate on cards." },
+      "body": { "displayName": "Body", "purpose": "Inputs, buttons, menu items, paragraphs." },
+      "label": { "displayName": "Label", "purpose": "Form labels, secondary buttons, brand lines, nav links." },
+      "caption": { "displayName": "Caption", "purpose": "Chips, tags, filter row labels, tab-bar labels. The minimum size." },
+      "numeral": { "displayName": "Numeral (mono)", "purpose": "Lure numbers, amounts, measurements and specs only. Tabular figures." }
+    },
+    "shadows": [
+      { "name": "floating-menu", "value": "0 8px 24px rgba(0,0,0,0.4)", "purpose": "Add dropdown and popovers." },
+      { "name": "toast", "value": "0 8px 32px rgba(0,0,0,0.5)", "purpose": "Demo-mode toast." },
+      { "name": "modal", "value": "0 20px 60px rgba(0,0,0,0.5)", "purpose": "Crop modal and dialogs." },
+      { "name": "chat-sheet", "value": "0 -8px 40px rgba(0,0,0,0.5)", "purpose": "Chatbot panel rising from the bottom." },
+      { "name": "accent-glow", "value": "0 8px 32px var(--of-accent-glow)", "purpose": "Lure card hover only, with the accent border." },
+      { "name": "focus-ring", "value": "0 0 0 3px var(--of-accent-bg-hover)", "purpose": "Input focus, with the border becoming --of-accent-solid." }
+    ],
+    "motion": [
+      { "name": "ease", "value": "cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "All state transitions (--of-ease)." },
+      { "name": "dur-fast", "value": "150ms", "purpose": "Hover, focus and color changes (--of-dur-fast)." },
+      { "name": "dur-enter", "value": "300ms", "purpose": "Panels and overlays appearing (--of-dur-enter)." },
+      { "name": "reduced-motion", "value": "0.01ms", "purpose": "All animation and transition durations under prefers-reduced-motion." }
+    ],
+    "breakpoints": [
+      { "name": "compact-form", "value": "480px" },
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one solid-accent action per view: Save, Add, Apply.",
+      "html": "<button class=\"ds-btn-primary\">Save lure</button>",
+      "css": ".ds-btn-primary { background: var(--of-accent-solid, #06b6d4); color: var(--of-ink, #030a12); font-family: 'DM Sans', sans-serif; font-size: 0.875rem; font-weight: 600; padding: 10px 24px; border-radius: 9px; border: none; cursor: pointer; transition: background-color 150ms cubic-bezier(0.22, 1, 0.36, 1); } .ds-btn-primary:hover { background: var(--of-accent, #22d3ee); } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--of-accent-border, rgba(6,182,212,0.25)); }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Cancel and back actions beside a primary button.",
+      "html": "<button class=\"ds-btn-secondary\">Cancel</button>",
+      "css": ".ds-btn-secondary { background: var(--of-bg-elevated, #0f2238); color: var(--of-text-2, #98c0d2); font-family: 'DM Sans', sans-serif; font-size: 0.875rem; font-weight: 500; padding: 10px 20px; border-radius: 9px; border: 1px solid var(--of-border, #243f5e); cursor: pointer; transition: background-color 150ms cubic-bezier(0.22, 1, 0.36, 1), color 150ms cubic-bezier(0.22, 1, 0.36, 1); } .ds-btn-secondary:hover { background: var(--of-bg-hover, #132841); color: var(--of-text, #c2dce8); } .ds-btn-secondary:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--of-accent-border, rgba(6,182,212,0.25)); }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Labelled form field on Raised Water with an accent focus ring.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-label\">Brand</span><input class=\"ds-input\" placeholder=\"e.g. Rapala\"></label>",
+      "css": ".ds-field { display: flex; flex-direction: column; gap: 6px; width: 260px; } .ds-label { font-family: 'DM Sans', sans-serif; font-size: 0.8125rem; font-weight: 500; color: var(--of-text-3, #84aabd); } .ds-input { width: 100%; padding: 9px 12px; background: var(--of-bg-elevated, #0f2238); border: 1px solid var(--of-border, #243f5e); border-radius: 9px; color: var(--of-text, #c2dce8); font-family: 'DM Sans', sans-serif; font-size: 0.875rem; outline: none; transition: border-color 150ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 150ms cubic-bezier(0.22, 1, 0.36, 1); } .ds-input:focus, .ds-input:focus-visible { border-color: var(--of-accent-solid, #06b6d4); box-shadow: 0 0 0 3px var(--of-accent-bg-hover, rgba(6,182,212,0.14)); }"
+    },
+    {
+      "name": "Filter Chips (tri-state)",
+      "kind": "chip",
+      "refersTo": "chip-filter",
+      "description": "Include / exclude / neutral filter chips on the lure overview.",
+      "html": "<div class=\"ds-chips\"><button class=\"ds-chip\">Spinner</button><button class=\"ds-chip ds-chip-include\">Crankbait</button><button class=\"ds-chip ds-chip-exclude\">Jig</button></div>",
+      "css": ".ds-chips { display: flex; flex-wrap: wrap; gap: 5px; } .ds-chip { font-family: 'DM Sans', sans-serif; font-size: 0.75rem; line-height: 1.5; padding: 3px 10px; border-radius: 20px; border: 1px solid var(--of-border-subtle, #172f4a); background: transparent; color: var(--of-text-4, #6b9ebb); cursor: pointer; transition: background-color 120ms, border-color 120ms, color 120ms; } .ds-chip:hover { border-color: var(--of-border, #243f5e); color: var(--of-text-2, #98c0d2); } .ds-chip:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--of-accent-border, rgba(6,182,212,0.25)); } .ds-chip-include { background: var(--of-accent-bg-hover, rgba(6,182,212,0.14)); border-color: var(--of-accent-border, rgba(6,182,212,0.25)); color: var(--of-accent, #22d3ee); } .ds-chip-exclude { background: var(--of-danger-bg, rgba(239,68,68,0.08)); border-color: var(--of-danger-border, rgba(239,68,68,0.25)); color: var(--of-danger, #f87171); text-decoration: line-through; }"
+    },
+    {
+      "name": "Lure Card",
+      "kind": "card",
+      "refersTo": "card-lure",
+      "description": "Grid card: photo with number plate, name, brand, up to two tags. Flat at rest, accent glow on hover.",
+      "html": "<a class=\"ds-card\" href=\"#\"><div class=\"ds-photo\"><span class=\"ds-num\">#0042</span></div><div class=\"ds-cbody\"><p class=\"ds-name\">Shad Rap SR7</p><p class=\"ds-brand\">Rapala</p><div class=\"ds-tags\"><span class=\"ds-tag\">pike</span><span class=\"ds-tag\">river</span><span class=\"ds-more\">+2</span></div></div></a>",
+      "css": ".ds-card { display: flex; flex-direction: column; width: 240px; background: var(--of-bg-surface, #0b1a2c); border: 1px solid var(--of-border-subtle, #172f4a); border-radius: 14px; overflow: hidden; text-decoration: none; transition: border-color 200ms, box-shadow 200ms; } .ds-card:hover, .ds-card:focus-visible { border-color: var(--of-accent-border, rgba(6,182,212,0.25)); box-shadow: 0 8px 32px var(--of-accent-glow, rgba(6,182,212,0.1)); outline: none; } .ds-photo { position: relative; height: 150px; background: linear-gradient(160deg, #12304a, #081624); } .ds-num { position: absolute; top: 8px; left: 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; font-weight: 600; color: var(--of-badge-num-text, #67e8f9); background: rgba(0,0,0,0.62); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 2px 7px; backdrop-filter: blur(6px); } .ds-cbody { padding: 14px 14px 12px; display: flex; flex-direction: column; gap: 4px; } .ds-name { margin: 0; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 500; color: var(--of-text-bright, #e0eaf8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .ds-brand { margin: 0 0 6px; font-family: 'DM Sans', sans-serif; font-size: 0.8125rem; color: var(--of-text-2, #98c0d2); } .ds-tags { display: flex; gap: 4px; } .ds-tag { font-family: 'DM Sans', sans-serif; font-size: 0.75rem; padding: 2px 7px; border-radius: 20px; background: var(--of-success-bg, rgba(74,222,128,0.08)); color: var(--of-success, #4ade80); border: 1px solid var(--of-success-border, rgba(74,222,128,0.15)); } .ds-more { font-family: 'DM Sans', sans-serif; font-size: 0.75rem; padding: 2px 7px; border-radius: 20px; background: var(--of-border, #243f5e); color: var(--of-text-3, #84aabd); }"
+    },
+    {
+      "name": "Desktop Nav Links",
+      "kind": "nav",
+      "refersTo": "nav-link-active",
+      "description": "Section links in the top bar; the active one is a raised pill.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-link ds-nav-active\" href=\"#\">Lures</a><a class=\"ds-nav-link\" href=\"#\">Tackle</a><a class=\"ds-nav-link\" href=\"#\">Spots</a><a class=\"ds-nav-link\" href=\"#\">Catches</a></nav>",
+      "css": ".ds-nav { display: flex; gap: 8px; align-items: center; background: var(--of-bg-surface, #0b1a2c); border-bottom: 1px solid var(--of-border-subtle, #172f4a); padding: 10px 16px; } .ds-nav-link { font-family: 'DM Sans', sans-serif; font-size: 0.875rem; font-weight: 500; padding: 6px 12px; border-radius: 10px; border: 1px solid transparent; color: var(--of-text-3, #84aabd); text-decoration: none; transition: color 150ms, background-color 150ms; } .ds-nav-link:hover { color: var(--of-text, #c2dce8); background: var(--of-bg-elevated, #0f2238); } .ds-nav-link:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--of-accent-border, rgba(6,182,212,0.25)); } .ds-nav-active { color: var(--of-text-bright, #e0eaf8); background: var(--of-bg-elevated, #0f2238); border-color: var(--of-border, #243f5e); }"
+    },
+    {
+      "name": "Spec Tiles (direction)",
+      "kind": "custom",
+      "refersTo": "spec-tiles",
+      "description": "Target pattern: catalogued specs as mono values on raised tiles, readable in sun.",
+      "html": "<dl class=\"ds-specs\"><div><dt>Type</dt><dd>Crankbait</dd></div><div><dt>Size</dt><dd>7.0 cm</dd></div><div><dt>Weight</dt><dd>8.0 g</dd></div><div><dt>Catches</dt><dd>12</dd></div></dl>",
+      "css": ".ds-specs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 240px; margin: 0; } .ds-specs > div { background: var(--of-bg-elevated, #0f2238); border-radius: 6px; padding: 5px 8px; display: flex; flex-direction: column; } .ds-specs dt { font-family: 'DM Sans', sans-serif; font-size: 0.75rem; font-weight: 500; color: var(--of-text-3, #84aabd); } .ds-specs dd { margin: 0; font-family: 'JetBrains Mono', monospace; font-size: 0.875rem; font-weight: 600; color: var(--of-text-bright, #e0eaf8); font-variant-numeric: tabular-nums; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Tackle Box at Dusk",
+    "overview": "OpenFishing is a tackle box: dark, ordered compartments where every lure has its numbered slot and its record. The world is the water at dusk. Deep, cool surfaces step up in small tonal increments, and a single accent glints against them like a lure catching the last light. Nothing is decorative for its own sake. Photos of real lures and catches carry the color, and the interface around them stays quiet and in order.\n\nThe system is an Operate surface first: people log catches one-handed on a phone at the bank, then sort and review their collection at home. Density is moderate. Cards and forms are compact, but the lure number, the name and the primary action are always the strongest things on screen. Every theme (Ocean, Forrest, Sunset, Dusk) is the same tackle box under a different light. The structure, spacing and type never change; only the semantic color set does, in both dark and light mode.\n\nDirection: catalogued, built for outdoors. The confirmed target for new and reworked screens combines two moods. Precise, catalogued: the lure is an inventory item with a numbered plate and a spec sheet in tabular mono. Outdoorsy, practical: everything that matters survives a phone held in direct sun or used in the dark.",
+    "keyCharacteristics": [
+      "Dark-first, tonal layering; light mode is a fully designed counterpart, not an inversion.",
+      "One accent per theme, used for actions, active state and the lure number, never as decoration.",
+      "DM Sans for everything readable; JetBrains Mono only for numbers that are catalogued (lure numbers, specs, measurements).",
+      "Flat surfaces with 1px borders; shadows appear only on floating layers.",
+      "Gently curved, consistent corners (9px controls, 14px cards).",
+      "Built to be readable at the water: the glare test is a design requirement."
+    ],
+    "rules": [
+      { "name": "The Single Glint Rule", "body": "Each theme has exactly one accent hue. It marks what you can act on and what is selected, and nothing else. Semantic colors are not accents and are never used for decoration.", "section": "colors" },
+      { "name": "The Token-Only Rule", "body": "Components take every color from --of-* semantic tokens, never from literals. A literal hex in a component breaks the other three themes and light mode. (The lure-number badge's photo scrim, rgba(0,0,0,0.62), is the one deliberate exception: it must be dark on every photo.)", "section": "colors" },
+      { "name": "The Glare Rule (direction)", "body": "On screens used at the water (lure cards, catch and spot forms, spot detail), information a person needs to read uses --of-text-2 or brighter. --of-text-4 is for hints and inactive states only, never for values.", "section": "colors" },
+      { "name": "The Stencil Rule", "body": "Mono type is reserved for catalogued numbers: lure numbers, weights, sizes, depths, counts, coordinates. Never for prose, labels or headings. Any column of digits uses font-variant-numeric: tabular-nums (.of-num).", "section": "typography" },
+      { "name": "The Long-Word Rule", "body": "Every label must survive German and Polish string lengths: allow wrapping in buttons and chips, and never set a fixed width on text-bearing controls.", "section": "typography" },
+      { "name": "The Thumb Rule (direction)", "body": "On mobile, every tappable control on a field-use screen is at least 40px tall, and a form's primary action is full width and at least 48px.", "section": "layout" },
+      { "name": "The Flat-At-Rest Rule", "body": "Cards and panels never carry a shadow at rest. A shadow means \"this is floating\" (menu, toast, modal) or \"you are pointing at this\" (card hover glow).", "section": "elevation" }
+    ],
+    "dos": [
+      "Do take every color from an --of-* token so all four themes and both modes work automatically.",
+      "Do check every new screen in dark and light mode, and in at least one non-Ocean theme.",
+      "Do keep one solid-accent primary action per view.",
+      "Do use JetBrains Mono with tabular numerals for lure numbers, measurements and counts, and nowhere else.",
+      "Do keep cards flat at rest (14px radius, 1px subtle border) and reserve shadows for floating layers.",
+      "Do run the glare test on field-use screens: secondary info at --of-text-2 or brighter, controls at least 40px, primary action at least 48px on mobile.",
+      "Do keep the wordmark and mark SVGs as they are, colored by currentColor from the theme accent."
+    ],
+    "donts": [
+      "Don't use --of-text-4 for anything a person needs to read at the water; it is for hints and inactive states.",
+      "Don't introduce a second accent hue within a theme, or use semantic red/green/amber decoratively.",
+      "Don't add shadows to resting cards or panels.",
+      "Don't set text below 0.75rem.",
+      "Don't let filter bars or chip rows scroll horizontally; they wrap.",
+      "Don't give text-bearing controls fixed widths; nine languages have to fit.",
+      "Don't hardcode hex values in components, even for one theme."
+    ]
+  }
+}

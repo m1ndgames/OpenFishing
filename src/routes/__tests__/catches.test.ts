@@ -28,7 +28,7 @@ const mockInsert = vi.fn();
 
 function makeChain(result: any = undefined) {
 	const self: any = {};
-	['from', 'set', 'orderBy', 'where', 'limit'].forEach(k => { self[k] = vi.fn(() => self); });
+	['from', 'set', 'orderBy', 'where', 'limit', 'groupBy'].forEach(k => { self[k] = vi.fn(() => self); });
 	self.values = vi.fn(() => ({
 		returning: vi.fn(() => Promise.resolve(Array.isArray(result) ? result : [result])),
 		then: (fn: any, rej: any) => Promise.resolve(undefined).then(fn, rej),
@@ -236,6 +236,31 @@ describe('catches/new load', () => {
 		expect(result.lures).toEqual([]);
 		expect(result.combos).toEqual([]);
 	});
+
+	it('returns picker data: quick lures, retrieve-style counts, last location, spots', async () => {
+		const lures = [
+			{ id: 'l1', lureNumber: 1, name: 'Spinner', photoPath: null, favourite: false, lost: false },
+			{ id: 'l2', lureNumber: 2, name: 'Jig', photoPath: null, favourite: true, lost: false },
+			{ id: 'l3', lureNumber: 3, name: 'Lost one', photoPath: null, favourite: true, lost: true }
+		];
+		// Query order in loadCatchFormData: lures, recent lure ids, presentation counts, last catch, spots.
+		const results = [lures, [{ lureId: 'l1' }], [{ presentation: 'Jigging', n: 3 }], [{ lat: 52.5, lng: 13.4 }], [{ id: 's1', name: 'Bay', lat: 1, lng: 2 }]];
+		let call = 0;
+		mockSelect.mockImplementation(() => makeChain(results[call++]));
+		const result = (await newLoad({ locals: { user: null } } as any)) as any;
+		expect(result.quickLureIds).toEqual(['l1', 'l2']);
+		expect(result.presentationCounts).toEqual({ Jigging: 3 });
+		expect(result.lastLocation).toEqual({ lat: 52.5, lng: 13.4 });
+		expect(result.spots).toHaveLength(1);
+	});
+
+	it('falls back to the first saved spot when no catch has a location', async () => {
+		const results = [[], [], [], [], [{ id: 's1', name: 'Bay', lat: 1, lng: 2 }]];
+		let call = 0;
+		mockSelect.mockImplementation(() => makeChain(results[call++]));
+		const result = (await newLoad({ locals: { user: null } } as any)) as any;
+		expect(result.lastLocation).toEqual({ lat: 1, lng: 2 });
+	});
 });
 
 describe('catches/new default action', () => {
@@ -262,7 +287,7 @@ describe('catches/new default action', () => {
 			newActions.default({
 				request: makeRequest({ species: 'Pike', lat: '52.52', lng: '13.40' }),
 			} as any)
-		).rejects.toMatchObject({ status: 303, location: '/catches/new-catch-id' });
+		).rejects.toMatchObject({ status: 303, location: '/catches/new-catch-id?saved=1' });
 		expect(mockInsert).toHaveBeenCalled();
 	});
 });

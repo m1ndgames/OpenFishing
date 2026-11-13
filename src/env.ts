@@ -32,6 +32,9 @@ export const variables = defineEnvVars({
 
 	DEMO_MODE: optional('Any value enables read-only demo mode'),
 
+	MAP_TILE_URL: optional('Map tile URL template, e.g. https://tiles.example/{z}/{x}/{y}.png (default: OpenStreetMap)'),
+	MAP_TILE_ATTRIBUTION: optional('Attribution HTML shown on the map for MAP_TILE_URL'),
+
 	CHATBOT: optional('Any truthy value enables the AI chatbot'),
 	LITELLM_URL: optional('Base URL of the LiteLLM proxy'),
 	LITELLM_MODEL: optional('LiteLLM model name for the chatbot'),

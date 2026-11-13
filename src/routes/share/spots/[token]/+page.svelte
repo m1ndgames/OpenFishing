@@ -1,4 +1,7 @@
 ﻿<script lang="ts">
+	import { setupMapGestures } from '#lib/mapGestures.js';
+	import { addBaseTiles, addMapControls, STATIC_PIN } from '#lib/mapTiles.js';
+	import { detailSrcset, DETAIL_SIZES, photoAlt } from '#lib/photo.js';
 	import { onMount, onDestroy } from 'svelte';
 	import type { PageData } from './$types';
 	import favicon from '#lib/assets/favicon.svg';
@@ -6,11 +9,12 @@
 	import 'leaflet/dist/leaflet.css';
 
 	let { data }: { data: PageData } = $props();
-	const { t, spot } = data;
+	const { t, spot } = $derived(data);
 
-	const photos = spot.photos;
-	const hasPhotos = photos.length > 0;
-	let currentPhoto = $state(0);
+	const photos = $derived(spot.photos);
+	const hasPhotos = $derived(photos.length > 0);
+	// Back to the first photo whenever the photo set changes (e.g. navigating to another entry)
+	let currentPhoto = $derived.by(() => { photos; return 0; });
 
 	function prevPhoto() { currentPhoto = (currentPhoto - 1 + photos.length) % photos.length; }
 	function nextPhoto() { currentPhoto = (currentPhoto + 1) % photos.length; }
@@ -24,13 +28,12 @@
 			html: `<svg width="28" height="38" viewBox="0 0 28 38" fill="none"><path d="M14 0C6.268 0 0 6.268 0 14c0 10.5 14 24 14 24S28 24.5 28 14C28 6.268 21.732 0 14 0z" fill="var(--of-accent-solid)"/><circle cx="14" cy="14" r="5" fill="var(--of-ink)"/></svg>`,
 			className: '', iconSize: [28, 38], iconAnchor: [14, 38]
 		});
-		mapInstance = L.map(mapEl, { zoomControl: true, scrollWheelZoom: false });
-		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-			attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-			maxZoom: 19
-		}).addTo(mapInstance);
+		mapInstance = L.map(mapEl, { zoomControl: false, scrollWheelZoom: false });
+		setupMapGestures(mapInstance, mapEl, t.mapTwoFingerHint);
+		addBaseTiles(L, mapInstance, data.mapTiles);
+		addMapControls(L, mapInstance, t);
 		mapInstance.setView([spot.lat, spot.lng], 15);
-		L.marker([spot.lat, spot.lng], { icon: pinIcon }).addTo(mapInstance);
+		L.marker([spot.lat, spot.lng], { icon: pinIcon, ...STATIC_PIN }).addTo(mapInstance);
 		requestAnimationFrame(() => mapInstance.invalidateSize());
 	});
 
@@ -38,26 +41,22 @@
 </script>
 
 <svelte:head>
-	<link rel="preconnect" href="https://fonts.googleapis.com" />
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
-	<link href="https://fonts.googleapis.com/css2?family=Carter+One&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 	<link rel="icon" href={favicon} type="image/svg+xml" />
 	<title>{spot.name} · OpenFishing</title>
 </svelte:head>
 
-<div style="min-height:100vh; background-color:var(--of-bg-base); background-image:radial-gradient(ellipse at 15% 60%, var(--of-accent-bg) 0%, transparent 55%); color:var(--of-text-bright); font-family:'DM Sans',sans-serif;">
-	<div style="height:1px; background:linear-gradient(90deg, transparent, var(--of-accent) 30%, var(--of-accent-solid) 50%, var(--of-accent) 70%, transparent);"></div>
+<div style="min-height:100vh; background-color:var(--of-bg-base); color:var(--of-text-bright); font-family:'DM Sans',sans-serif;">
 
 	<!-- Minimal header -->
 	<header style="background:var(--of-bg-surface); border-bottom:1px solid var(--of-border-subtle); padding:0 16px;">
 		<div style="max-width:720px; margin:0 auto; height:52px; display:flex; align-items:center; justify-content:space-between;">
-			<span style="font-family:'Carter One',sans-serif; font-size:1.1rem; color:var(--of-text-bright); display:flex; align-items:center; gap:8px;">
+			<span style="font-family:'DM Sans',sans-serif; font-size:var(--of-fs-section); color:var(--of-text-bright); display:flex; align-items:center; gap:8px;">
 				<span style="color:var(--of-accent); flex-shrink:0; display:flex;">
 					{@html mark.replace('<svg ', '<svg width="20" height="20" ')}
 				</span>
 				OpenFishing
 			</span>
-			<span style="font-size:0.72rem; font-weight:500; color:var(--of-text-4); background:var(--of-accent-bg); border:1px solid var(--of-accent-bg-hover); padding:3px 10px; border-radius:20px; letter-spacing:0.04em;">{t.shareViewOnly}</span>
+			<span style="font-size:0.75rem; font-weight:500; color:var(--of-text-4); background:var(--of-accent-bg); border:1px solid var(--of-accent-bg-hover); padding:3px 10px; border-radius:20px;">{t.shareViewOnly}</span>
 		</div>
 	</header>
 
@@ -72,23 +71,23 @@
 		{#if hasPhotos}
 			<div style="position:relative; border-radius:14px; overflow:hidden; background:var(--of-bg-overlay); aspect-ratio:16/9; margin-bottom:16px;">
 				{#each photos as photo, i}
-					<img src="/uploads/{photo.filename}" alt="{spot.name} photo {i + 1}"
+					<img src="/uploads/{photo.filename}" srcset={detailSrcset(photo.filename)} sizes={DETAIL_SIZES} alt={photoAlt(t, spot.name, i, photos.length)}
 						style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; transition:opacity 0.3s; opacity:{i === currentPhoto ? '1' : '0'}; pointer-events:{i === currentPhoto ? 'auto' : 'none'};" />
 				{/each}
 				{#if photos.length > 1}
-					<button onclick={prevPhoto} aria-label="Previous"
+					<button onclick={prevPhoto} aria-label={t.previousItem}
 						style="position:absolute; left:10px; top:50%; transform:translateY(-50%); background:rgba(0,0,0,0.5); border:none; color:var(--of-text-bright); border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; cursor:pointer; backdrop-filter:blur(4px);">
 						<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
 					</button>
-					<button onclick={nextPhoto} aria-label="Next"
+					<button onclick={nextPhoto} aria-label={t.nextItem}
 						style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:rgba(0,0,0,0.5); border:none; color:var(--of-text-bright); border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; cursor:pointer; backdrop-filter:blur(4px);">
 						<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
 					</button>
 					<div style="position:absolute; bottom:10px; left:50%; transform:translateX(-50%); display:flex; gap:5px;">
 						{#each photos as _, i}
 							<button onclick={() => currentPhoto = i}
-								style="width:{i === currentPhoto ? '18px' : '6px'}; height:6px; border-radius:3px; background:{i === currentPhoto ? 'var(--of-accent)' : 'rgba(255,255,255,0.4)'}; border:none; cursor:pointer; transition:all 0.2s; padding:0;"
-								aria-label="Photo {i + 1}"></button>
+								style="width:{i === currentPhoto ? '18px' : '6px'}; height:6px; border-radius:var(--of-radius-full); background:{i === currentPhoto ? 'var(--of-accent)' : 'rgba(255,255,255,0.4)'}; border:none; cursor:pointer; transition:var(--of-transition); padding:0;"
+								aria-label={t.photoN.replace("{n}", String(i + 1))}></button>
 						{/each}
 					</div>
 				{/if}
@@ -98,12 +97,12 @@
 		<!-- Info card -->
 		<div style="background:var(--of-bg-surface); border:1px solid var(--of-border-subtle); border-radius:14px; padding:20px; display:flex; flex-direction:column; gap:16px;">
 			<div>
-				<h1 style="font-family:'Carter One',sans-serif; font-size:1.4rem; color:var(--of-text-bright); margin:0 0 8px;">{spot.name}</h1>
-				<p style="font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:var(--of-text-4); margin:0;">{spot.lat.toFixed(6)}, {spot.lng.toFixed(6)}</p>
+				<h1 style="font-family:'DM Sans',sans-serif; font-size:var(--of-fs-headline); color:var(--of-text-bright); margin:0 0 8px;">{spot.name}</h1>
+				<p style="font-family:'JetBrains Mono',monospace; font-size:0.75rem; color:var(--of-text-4); margin:0;">{spot.lat.toFixed(6)}, {spot.lng.toFixed(6)}</p>
 			</div>
 
 			<a href="https://www.google.com/maps/dir/?api=1&destination={spot.lat},{spot.lng}" target="_blank" rel="noopener noreferrer"
-				style="display:inline-flex; align-items:center; gap:6px; background:var(--of-bg-elevated); color:var(--of-text-2); font-size:0.8rem; font-weight:500; padding:8px 14px; border-radius:8px; border:1px solid var(--of-border); text-decoration:none; width:fit-content;"
+				style="display:inline-flex; align-items:center; gap:6px; background:var(--of-bg-elevated); color:var(--of-text-2); font-size:0.8125rem; font-weight:500; padding:8px 14px; border-radius:8px; border:1px solid var(--of-border); text-decoration:none; width:fit-content;"
 				onmouseenter={function(e){(e.currentTarget as HTMLElement).style.borderColor='var(--of-accent-border)'; (e.currentTarget as HTMLElement).style.color='var(--of-accent)';}}
 				onmouseleave={function(e){(e.currentTarget as HTMLElement).style.borderColor='var(--of-border)'; (e.currentTarget as HTMLElement).style.color='var(--of-text-2)';}}
 			>
@@ -116,10 +115,10 @@
 
 			{#if spot.tags.length > 0}
 				<div>
-					<p style="font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--of-text-4); margin:0 0 8px;">{t.spotTagsLabel}</p>
+					<p style="font-size:0.75rem; color:var(--of-text-4); margin:0 0 8px;">{t.spotTagsLabel}</p>
 					<div style="display:flex; flex-wrap:wrap; gap:6px;">
 						{#each spot.tags as tag (tag.id)}
-							<span style="font-size:0.78rem; padding:3px 10px; border-radius:20px; background:var(--of-success-bg); color:var(--of-success); border:1px solid var(--of-success-border); font-weight:500;">{tag.name}</span>
+							<span style="font-size:0.8125rem; padding:3px 10px; border-radius:20px; background:var(--of-success-bg); color:var(--of-success); border:1px solid var(--of-success-border); font-weight:500;">{tag.name}</span>
 						{/each}
 					</div>
 				</div>
@@ -127,7 +126,7 @@
 
 			{#if spot.notes}
 				<div>
-					<p style="font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--of-text-4); margin:0 0 6px;">{t.spotNotesLabel}</p>
+					<p style="font-size:0.75rem; color:var(--of-text-4); margin:0 0 6px;">{t.spotNotesLabel}</p>
 					<p style="font-size:0.875rem; color:var(--of-text-2); margin:0; line-height:1.6; white-space:pre-wrap;">{spot.notes}</p>
 				</div>
 			{/if}

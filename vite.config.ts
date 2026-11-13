@@ -3,7 +3,13 @@ import tailwindcss from '@tailwindcss/vite';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 
+// NO_AUTORELOAD=1 turns off file watching and HMR for the dev server. Every SSR module reload
+// re-runs the admin sync (a fresh password salt), which invalidates the session cookie, so
+// long browser sessions (manual testing, screenshot audits) set this and restart on demand.
+const noAutoReload = !!process.env.NO_AUTORELOAD;
+
 export default defineConfig({
+	server: noAutoReload ? { watch: null, hmr: false } : undefined,
 	plugins: [
 		tailwindcss(),
 		sveltekit({

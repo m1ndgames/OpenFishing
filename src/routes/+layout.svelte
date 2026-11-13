@@ -5,18 +5,25 @@
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 	import type { LayoutData } from './$types';
-	import Chatbot from '#lib/components/Chatbot.svelte';
+	import { pageTitle } from '#lib/pageTitle.js';
 
 	let { children, data }: { children: import('svelte').Snippet; data: LayoutData } = $props();
-	const { t, demoMode, chatbotEnabled } = data;
+	const { t, demoMode, chatbotEnabled } = $derived(data);
 
 	$effect(() => {
 		document.documentElement.setAttribute('data-mode', data.colorMode);
 		document.documentElement.setAttribute('data-theme', data.themeName);
+		// Correct language for screen readers and for hyphenating long tab labels.
+		document.documentElement.lang = data.lang;
 	});
 
 	const isLoginPage    = $derived(['/login', '/forgot-password', '/reset-password'].includes(page.url.pathname));
 	const isSharePage    = $derived(page.url.pathname.startsWith('/share/'));
+	// Forms keep the save row as the last thing on the page: no footer links
+	// to tap by accident under a sticky action bar.
+	const isFormPage     = $derived(/\/(new|edit)\/?$/.test(page.url.pathname));
+	// Login and share pages set their own <title>.
+	const docTitle       = $derived(pageTitle(page.url.pathname, t as unknown as Record<string, unknown>, page.data as Record<string, unknown>));
 	const luresActive    = $derived(page.url.pathname === '/' || page.url.pathname.startsWith('/lures'));
 	const spotsActive    = $derived(page.url.pathname.startsWith('/spots'));
 	const catchesActive  = $derived(page.url.pathname.startsWith('/catches'));
@@ -56,29 +63,25 @@
 }} />
 
 <svelte:head>
-	<link rel="preconnect" href="https://fonts.googleapis.com" />
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
-	<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+	<link rel="preload" href="/fonts/dm-sans-latin-opsz-normal.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
 	<link rel="icon" href={favicon} type="image/svg+xml" />
-	<title>OpenFishing</title>
+	{#if !isLoginPage && !isSharePage}<title>{docTitle}</title>{/if}
 </svelte:head>
 
 {#if isLoginPage || isSharePage}
 	{@render children()}
 {:else}
-<div class="min-h-screen" style="background-color:var(--of-bg-base); background-image: radial-gradient(ellipse at 15% 60%, var(--of-accent-bg) 0%, transparent 55%), radial-gradient(ellipse at 85% 10%, rgba(251,191,36,0.025) 0%, transparent 45%);">
-
-	<!-- Top accent stripe -->
-	<div class="h-px no-print" style="background: linear-gradient(90deg, transparent, var(--of-accent) 30%, var(--of-accent-solid) 50%, var(--of-accent) 70%, transparent);"></div>
+<div class="min-h-screen" style="background-color:var(--of-bg-base);">
+	<a href="#main" class="of-skip">{t.skipToContent}</a>
 
 	<!-- Demo mode banner -->
 	{#if demoMode}
-	<div class="no-print" style="background:var(--of-warning-bg); border-bottom:1px solid var(--of-warning-border); padding:7px 16px; display:flex; align-items:center; justify-content:center; gap:8px;">
+	<div class="no-print" style="background:var(--of-warning-bg); border-bottom:1px solid var(--of-warning-border); padding:8px 16px; display:flex; align-items:center; justify-content:center; gap:8px;">
 		<svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="color:var(--of-warning-solid); flex-shrink:0;">
 			<rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/>
 			<path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
 		</svg>
-		<span style="font-size:0.8rem; color:var(--of-warning); font-weight:500; font-family:'DM Sans',sans-serif;">{t.demoBanner}</span>
+		<span style="font-size:0.8125rem; color:var(--of-warning); font-weight:500; font-family:'DM Sans',sans-serif;">{t.demoBanner}</span>
 	</div>
 	{/if}
 
@@ -93,44 +96,44 @@
 
 			<!-- Nav links -->
 			<a href="/"
-				class="text-sm font-medium px-3 py-1.5 rounded-lg transition-all"
-				style={luresActive ? 'color:var(--of-accent); background:var(--of-accent-glow); border:1px solid var(--of-accent-border);' : 'color:var(--of-text-3); border:1px solid transparent;'}
-				onmouseenter={function(e){ if (!luresActive) { (e.currentTarget as HTMLElement).style.color='var(--of-text)'; (e.currentTarget as HTMLElement).style.background='rgba(255,255,255,0.04)'; }}}
+				class="text-sm font-medium px-3 py-1.5 rounded-lg transition-colors"
+				style={luresActive ? 'color:var(--of-text-bright); background:var(--of-bg-elevated); border:1px solid var(--of-border);' : 'color:var(--of-text-3); border:1px solid transparent;'}
+				onmouseenter={function(e){ if (!luresActive) { (e.currentTarget as HTMLElement).style.color='var(--of-text)'; (e.currentTarget as HTMLElement).style.background='var(--of-bg-elevated)'; }}}
 				onmouseleave={function(e){ if (!luresActive) { (e.currentTarget as HTMLElement).style.color='var(--of-text-3)'; (e.currentTarget as HTMLElement).style.background=''; }}}
 			>{t.navLures}</a>
 
 			<a href="/tackle"
-				class="text-sm font-medium px-3 py-1.5 rounded-lg transition-all"
-				style={tackleActive ? 'color:var(--of-accent); background:var(--of-accent-glow); border:1px solid var(--of-accent-border);' : 'color:var(--of-text-3); border:1px solid transparent;'}
-				onmouseenter={function(e){ if (!tackleActive) { (e.currentTarget as HTMLElement).style.color='var(--of-text)'; (e.currentTarget as HTMLElement).style.background='rgba(255,255,255,0.04)'; }}}
+				class="text-sm font-medium px-3 py-1.5 rounded-lg transition-colors"
+				style={tackleActive ? 'color:var(--of-text-bright); background:var(--of-bg-elevated); border:1px solid var(--of-border);' : 'color:var(--of-text-3); border:1px solid transparent;'}
+				onmouseenter={function(e){ if (!tackleActive) { (e.currentTarget as HTMLElement).style.color='var(--of-text)'; (e.currentTarget as HTMLElement).style.background='var(--of-bg-elevated)'; }}}
 				onmouseleave={function(e){ if (!tackleActive) { (e.currentTarget as HTMLElement).style.color='var(--of-text-3)'; (e.currentTarget as HTMLElement).style.background=''; }}}
 			>{t.navTackle}</a>
 
 			<a href="/spots"
-				class="text-sm font-medium px-3 py-1.5 rounded-lg transition-all"
-				style={spotsActive ? 'color:var(--of-accent); background:var(--of-accent-glow); border:1px solid var(--of-accent-border);' : 'color:var(--of-text-3); border:1px solid transparent;'}
-				onmouseenter={function(e){ if (!spotsActive) { (e.currentTarget as HTMLElement).style.color='var(--of-text)'; (e.currentTarget as HTMLElement).style.background='rgba(255,255,255,0.04)'; }}}
+				class="text-sm font-medium px-3 py-1.5 rounded-lg transition-colors"
+				style={spotsActive ? 'color:var(--of-text-bright); background:var(--of-bg-elevated); border:1px solid var(--of-border);' : 'color:var(--of-text-3); border:1px solid transparent;'}
+				onmouseenter={function(e){ if (!spotsActive) { (e.currentTarget as HTMLElement).style.color='var(--of-text)'; (e.currentTarget as HTMLElement).style.background='var(--of-bg-elevated)'; }}}
 				onmouseleave={function(e){ if (!spotsActive) { (e.currentTarget as HTMLElement).style.color='var(--of-text-3)'; (e.currentTarget as HTMLElement).style.background=''; }}}
 			>{t.navSpots}</a>
 
 			<a href="/catches"
-				class="text-sm font-medium px-3 py-1.5 rounded-lg transition-all"
-				style={catchesActive ? 'color:var(--of-accent); background:var(--of-accent-glow); border:1px solid var(--of-accent-border);' : 'color:var(--of-text-3); border:1px solid transparent;'}
-				onmouseenter={function(e){ if (!catchesActive) { (e.currentTarget as HTMLElement).style.color='var(--of-text)'; (e.currentTarget as HTMLElement).style.background='rgba(255,255,255,0.04)'; }}}
+				class="text-sm font-medium px-3 py-1.5 rounded-lg transition-colors"
+				style={catchesActive ? 'color:var(--of-text-bright); background:var(--of-bg-elevated); border:1px solid var(--of-border);' : 'color:var(--of-text-3); border:1px solid transparent;'}
+				onmouseenter={function(e){ if (!catchesActive) { (e.currentTarget as HTMLElement).style.color='var(--of-text)'; (e.currentTarget as HTMLElement).style.background='var(--of-bg-elevated)'; }}}
 				onmouseleave={function(e){ if (!catchesActive) { (e.currentTarget as HTMLElement).style.color='var(--of-text-3)'; (e.currentTarget as HTMLElement).style.background=''; }}}
 			>{t.navCatches}</a>
 
 			<a href="/stats"
-				class="text-sm font-medium px-3 py-1.5 rounded-lg transition-all"
-				style={statsActive ? 'color:var(--of-accent); background:var(--of-accent-glow); border:1px solid var(--of-accent-border);' : 'color:var(--of-text-3); border:1px solid transparent;'}
-				onmouseenter={function(e){ if (!statsActive) { (e.currentTarget as HTMLElement).style.color='var(--of-text)'; (e.currentTarget as HTMLElement).style.background='rgba(255,255,255,0.04)'; }}}
+				class="text-sm font-medium px-3 py-1.5 rounded-lg transition-colors"
+				style={statsActive ? 'color:var(--of-text-bright); background:var(--of-bg-elevated); border:1px solid var(--of-border);' : 'color:var(--of-text-3); border:1px solid transparent;'}
+				onmouseenter={function(e){ if (!statsActive) { (e.currentTarget as HTMLElement).style.color='var(--of-text)'; (e.currentTarget as HTMLElement).style.background='var(--of-bg-elevated)'; }}}
 				onmouseleave={function(e){ if (!statsActive) { (e.currentTarget as HTMLElement).style.color='var(--of-text-3)'; (e.currentTarget as HTMLElement).style.background=''; }}}
 			>{t.navStats}</a>
 
 			<a href="/settings"
-				class="text-sm font-medium px-3 py-1.5 rounded-lg transition-all"
-				style={settingsActive ? 'color:var(--of-accent); background:var(--of-accent-glow); border:1px solid var(--of-accent-border);' : 'color:var(--of-text-3); border:1px solid transparent;'}
-				onmouseenter={function(e){ if (!settingsActive) { (e.currentTarget as HTMLElement).style.color='var(--of-text)'; (e.currentTarget as HTMLElement).style.background='rgba(255,255,255,0.04)'; }}}
+				class="text-sm font-medium px-3 py-1.5 rounded-lg transition-colors"
+				style={settingsActive ? 'color:var(--of-text-bright); background:var(--of-bg-elevated); border:1px solid var(--of-border);' : 'color:var(--of-text-3); border:1px solid transparent;'}
+				onmouseenter={function(e){ if (!settingsActive) { (e.currentTarget as HTMLElement).style.color='var(--of-text)'; (e.currentTarget as HTMLElement).style.background='var(--of-bg-elevated)'; }}}
 				onmouseleave={function(e){ if (!settingsActive) { (e.currentTarget as HTMLElement).style.color='var(--of-text-3)'; (e.currentTarget as HTMLElement).style.background=''; }}}
 			>{t.navSettings}</a>
 
@@ -140,21 +143,23 @@
 			<div data-add-menu="true" style="position:relative; flex-shrink:0;">
 				<button
 					onclick={() => showAddMenu = !showAddMenu}
-					style="display:flex; align-items:center; gap:6px; font-size:0.875rem; font-weight:700; padding:7px 14px; border-radius:9px; border:1px solid transparent; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.15s;
+					aria-haspopup="menu"
+					aria-expanded={showAddMenu}
+					style="display:flex; align-items:center; gap:6px; font-size:0.875rem; font-weight:600; padding:8px 16px; border-radius:10px; border:1px solid transparent; cursor:pointer; font-family:'DM Sans',sans-serif; transition:background-color var(--of-dur-fast) var(--of-ease);
 						background:{showAddMenu ? 'var(--of-accent)' : 'var(--of-accent-solid)'}; color:var(--of-ink);"
 					onmouseenter={function(e){ (e.currentTarget as HTMLElement).style.background='var(--of-accent)'; }}
 					onmouseleave={function(e){ if (!showAddMenu) (e.currentTarget as HTMLElement).style.background='var(--of-accent-solid)'; }}
 				>
 					<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
 					{t.add}
-					<svg width="10" height="10" viewBox="0 0 10 10" fill="none" style="margin-left:1px; transition:transform 0.15s; transform:{showAddMenu ? 'rotate(180deg)' : 'rotate(0deg)'}">
+					<svg width="10" height="10" viewBox="0 0 10 10" fill="none" style="margin-left:4px; transition:transform var(--of-dur-fast) var(--of-ease); transform:{showAddMenu ? 'rotate(180deg)' : 'rotate(0deg)'}">
 						<path d="M2 3.5l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 					</svg>
 				</button>
 				{#if showAddMenu}
 					<div style="position:absolute; top:calc(100% + 6px); right:0; min-width:160px; background:var(--of-bg-elevated); border:1px solid var(--of-border); border-radius:10px; padding:4px; z-index:100; box-shadow:0 8px 24px rgba(0,0,0,0.4);">
 						<a href="/lures/new" onclick={() => showAddMenu = false}
-							style="display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:7px; text-decoration:none; color:var(--of-text); font-size:0.875rem; font-weight:500; transition:background 0.1s;"
+							style="display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:6px; text-decoration:none; color:var(--of-text); font-size:0.875rem; font-weight:500; transition:background-color var(--of-dur-fast) var(--of-ease), color var(--of-dur-fast) var(--of-ease);"
 							onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-accent-bg)'; (e.currentTarget as HTMLElement).style.color='var(--of-accent)';}}
 							onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background=''; (e.currentTarget as HTMLElement).style.color='var(--of-text)';}}
 						>
@@ -162,7 +167,7 @@
 							{t.navAddLure}
 						</a>
 						<a href="/spots/new" onclick={() => showAddMenu = false}
-							style="display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:7px; text-decoration:none; color:var(--of-text); font-size:0.875rem; font-weight:500; transition:background 0.1s;"
+							style="display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:6px; text-decoration:none; color:var(--of-text); font-size:0.875rem; font-weight:500; transition:background-color var(--of-dur-fast) var(--of-ease), color var(--of-dur-fast) var(--of-ease);"
 							onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-accent-bg)'; (e.currentTarget as HTMLElement).style.color='var(--of-accent)';}}
 							onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background=''; (e.currentTarget as HTMLElement).style.color='var(--of-text)';}}
 						>
@@ -170,7 +175,7 @@
 							{t.navAddSpot}
 						</a>
 						<a href="/catches/new" onclick={() => showAddMenu = false}
-							style="display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:7px; text-decoration:none; color:var(--of-text); font-size:0.875rem; font-weight:500; transition:background 0.1s;"
+							style="display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:6px; text-decoration:none; color:var(--of-text); font-size:0.875rem; font-weight:500; transition:background-color var(--of-dur-fast) var(--of-ease), color var(--of-dur-fast) var(--of-ease);"
 							onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-accent-bg)'; (e.currentTarget as HTMLElement).style.color='var(--of-accent)';}}
 							onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background=''; (e.currentTarget as HTMLElement).style.color='var(--of-text)';}}
 						>
@@ -186,17 +191,32 @@
 	<!-- ── MOBILE TOP BAR (< md) ── -->
 	<header class="no-print md:hidden" style="background-color:var(--of-bg-surface); border-bottom:1px solid var(--of-border-subtle);">
 		<div class="px-4 h-12 flex items-center justify-between gap-2">
-			<a href="/" style="text-decoration:none; display:flex; align-items:center; flex-shrink:0; color:var(--of-accent); height:22px;">
+			<a href="/" class="of-tap" style="text-decoration:none; display:flex; align-items:center; flex-shrink:0; color:var(--of-accent); height:22px;">
 				{@html logo.replace('<svg ', '<svg height="22" ')}
 			</a>
 
 			<div style="flex:1;"></div>
 
+			<!-- Settings (mobile): lives up here so the bottom bar keeps five tabs that
+			     fit long translations; settings are a home task, not a field task. -->
+			<a href="/settings" aria-label={t.navSettings} title={t.navSettings}
+				aria-current={settingsActive ? 'page' : undefined}
+				style="display:flex; align-items:center; justify-content:center; width:44px; height:44px; flex-shrink:0; border-radius:10px; text-decoration:none; transition:var(--of-transition); color:{settingsActive ? 'var(--of-accent)' : 'var(--of-text-3)'}; background:{settingsActive ? 'var(--of-accent-bg)' : 'transparent'};"
+			>
+				<svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+					<circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6" fill={settingsActive ? 'var(--of-accent-bg-hover)' : 'none'}/>
+					<path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+				</svg>
+			</a>
+
 			<!-- Add... dropdown (mobile) -->
 			<div data-add-menu="true" style="position:relative; flex-shrink:0;">
 				<button
+					class="of-touch"
 					onclick={() => showAddMenu = !showAddMenu}
-					style="display:flex; align-items:center; gap:5px; font-size:0.78rem; font-weight:700; padding:6px 11px; border-radius:8px; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; background:{showAddMenu ? 'var(--of-accent)' : 'var(--of-accent-solid)'}; color:var(--of-ink);"
+					aria-haspopup="menu"
+					aria-expanded={showAddMenu}
+					style="display:flex; align-items:center; gap:5px; font-size:0.8125rem; font-weight:600; padding:8px 12px; border-radius:10px; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; background:{showAddMenu ? 'var(--of-accent)' : 'var(--of-accent-solid)'}; color:var(--of-ink);"
 				>
 					<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
 					{t.add}
@@ -204,7 +224,7 @@
 				{#if showAddMenu}
 					<div style="position:absolute; top:calc(100% + 6px); right:0; min-width:160px; background:var(--of-bg-elevated); border:1px solid var(--of-border); border-radius:10px; padding:4px; z-index:100; box-shadow:0 8px 24px rgba(0,0,0,0.5);">
 						<a href="/lures/new" onclick={() => showAddMenu = false}
-							style="display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:7px; text-decoration:none; color:var(--of-text); font-size:0.875rem; font-weight:500;"
+							style="display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:6px; text-decoration:none; color:var(--of-text); font-size:0.875rem; font-weight:500;"
 							onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-accent-bg)';}}
 							onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='';}}
 						>
@@ -212,7 +232,7 @@
 							{t.navAddLure}
 						</a>
 						<a href="/spots/new" onclick={() => showAddMenu = false}
-							style="display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:7px; text-decoration:none; color:var(--of-text); font-size:0.875rem; font-weight:500;"
+							style="display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:6px; text-decoration:none; color:var(--of-text); font-size:0.875rem; font-weight:500;"
 							onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-accent-bg)';}}
 							onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='';}}
 						>
@@ -220,7 +240,7 @@
 							{t.navAddSpot}
 						</a>
 						<a href="/catches/new" onclick={() => showAddMenu = false}
-							style="display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:7px; text-decoration:none; color:var(--of-text); font-size:0.875rem; font-weight:500;"
+							style="display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:6px; text-decoration:none; color:var(--of-text); font-size:0.875rem; font-weight:500;"
 							onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-accent-bg)';}}
 							onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='';}}
 						>
@@ -234,11 +254,12 @@
 	</header>
 
 	<!-- Content -->
-	<main class="max-w-6xl mx-auto px-4 py-6 sm:py-8 pb-24 md:pb-8">
+	<main id="main" tabindex="-1" class="max-w-6xl mx-auto px-4 py-6 sm:py-8 pb-24 md:pb-8">
 		{@render children()}
 	</main>
 
 	<!-- Footer -->
+	{#if !isFormPage}
 	<footer class="no-print pb-20 md:pb-6" style="border-top:1px solid var(--of-bg-elevated); padding-top:20px; background:transparent;">
 		<div class="max-w-6xl mx-auto px-4">
 			<div style="display:flex; justify-content:center; align-items:center; gap:12px;">
@@ -246,7 +267,7 @@
 				<!-- GitHub -->
 				<a href="https://github.com/m1ndgames/openfishing" target="_blank" rel="noopener noreferrer"
 					title="GitHub"
-					style="display:flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:50%; background:var(--of-bg-elevated); border:1px solid var(--of-border-subtle); color:var(--of-text-4); text-decoration:none; transition:color 0.15s, border-color 0.15s, background 0.15s; flex-shrink:0;"
+					style="display:flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:50%; background:var(--of-bg-elevated); border:1px solid var(--of-border-subtle); color:var(--of-text-4); text-decoration:none; transition:color var(--of-dur-fast) var(--of-ease), border-color var(--of-dur-fast) var(--of-ease), background-color var(--of-dur-fast) var(--of-ease); flex-shrink:0;"
 					onmouseenter={function(e){const el=e.currentTarget as HTMLElement; el.style.color='var(--of-text)'; el.style.borderColor='var(--of-text-4)'; el.style.background='var(--of-border-subtle)';}}
 					onmouseleave={function(e){const el=e.currentTarget as HTMLElement; el.style.color='var(--of-text-4)'; el.style.borderColor='var(--of-border-subtle)'; el.style.background='var(--of-bg-elevated)';}}
 				>
@@ -258,8 +279,8 @@
 				<!-- Discord -->
 				<a href="https://discord.gg/jETYPFXdGr" target="_blank" rel="noopener noreferrer"
 					title="Discord"
-					style="display:flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:50%; background:var(--of-bg-elevated); border:1px solid var(--of-border-subtle); color:var(--of-text-4); text-decoration:none; transition:color 0.15s, border-color 0.15s, background 0.15s; flex-shrink:0;"
-					onmouseenter={function(e){const el=e.currentTarget as HTMLElement; el.style.color='#5865f2'; el.style.borderColor='#5865f2'; el.style.background='rgba(88,101,242,0.1)';}}
+					style="display:flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:50%; background:var(--of-bg-elevated); border:1px solid var(--of-border-subtle); color:var(--of-text-4); text-decoration:none; transition:color var(--of-dur-fast) var(--of-ease), border-color var(--of-dur-fast) var(--of-ease), background-color var(--of-dur-fast) var(--of-ease); flex-shrink:0;"
+					onmouseenter={function(e){const el=e.currentTarget as HTMLElement; el.style.color='var(--of-accent)'; el.style.borderColor='var(--of-accent-border)'; el.style.background='var(--of-accent-bg)';}}
 					onmouseleave={function(e){const el=e.currentTarget as HTMLElement; el.style.color='var(--of-text-4)'; el.style.borderColor='var(--of-border-subtle)'; el.style.background='var(--of-bg-elevated)';}}
 				>
 					<svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -270,8 +291,8 @@
 				<!-- Ko-Fi -->
 				<a href="https://ko-fi.com/m1ndio" target="_blank" rel="noopener noreferrer"
 					title="Ko-Fi"
-					style="display:flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:50%; background:var(--of-bg-elevated); border:1px solid var(--of-border-subtle); color:var(--of-text-4); text-decoration:none; transition:color 0.15s, border-color 0.15s, background 0.15s; flex-shrink:0;"
-					onmouseenter={function(e){const el=e.currentTarget as HTMLElement; el.style.color='#ff5e5b'; el.style.borderColor='#ff5e5b'; el.style.background='rgba(255,94,91,0.1)';}}
+					style="display:flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:50%; background:var(--of-bg-elevated); border:1px solid var(--of-border-subtle); color:var(--of-text-4); text-decoration:none; transition:color var(--of-dur-fast) var(--of-ease), border-color var(--of-dur-fast) var(--of-ease), background-color var(--of-dur-fast) var(--of-ease); flex-shrink:0;"
+					onmouseenter={function(e){const el=e.currentTarget as HTMLElement; el.style.color='var(--of-accent)'; el.style.borderColor='var(--of-accent-border)'; el.style.background='var(--of-accent-bg)';}}
 					onmouseleave={function(e){const el=e.currentTarget as HTMLElement; el.style.color='var(--of-text-4)'; el.style.borderColor='var(--of-border-subtle)'; el.style.background='var(--of-bg-elevated)';}}
 				>
 					<svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -282,78 +303,74 @@
 			</div>
 		</div>
 	</footer>
+	{/if}
 
 	<!-- ── MOBILE BOTTOM TAB NAV (< md) ── -->
 	<nav class="no-print flex md:hidden items-stretch" style="position:fixed; bottom:0; left:0; right:0; height:64px; background:var(--of-bg-surface); border-top:1px solid var(--of-border-subtle); z-index:50; padding-bottom:env(safe-area-inset-bottom);">
 
 		<!-- Lures -->
-		<a href="/" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; text-decoration:none; transition:color 0.15s; color:{luresActive ? 'var(--of-accent)' : 'var(--of-text-4)'};">
+		<a href="/" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; text-decoration:none; transition:color var(--of-dur-fast) var(--of-ease); color:{luresActive ? 'var(--of-accent)' : 'var(--of-text-4)'};">
 			<svg width="22" height="22" viewBox="0 0 24 24" fill="none">
 				<rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6" fill={luresActive ? 'var(--of-accent-bg-hover)' : 'none'}/>
 				<rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6" fill={luresActive ? 'var(--of-accent-bg-hover)' : 'none'}/>
 				<rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6" fill={luresActive ? 'var(--of-accent-bg-hover)' : 'none'}/>
 				<rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.6" fill={luresActive ? 'var(--of-accent-bg-hover)' : 'none'}/>
 			</svg>
-			<span style="font-size:0.65rem; font-weight:600; letter-spacing:0.03em;">{t.navLures}</span>
+			<span class="of-tab-label">{t.navLures}</span>
 		</a>
 
 		<!-- Spots -->
-		<a href="/spots" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; text-decoration:none; transition:color 0.15s; color:{spotsActive ? 'var(--of-accent)' : 'var(--of-text-4)'};">
+		<a href="/spots" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; text-decoration:none; transition:color var(--of-dur-fast) var(--of-ease); color:{spotsActive ? 'var(--of-accent)' : 'var(--of-text-4)'};">
 			<svg width="22" height="22" viewBox="0 0 24 24" fill="none">
 				<path d="M12 2C8.69 2 6 4.69 6 8c0 4.5 6 12 6 12s6-7.5 6-12c0-3.31-2.69-6-6-6z" stroke="currentColor" stroke-width="1.6" fill={spotsActive ? 'var(--of-accent-bg-hover)' : 'none'}/>
 				<circle cx="12" cy="8" r="2" stroke="currentColor" stroke-width="1.6" fill={spotsActive ? 'var(--of-accent-border)' : 'none'}/>
 			</svg>
-			<span style="font-size:0.65rem; font-weight:600; letter-spacing:0.03em;">{t.navSpots}</span>
+			<span class="of-tab-label">{t.navSpots}</span>
 		</a>
 
 		<!-- Catches -->
-		<a href="/catches" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; text-decoration:none; transition:color 0.15s; color:{catchesActive ? 'var(--of-accent)' : 'var(--of-text-4)'};">
+		<a href="/catches" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; text-decoration:none; transition:color var(--of-dur-fast) var(--of-ease); color:{catchesActive ? 'var(--of-accent)' : 'var(--of-text-4)'};">
 			<svg width="22" height="22" viewBox="0 0 24 24" fill="none">
 				<path d="M2 12 C4 8 7 6 10 7 C13 8 14 11 17 11 C20 11 22 9 22 9 C22 9 21 14 18 15 C15 16 13 14 10 14 C7 14 4 16 2 12Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" fill={catchesActive ? 'var(--of-accent-bg-hover)' : 'none'}/>
 				<path d="M22 9 L20 6 M22 9 L20 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
 				<circle cx="7" cy="11" r="1" fill="currentColor" opacity={catchesActive ? '1' : '0.5'}/>
 			</svg>
-			<span style="font-size:0.65rem; font-weight:600; letter-spacing:0.03em;">{t.navCatches}</span>
+			<span class="of-tab-label">{t.navCatches}</span>
 		</a>
 
 		<!-- Stats -->
-		<a href="/stats" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; text-decoration:none; transition:color 0.15s; color:{statsActive ? 'var(--of-accent)' : 'var(--of-text-4)'};">
+		<a href="/stats" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; text-decoration:none; transition:color var(--of-dur-fast) var(--of-ease); color:{statsActive ? 'var(--of-accent)' : 'var(--of-text-4)'};">
 			<svg width="20" height="20" viewBox="0 0 24 24" fill="none">
 				<rect x="3" y="12" width="4" height="9" rx="1" stroke="currentColor" stroke-width="1.6" fill={statsActive ? 'var(--of-accent-bg-hover)' : 'none'}/>
 				<rect x="10" y="7" width="4" height="14" rx="1" stroke="currentColor" stroke-width="1.6" fill={statsActive ? 'var(--of-accent-bg-hover)' : 'none'}/>
 				<rect x="17" y="3" width="4" height="18" rx="1" stroke="currentColor" stroke-width="1.6" fill={statsActive ? 'var(--of-accent-bg-hover)' : 'none'}/>
 			</svg>
-			<span style="font-size:0.6rem; font-weight:600; letter-spacing:0.02em;">{t.navStats}</span>
+			<span class="of-tab-label">{t.navStats}</span>
 		</a>
 
 		<!-- Tackle -->
-		<a href="/tackle" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; text-decoration:none; transition:color 0.15s; color:{tackleActive ? 'var(--of-accent)' : 'var(--of-text-4)'};">
+		<a href="/tackle" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; text-decoration:none; transition:color var(--of-dur-fast) var(--of-ease); color:{tackleActive ? 'var(--of-accent)' : 'var(--of-text-4)'};">
 			<svg width="20" height="20" viewBox="0 0 24 24" fill="none">
 				<path d="M3 21L20 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
 				<circle cx="7.5" cy="16.5" r="3" stroke="currentColor" stroke-width="1.5" fill={tackleActive ? 'var(--of-accent-bg-hover)' : 'none'}/>
 				<circle cx="7.5" cy="16.5" r="1" fill="currentColor" opacity={tackleActive ? '1' : '0.5'}/>
 			</svg>
-			<span style="font-size:0.6rem; font-weight:600; letter-spacing:0.02em;">{t.navTackle}</span>
+			<span class="of-tab-label">{t.navTackle}</span>
 		</a>
 
-		<!-- Settings -->
-		<a href="/settings" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; text-decoration:none; transition:color 0.15s; color:{settingsActive ? 'var(--of-accent)' : 'var(--of-text-4)'};">
-			<svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-				<circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6" fill={settingsActive ? 'var(--of-accent-bg-hover)' : 'none'}/>
-				<path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-			</svg>
-			<span style="font-size:0.6rem; font-weight:600; letter-spacing:0.02em;">{t.navSettings}</span>
-		</a>
 	</nav>
 
 	<!-- AI Chatbot -->
+	<!-- Loaded on demand: instances without the chatbot never download it (or `marked`). -->
 	{#if chatbotEnabled || demoMode}
-		<Chatbot {t} {demoMode} />
+		{#await import('#lib/components/Chatbot.svelte') then { default: Chatbot }}
+			<Chatbot {t} {demoMode} />
+		{/await}
 	{/if}
 
 	<!-- Demo mode toast -->
 	{#if demoToast}
-		<div style="position:fixed; bottom:80px; left:50%; transform:translateX(-50%); z-index:9999; background:var(--of-bg-elevated); border:1px solid var(--of-warning-border); border-radius:12px; padding:13px 20px; display:flex; align-items:center; gap:10px; box-shadow:0 8px 32px rgba(0,0,0,0.5); pointer-events:none; white-space:nowrap;">
+		<div style="position:fixed; bottom:80px; left:50%; transform:translateX(-50%); z-index:9999; background:var(--of-bg-elevated); border:1px solid var(--of-warning-border); border-radius:12px; padding:12px 20px; display:flex; align-items:center; gap:10px; box-shadow:0 8px 32px rgba(0,0,0,0.5); pointer-events:none; white-space:nowrap;">
 			<svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="color:var(--of-warning-solid); flex-shrink:0;">
 				<rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/>
 				<path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
@@ -365,6 +382,19 @@
 {/if}
 
 <style>
+	/* Tab labels: long translations (Statistiques, Ausrüstung) wrap onto a second
+	   line or hyphenate instead of being clipped by the 1/5-width tab. */
+	.of-tab-label {
+		font-size: 0.75rem;
+		font-weight: 500;
+		line-height: 1.15;
+		text-align: center;
+		max-width: 100%;
+		padding: 0 2px;
+		hyphens: auto;
+		overflow-wrap: break-word;
+	}
+
 	@media print {
 		:global(.no-print) { display: none !important; }
 	}

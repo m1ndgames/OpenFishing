@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { setupMapGestures } from '#lib/mapGestures.js';
+	import { addBaseTiles, addMapControls, STATIC_PIN } from '#lib/mapTiles.js';
 	import { onMount, onDestroy } from 'svelte';
 	import type { ActionData, PageData } from './$types';
 	import TagInput from '#lib/components/TagInput.svelte';
@@ -6,7 +8,7 @@
 	import 'leaflet/dist/leaflet.css';
 
 	let { form, data }: { form: ActionData; data: PageData } = $props();
-	const { t } = data;
+	const { t } = $derived(data);
 
 	let mapEl: HTMLElement;
 	let mapInstance: any = null;
@@ -30,7 +32,7 @@
 	let photoInput: HTMLInputElement;
 
 	const inputStyle = "width:100%; padding:9px 12px; background:var(--of-bg-elevated); border:1px solid var(--of-border); border-radius:9px; color:var(--of-text); font-size:0.875rem; outline:none; box-sizing:border-box; font-family:'DM Sans',sans-serif; transition:border-color 0.15s;";
-	const labelStyle = "display:block; font-size:0.78rem; font-weight:500; color:var(--of-text-3); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.06em;";
+	const labelStyle = "display:block; font-size:0.8125rem; font-weight:500; color:var(--of-text-2); margin-bottom:6px; ";
 
 	function focusInput(e: FocusEvent) {
 		const el = e.target as HTMLElement;
@@ -57,12 +59,12 @@
 			popupAnchor: [0, -40]
 		});
 
-		mapInstance = L.map(mapEl, { zoomControl: true });
+		mapInstance = L.map(mapEl, { zoomControl: false });
 
-		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-			attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-			maxZoom: 19
-		}).addTo(mapInstance);
+		setupMapGestures(mapInstance, mapEl, t.mapTwoFingerHint);
+
+		addBaseTiles(L, mapInstance, data.mapTiles);
+		addMapControls(L, mapInstance, t);
 
 		// Default view up front: without it the map stays grey (no tiles) whenever geolocation
 		// is denied, unavailable (plain HTTP) or the permission prompt is never answered (#104).
@@ -103,7 +105,7 @@
 		locationError = false;
 		locationFromPhoto = false;
 		if (marker) marker.remove();
-		marker = L.marker([la, ln], { icon: pinIcon }).addTo(mapInstance);
+		marker = L.marker([la, ln], { icon: pinIcon, ...STATIC_PIN }).addTo(mapInstance);
 	}
 
 	function usePhotoLocation() {
@@ -162,14 +164,15 @@
 </script>
 
 <div style="max-width:600px; margin:0 auto;">
+	<h1 style="font-family:'DM Sans',sans-serif; font-weight:500; font-size:var(--of-fs-headline); color:var(--of-text-bright); margin:0 0 20px;">{t.addSpot}</h1>
 	{#if form?.error}
-		<div style="margin-bottom:16px; background:var(--of-danger-bg); border:1px solid var(--of-danger-border); color:var(--of-danger); font-size:0.875rem; padding:12px 16px; border-radius:10px;">
+		<div role="alert" style="margin-bottom:16px; background:var(--of-danger-bg); border:1px solid var(--of-danger-border); color:var(--of-danger); font-size:0.875rem; padding:12px 16px; border-radius:10px;">
 			{t[form.error as keyof typeof t] ?? form.error}
 		</div>
 	{/if}
 
 	<form method="POST" enctype="multipart/form-data" onsubmit={handleSubmit}
-		style="background:var(--of-bg-surface); border:1px solid var(--of-border-subtle); border-radius:16px; padding:24px; display:flex; flex-direction:column; gap:20px;">
+		class="of-panel" style="background:var(--of-bg-surface); border:1px solid var(--of-border-subtle); border-radius:16px; padding:24px; display:flex; flex-direction:column; gap:20px;">
 
 		<input bind:this={photoInput} type="file" name="photos" accept="image/*" multiple class="hidden" onchange={handlePhotoChange} />
 		<input type="hidden" name="lat" value={lat ?? ''} />
@@ -182,6 +185,7 @@
 				<div style="display:flex; align-items:center; gap:6px 14px; flex-wrap:wrap; justify-content:flex-end;">
 					{#if photoCoords && !locationFromPhoto}
 						<button type="button" onclick={usePhotoLocation}
+							class="of-linkbtn"
 							style="display:flex; align-items:center; gap:6px; font-size:0.75rem; font-weight:600; color:var(--of-accent); background:none; border:none; cursor:pointer; padding:0; font-family:'DM Sans',sans-serif;"
 						>
 							<svg width="13" height="13" viewBox="0 0 24 24" fill="none">
@@ -193,6 +197,7 @@
 						</button>
 					{/if}
 					<button type="button" onclick={handleLocateClick}
+						class="of-linkbtn"
 						style="display:flex; align-items:center; gap:6px; font-size:0.75rem; font-weight:600; color:{locating ? 'var(--of-text-3)' : 'var(--of-accent)'}; background:none; border:none; cursor:pointer; padding:0; font-family:'DM Sans',sans-serif;"
 						disabled={locating}
 					>
@@ -206,7 +211,7 @@
 			</div>
 
 			{#if locationError}
-				<p style="font-size:0.8rem; color:var(--of-danger); margin:0 0 8px;">{t.spotLocationRequired}</p>
+				<p style="font-size:0.8125rem; color:var(--of-danger); margin:0 0 8px;">{t.spotLocationRequired}</p>
 			{/if}
 
 			<div style="border-radius:10px; overflow:hidden; border:2px solid {locationError ? 'var(--of-danger-border)' : lat !== null ? 'var(--of-accent-border)' : 'var(--of-border)'};">
@@ -216,12 +221,13 @@
 			{#if lat !== null}
 				<div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin:6px 0 0;">
 					<span style="font-size:0.75rem; color:var(--of-accent);">{locationFromPhoto ? t.photoLocationApplied : ''}</span>
-					<p style="font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:var(--of-text-3); margin:0; text-align:right;">
+					<p style="font-family:'JetBrains Mono',monospace; font-size:0.75rem; color:var(--of-text-3); margin:0; text-align:right;">
 						{lat.toFixed(6)}, {lng?.toFixed(6)}
 					</p>
 				</div>
 			{:else}
-				<p style="font-size:0.78rem; color:var(--of-text-4); margin:6px 0 0; text-align:center;">{t.spotClickToPlace}</p>
+				<p class="of-when-mouse" style="font-size:0.8125rem; color:var(--of-text-4); margin:6px 0 0; text-align:center;">{t.spotClickToPlace}</p>
+				<p class="of-when-touch" style="font-size:0.8125rem; color:var(--of-text-4); margin:6px 0 0; text-align:center;">{t.spotTapToPlace}</p>
 			{/if}
 		</div>
 
@@ -230,14 +236,14 @@
 		<!-- Name -->
 		<div>
 			<label style={labelStyle} for="name">{t.spotNameLabel}</label>
-			<input id="name" name="name" type="text" placeholder="e.g. Old Oak Bend"
+			<input id="name" name="name" type="text" placeholder={t.phSpotName}
 				style={inputStyle} onfocus={focusInput} onblur={blurInput} />
 		</div>
 
 		<!-- Tags -->
 		<div>
-			<label style={labelStyle}>{t.spotTagsLabel}</label>
-			<TagInput name="tags" placeholder={t.spotTagsPlaceholder} />
+			<label style={labelStyle} for="spot-tags">{t.spotTagsLabel}</label>
+			<TagInput id="spot-tags" name="tags" placeholder={t.spotTagsPlaceholder} removeLabel={t.removeTag} />
 		</div>
 
 		<!-- Notes -->
@@ -250,41 +256,42 @@
 
 		<!-- Photos -->
 		<div>
-			<label style={labelStyle}>{t.spotPhotosLabel}</label>
+			<p style={labelStyle}>{t.spotPhotosLabel}</p>
 
 			{#if photoPreviews.length > 0}
 				<div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
 					{#each photoPreviews as src, i}
 						<div style="position:relative; width:88px; height:66px; border-radius:8px; overflow:hidden; border:1px solid var(--of-border);">
 							<img {src} alt="" style="width:100%; height:100%; object-fit:cover;" />
-							<button type="button" onclick={() => removePhoto(i)}
-								style="position:absolute; top:3px; right:3px; background:rgba(0,0,0,0.6); border:none; color:var(--of-text-bright); border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:0.65rem; line-height:1;">✕</button>
+							<button aria-label={t.removePhoto} type="button" onclick={() => removePhoto(i)}
+								class="of-hit" style="position:absolute; top:3px; right:3px; background:rgba(0,0,0,0.6); border:none; color:var(--of-text-bright); border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:0.75rem; line-height:1;"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
 						</div>
 					{/each}
 				</div>
 			{/if}
 
 			<button type="button" onclick={() => photoInput.click()}
-				style="display:flex; align-items:center; gap:8px; padding:10px 14px; background:var(--of-bg-elevated); border:1px dashed var(--of-border); border-radius:9px; color:var(--of-text-3); font-size:0.8rem; font-weight:500; cursor:pointer; transition:all 0.15s; font-family:'DM Sans',sans-serif; width:100%; justify-content:center;"
+				class="of-touch"
+				style="display:flex; align-items:center; gap:8px; padding:10px 14px; background:var(--of-bg-elevated); border:1px dashed var(--of-border); border-radius:9px; color:var(--of-text-3); font-size:0.8125rem; font-weight:500; cursor:pointer; transition:var(--of-transition); font-family:'DM Sans',sans-serif; width:100%; justify-content:center;"
 				onmouseenter={function(e){(e.currentTarget as HTMLElement).style.borderColor='var(--of-accent-solid)'; (e.currentTarget as HTMLElement).style.color='var(--of-accent)';}}
 				onmouseleave={function(e){(e.currentTarget as HTMLElement).style.borderColor='var(--of-border)'; (e.currentTarget as HTMLElement).style.color='var(--of-text-3)';}}
 			>
 				<svg width="14" height="14" viewBox="0 0 15 15" fill="none">
 					<path d="M7.5 1.5v9M4 7l3.5 3.5L11 7M2 12.5h11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
 				</svg>
-				{t.spotPhotosLabel}
+				{t.spotAddPhotos}
 			</button>
 		</div>
 
 		<!-- Actions -->
-		<div style="display:flex; gap:10px; padding-top:4px; border-top:1px solid var(--of-border-subtle); margin-top:-4px;">
-			<button type="submit"
-				style="background:var(--of-accent-solid); color:var(--of-ink); font-size:0.875rem; font-weight:700; padding:10px 24px; border-radius:9px; border:none; cursor:pointer; transition:background 0.15s; font-family:'DM Sans',sans-serif;"
+		<div class="of-actions" style="display:flex; gap:10px; padding-top:16px; border-top:1px solid var(--of-border-subtle);">
+			<button type="submit" class="of-primary"
+				style="background:var(--of-accent-solid); color:var(--of-ink); font-size:0.875rem; font-weight:600; padding:10px 24px; border-radius:9px; border:none; cursor:pointer; transition:background 0.15s; font-family:'DM Sans',sans-serif;"
 				onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-accent)';}}
 				onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-accent-solid)';}}
 			>{t.spotSave}</button>
 			<a href="/spots"
-				style="display:inline-flex; align-items:center; background:var(--of-bg-elevated); color:var(--of-text-2); font-size:0.875rem; font-weight:500; padding:10px 20px; border-radius:9px; border:1px solid var(--of-border); text-decoration:none; transition:all 0.15s; font-family:'DM Sans',sans-serif;"
+				style="display:inline-flex; align-items:center; background:var(--of-bg-elevated); color:var(--of-text-2); font-size:0.875rem; font-weight:500; padding:10px 20px; border-radius:9px; border:1px solid var(--of-border); text-decoration:none; transition:var(--of-transition); font-family:'DM Sans',sans-serif;"
 				onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-bg-hover)'; (e.currentTarget as HTMLElement).style.color='var(--of-text)';}}
 				onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-bg-elevated)'; (e.currentTarget as HTMLElement).style.color='var(--of-text-2)';}}
 			>{t.cancel}</a>

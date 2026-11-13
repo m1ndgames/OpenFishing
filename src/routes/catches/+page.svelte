@@ -1,8 +1,9 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import { photoUrl, gridSrcset, CARD_SIZES } from '#lib/photo.js';
 
 	let { data }: { data: PageData } = $props();
-	const { t, catches } = data;
+	const { t, catches } = $derived(data);
 
 	// Filter state
 	let fSpecies    = $state('');
@@ -54,19 +55,20 @@
 </script>
 
 <div>
+	<h1 class="sr-only">{t.navCatches}</h1>
 	<!-- Filter bar -->
 	<div style="background:var(--of-bg-surface); border:1px solid var(--of-border-subtle); border-radius:14px; padding:14px 16px; display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
 
 		<!-- All filters in one row -->
 		<div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
 			{#if speciesOptions.length > 0}
-				<select bind:value={fSpecies} style={selectStyle(!!fSpecies)}>
+				<select bind:value={fSpecies} aria-label={t.catchSpeciesLabel} style={selectStyle(!!fSpecies)}>
 					<option value="">{t.catchSpeciesLabel}: {t.filterAll}</option>
 					{#each speciesOptions as o}<option value={o}>{o}</option>{/each}
 				</select>
 			{/if}
 			{#if lureOptions.length > 0}
-				<select bind:value={fLure} style={selectStyle(!!fLure)}>
+				<select bind:value={fLure} aria-label={t.catchLureLabel} style={selectStyle(!!fLure)}>
 					<option value="">{t.catchLureLabel}: {t.filterAll}</option>
 					{#each lureOptions as o}<option value={o}>{o}</option>{/each}
 				</select>
@@ -75,34 +77,36 @@
 			<button
 				type="button"
 				onclick={() => fCnR = !fCnR}
-				style="flex-shrink:0; font-size:0.8rem; padding:6px 12px; border-radius:8px; cursor:pointer; outline:none; font-family:'DM Sans',sans-serif; border:1px solid; transition:all 0.15s; {fCnR ? 'background:var(--of-accent-bg-hover); border-color:var(--of-accent-border); color:var(--of-accent);' : 'background:var(--of-bg-elevated); border-color:var(--of-border); color:var(--of-text-2);'}"
+				aria-pressed={fCnR}
+				style="flex-shrink:0; font-size:0.8125rem; padding:6px 12px; border-radius:8px; cursor:pointer; outline:none; font-family:'DM Sans',sans-serif; border:1px solid; transition:var(--of-transition); {fCnR ? 'background:var(--of-accent-bg-hover); border-color:var(--of-accent-border); color:var(--of-accent);' : 'background:var(--of-bg-elevated); border-color:var(--of-border); color:var(--of-text-2);'}"
 			>{t.catchAndReleaseShort}</button>
 
 			{#each [['', t.filterAll], ['30d', t.catchFilterLast30], ['1y', t.catchFilterLast365], ['custom', t.catchFilterCustom]] as [val, label]}
 				<button
 					type="button"
 					onclick={() => { datePreset = val as typeof datePreset; if (val !== 'custom') { dateFrom = ''; dateTo = ''; } }}
-					style="flex-shrink:0; font-size:0.8rem; padding:6px 12px; border-radius:8px; cursor:pointer; outline:none; font-family:'DM Sans',sans-serif; border:1px solid; transition:all 0.15s; {datePreset === val ? 'background:var(--of-accent-bg-hover); border-color:var(--of-accent-border); color:var(--of-accent);' : 'background:var(--of-bg-elevated); border-color:var(--of-border); color:var(--of-text-2);'}"
+					aria-pressed={datePreset === val}
+					style="flex-shrink:0; font-size:0.8125rem; padding:6px 12px; border-radius:8px; cursor:pointer; outline:none; font-family:'DM Sans',sans-serif; border:1px solid; transition:var(--of-transition); {datePreset === val ? 'background:var(--of-accent-bg-hover); border-color:var(--of-accent-border); color:var(--of-accent);' : 'background:var(--of-bg-elevated); border-color:var(--of-border); color:var(--of-text-2);'}"
 				>{label}</button>
 			{/each}
 
 			{#if datePreset === 'custom'}
 				<div style="width:1px; height:20px; background:var(--of-border-subtle); flex-shrink:0;"></div>
-				<input type="date" bind:value={dateFrom}
-					style="flex-shrink:0; font-size:0.8rem; padding:6px 10px; border-radius:8px; outline:none; font-family:'DM Sans',sans-serif; background:var(--of-bg-elevated); border:1px solid {dateFrom ? 'var(--of-accent-border)' : 'var(--of-border)'}; color:{dateFrom ? 'var(--of-accent)' : 'var(--of-text-2)'}; cursor:pointer;"
+				<input type="date" bind:value={dateFrom} aria-label="{t.filterDateRange}: {t.filterFrom}"
+					style="flex-shrink:0; font-size:0.8125rem; padding:6px 10px; border-radius:8px; outline:none; font-family:'DM Sans',sans-serif; background:var(--of-bg-elevated); border:1px solid {dateFrom ? 'var(--of-accent-border)' : 'var(--of-border)'}; color:{dateFrom ? 'var(--of-accent)' : 'var(--of-text-2)'}; cursor:pointer;"
 				/>
-				<span style="font-size:0.8rem; color:var(--of-text-4); flex-shrink:0;">→</span>
-				<input type="date" bind:value={dateTo}
-					style="flex-shrink:0; font-size:0.8rem; padding:6px 10px; border-radius:8px; outline:none; font-family:'DM Sans',sans-serif; background:var(--of-bg-elevated); border:1px solid {dateTo ? 'var(--of-accent-border)' : 'var(--of-border)'}; color:{dateTo ? 'var(--of-accent)' : 'var(--of-text-2)'}; cursor:pointer;"
+				<span style="font-size:0.8125rem; color:var(--of-text-4); flex-shrink:0; display:inline-flex;"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M3 7h8M7.5 3.5L11 7l-3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+				<input type="date" bind:value={dateTo} aria-label="{t.filterDateRange}: {t.filterTo}"
+					style="flex-shrink:0; font-size:0.8125rem; padding:6px 10px; border-radius:8px; outline:none; font-family:'DM Sans',sans-serif; background:var(--of-bg-elevated); border:1px solid {dateTo ? 'var(--of-accent-border)' : 'var(--of-border)'}; color:{dateTo ? 'var(--of-accent)' : 'var(--of-text-2)'}; cursor:pointer;"
 				/>
 			{/if}
 		</div>
 
 		<!-- Active filter summary -->
 		{#if anyActive}
-			<div style="display:flex; align-items:center; justify-content:space-between; font-size:0.8rem;">
+			<div style="display:flex; align-items:center; justify-content:space-between; font-size:0.8125rem;">
 				<span style="color:var(--of-text-4);">{filtered.length} {filtered.length === 1 ? t.catchSpeciesLabel : t.navCatches} {t.matching} {t.filterActive}</span>
-				<button onclick={clearAll} style="color:var(--of-accent); font-weight:600; background:none; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:0.8rem; padding:0;">{t.clear}</button>
+				<button onclick={clearAll} style="color:var(--of-accent); font-weight:600; background:none; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:0.8125rem; padding:0;">{t.clear}</button>
 			</div>
 		{/if}
 	</div>
@@ -117,10 +121,10 @@
 					<circle cx="7" cy="11" r="1.2" fill="currentColor" opacity="0.5"/>
 				</svg>
 			</div>
-			<p style="font-family:'Carter One',sans-serif; font-size:1.1rem; color:var(--of-text-2); margin:0 0 8px;">{t.catchNoItems}</p>
+			<p style="font-family:'DM Sans',sans-serif; font-size:var(--of-fs-section); color:var(--of-text-2); margin:0 0 8px;">{t.catchNoItems}</p>
 			<p style="font-size:0.875rem; color:var(--of-text-4); margin:0 0 24px;">{t.catchNoItemsHint}</p>
 			<a href="/catches/new"
-				style="display:inline-flex; align-items:center; gap:7px; background:var(--of-accent-solid); color:var(--of-ink); font-size:0.875rem; font-weight:700; padding:10px 22px; border-radius:9px; text-decoration:none; font-family:'DM Sans',sans-serif;"
+				style="display:inline-flex; align-items:center; gap:7px; background:var(--of-accent-solid); color:var(--of-ink); font-size:0.875rem; font-weight:600; padding:10px 22px; border-radius:9px; text-decoration:none; font-family:'DM Sans',sans-serif;"
 			>
 				<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
 				{t.addCatch}
@@ -130,7 +134,7 @@
 	<!-- Empty state (filters active, no matches) -->
 	{:else if filtered.length === 0}
 		<div style="text-align:center; padding:60px 24px;">
-			<p style="font-family:'Carter One',sans-serif; font-size:1rem; color:var(--of-text-2); margin:0 0 8px;">{t.noLuresMatch} {t.filterActive}</p>
+			<p style="font-family:'DM Sans',sans-serif; font-size:1rem; color:var(--of-text-2); margin:0 0 8px;">{t.noLuresMatch} {t.filterActive}</p>
 			<button onclick={clearAll} style="color:var(--of-accent); background:none; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:0.875rem; text-decoration:underline; padding:0;">{t.clear}</button>
 		</div>
 
@@ -144,7 +148,7 @@
 					<!-- Thumbnail -->
 					{#if c.photos.length > 0}
 						<div style="aspect-ratio:16/9; overflow:hidden; background:var(--of-bg-overlay);">
-							<img src="/uploads/{c.photos[0].filename}" alt={c.species ?? ''} style="width:100%; height:100%; object-fit:cover;" />
+							<img src={photoUrl(c.photos[0].filename, 640)} srcset={gridSrcset(c.photos[0].filename)} sizes={CARD_SIZES} alt={c.species ?? ''} loading="lazy" decoding="async" style="width:100%; height:100%; object-fit:cover;" />
 						</div>
 					{:else}
 						<div style="aspect-ratio:16/9; background:var(--of-bg-overlay); display:flex; align-items:center; justify-content:center;">
@@ -159,28 +163,28 @@
 					<!-- Info -->
 					<div style="padding:14px 16px;">
 						<div style="display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin-bottom:4px;">
-							<p style="font-family:'Carter One',sans-serif; font-size:1rem; color:var(--of-text-bright); margin:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{c.species ?? '—'}</p>
-							<span style="font-family:'JetBrains Mono',monospace; font-size:0.68rem; color:var(--of-text-4); white-space:nowrap; flex-shrink:0;">{formatTime(c.caughtAt)}</span>
+							<p style="font-family:'DM Sans',sans-serif; font-size:1rem; color:var(--of-text-bright); margin:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{c.species ?? '—'}</p>
+							<span style="font-family:'JetBrains Mono',monospace; font-size:0.75rem; color:var(--of-text-4); white-space:nowrap; flex-shrink:0;">{formatTime(c.caughtAt)}</span>
 						</div>
 						<p style="font-size:0.75rem; color:var(--of-text-3); margin:0 0 10px;">{formatDate(c.caughtAt)}</p>
 
 						{#if c.weightG || c.lengthCm || c.catchAndRelease}
 							<div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px;">
 								{#if c.weightG}
-									<span style="font-size:0.72rem; font-weight:600; color:var(--of-accent); background:var(--of-accent-bg); border:1px solid var(--of-accent-border); padding:2px 8px; border-radius:20px;">{c.weightG}g</span>
+									<span style="font-size:0.75rem; font-weight:600; color:var(--of-accent); background:var(--of-accent-bg); border:1px solid var(--of-accent-border); padding:2px 8px; border-radius:20px;">{c.weightG}g</span>
 								{/if}
 								{#if c.lengthCm}
-									<span style="font-size:0.72rem; font-weight:600; color:var(--of-accent); background:var(--of-accent-bg); border:1px solid var(--of-accent-border); padding:2px 8px; border-radius:20px;">{c.lengthCm}cm</span>
+									<span style="font-size:0.75rem; font-weight:600; color:var(--of-accent); background:var(--of-accent-bg); border:1px solid var(--of-accent-border); padding:2px 8px; border-radius:20px;">{c.lengthCm}cm</span>
 								{/if}
 								{#if c.catchAndRelease}
-									<span style="font-size:0.72rem; font-weight:700; color:var(--of-accent); background:var(--of-accent-bg-hover); border:1px solid var(--of-accent-border); padding:2px 8px; border-radius:20px;">{t.catchAndReleaseShort}</span>
+									<span style="font-size:0.75rem; font-weight:600; color:var(--of-accent); background:var(--of-accent-bg-hover); border:1px solid var(--of-accent-border); padding:2px 8px; border-radius:20px;">{t.catchAndReleaseShort}</span>
 								{/if}
 							</div>
 						{/if}
 
 						{#if c.lure}
 							<div style="display:flex; gap:5px; flex-wrap:wrap;">
-								<span style="font-size:0.7rem; font-weight:500; color:var(--of-text-3); background:rgba(93,143,168,0.1); border:1px solid rgba(93,143,168,0.2); padding:2px 8px; border-radius:20px; display:inline-flex; align-items:center; gap:4px;">
+								<span style="font-size:0.75rem; font-weight:500; color:var(--of-text-3); background:var(--of-border-subtle); border:1px solid var(--of-border); padding:2px 8px; border-radius:20px; display:inline-flex; align-items:center; gap:4px;">
 									<svg width="9" height="9" viewBox="0 0 24 24" fill="none"><path d="M4 20 Q8 16 12 14 Q16 12 20 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="20" cy="8" r="2" fill="currentColor"/></svg>
 									{c.lure.name}
 								</span>

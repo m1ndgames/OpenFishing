@@ -1,14 +1,17 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import type Cropper from 'cropperjs';
+	import { modal } from '#lib/modal.js';
+	import type { Translations } from '#lib/i18n/index.js';
 	import type { CropperCanvas, CropperImage, CropperSelection } from 'cropperjs';
 
 	interface Props {
+		t: Translations;
 		src: string;
 		onConfirm: (blob: Blob) => void;
 		onCancel: () => void;
 	}
-	let { src, onConfirm, onCancel }: Props = $props();
+	let { t, src, onConfirm, onCancel }: Props = $props();
 
 	const ASPECT = 4 / 3;
 	const MAX_WIDTH = 1920; // with the fixed 4:3 ratio this also caps the height at 1440
@@ -20,7 +23,7 @@
 		.join('');
 	const TEMPLATE = `<cropper-canvas theme-color="var(--of-accent)">
 		<cropper-image rotatable scalable translatable></cropper-image>
-		<cropper-shade theme-color="rgba(3, 10, 18, 0.7)"></cropper-shade>
+		<cropper-shade theme-color="var(--of-scrim)"></cropper-shade>
 		<cropper-handle action="move" plain></cropper-handle>
 		<cropper-selection aspect-ratio="${ASPECT}" movable resizable>
 			<cropper-grid role="grid" bordered covered></cropper-grid>
@@ -128,32 +131,36 @@
 </script>
 
 <!-- Overlay -->
-<div
-	style="position:fixed; inset:0; z-index:100; background:rgba(3,10,18,0.92); display:flex; align-items:center; justify-content:center; padding:16px;"
-	onclick={(e) => { if (e.target === e.currentTarget) onCancel(); }}
->
-	<div style="background:var(--of-bg-surface); border:1px solid var(--of-border-subtle); border-radius:16px; width:100%; max-width:600px; overflow:hidden; display:flex; flex-direction:column;">
+<div style="position:fixed; inset:0; z-index:100; display:flex; align-items:center; justify-content:center; padding:16px;">
+	<div aria-hidden="true" onclick={onCancel} style="position:absolute; inset:0; background:var(--of-scrim);"></div>
+	<div
+		role="dialog"
+		aria-modal="true"
+		aria-labelledby="crop-title"
+		use:modal={{ onClose: onCancel, trap: true }}
+		style="position:relative; background:var(--of-bg-surface); border:1px solid var(--of-border-subtle); border-radius:16px; width:100%; max-width:600px; overflow:hidden; display:flex; flex-direction:column;"
+	>
 
 		<!-- Header -->
 		<div style="padding:14px 18px; border-bottom:1px solid var(--of-border-subtle); display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
-			<span style="font-family:'Carter One',sans-serif; font-size:1.05rem; color:var(--of-text-bright);">Crop Photo</span>
+			<span id="crop-title" style="font-family:'DM Sans',sans-serif; font-size:var(--of-fs-section); color:var(--of-text-bright);">{t.cropTitle}</span>
 			<div style="display:flex; gap:6px;">
-				<button onclick={rotateCCW} title="Rotate left"
-					style="width:34px; height:34px; display:flex; align-items:center; justify-content:center; background:var(--of-bg-elevated); border:1px solid var(--of-border); border-radius:8px; color:var(--of-text-2); cursor:pointer; transition:all 0.15s;"
+				<button onclick={rotateCCW} title={t.cropRotateLeft} aria-label={t.cropRotateLeft}
+					style="width:34px; height:34px; display:flex; align-items:center; justify-content:center; background:var(--of-bg-elevated); border:1px solid var(--of-border); border-radius:8px; color:var(--of-text-2); cursor:pointer; transition:var(--of-transition);"
 					onmouseenter={function(e){(e.currentTarget as HTMLElement).style.color='var(--of-accent)';(e.currentTarget as HTMLElement).style.borderColor='var(--of-accent-border)';}}
 					onmouseleave={function(e){(e.currentTarget as HTMLElement).style.color='var(--of-text-2)';(e.currentTarget as HTMLElement).style.borderColor='var(--of-border)';}}
 				>
-					<svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+					<svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
 						<path d="M3.5 7.5a4 4 0 1 0 1.2-2.8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
 						<path d="M3.5 10.5v-3h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
 					</svg>
 				</button>
-				<button onclick={rotateCW} title="Rotate right"
-					style="width:34px; height:34px; display:flex; align-items:center; justify-content:center; background:var(--of-bg-elevated); border:1px solid var(--of-border); border-radius:8px; color:var(--of-text-2); cursor:pointer; transition:all 0.15s;"
+				<button onclick={rotateCW} title={t.cropRotateRight} aria-label={t.cropRotateRight}
+					style="width:34px; height:34px; display:flex; align-items:center; justify-content:center; background:var(--of-bg-elevated); border:1px solid var(--of-border); border-radius:8px; color:var(--of-text-2); cursor:pointer; transition:var(--of-transition);"
 					onmouseenter={function(e){(e.currentTarget as HTMLElement).style.color='var(--of-accent)';(e.currentTarget as HTMLElement).style.borderColor='var(--of-accent-border)';}}
 					onmouseleave={function(e){(e.currentTarget as HTMLElement).style.color='var(--of-text-2)';(e.currentTarget as HTMLElement).style.borderColor='var(--of-border)';}}
 				>
-					<svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+					<svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
 						<path d="M11.5 7.5a4 4 0 1 0-1.2-2.8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
 						<path d="M11.5 10.5v-3h-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
 					</svg>
@@ -163,26 +170,26 @@
 
 		<!-- Cropper area (cropperjs hides the <img> and inserts its <cropper-canvas> after it) -->
 		<div class="crop-area" style="background:var(--of-bg-base); overflow:hidden;">
-			<img bind:this={imgEl} {src} alt="Crop" style="display:block; max-width:100%;" />
+			<img bind:this={imgEl} {src} alt="" style="display:block; max-width:100%;" />
 		</div>
 
 		<!-- Footer -->
 		<div style="padding:12px 18px; border-top:1px solid var(--of-border-subtle); display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
-			<span style="font-size:0.75rem; color:var(--of-text-4);">Drag to reposition · Scroll to zoom · Drag corners to resize</span>
+			<span style="font-size:0.75rem; color:var(--of-text-4);"><span class="of-when-mouse">{t.cropHint}</span><span class="of-when-touch">{t.cropHintTouch}</span></span>
 			<div style="display:flex; gap:8px;">
 				<button onclick={onCancel}
-					style="padding:8px 18px; background:var(--of-bg-elevated); color:var(--of-text-2); font-size:0.875rem; font-weight:500; border:1px solid var(--of-border); border-radius:9px; cursor:pointer; transition:all 0.15s; font-family:'DM Sans',sans-serif;"
+					style="padding:8px 18px; background:var(--of-bg-elevated); color:var(--of-text-2); font-size:0.875rem; font-weight:500; border:1px solid var(--of-border); border-radius:9px; cursor:pointer; transition:var(--of-transition); font-family:'DM Sans',sans-serif;"
 					onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-bg-hover)';}}
 					onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-bg-elevated)';}}
 				>
-					Cancel
+					{t.cancel}
 				</button>
 				<button onclick={confirm} disabled={!ready}
-					style="padding:8px 18px; background:var(--of-accent-solid); color:var(--of-ink); font-size:0.875rem; font-weight:700; border:none; border-radius:9px; cursor:{ready ? 'pointer' : 'wait'}; opacity:{ready ? 1 : 0.6}; transition:background 0.15s; font-family:'DM Sans',sans-serif;"
+					style="padding:8px 18px; background:var(--of-accent-solid); color:var(--of-ink); font-size:0.875rem; font-weight:600; border:none; border-radius:9px; cursor:{ready ? 'pointer' : 'wait'}; opacity:{ready ? 1 : 0.6}; transition:background 0.15s; font-family:'DM Sans',sans-serif;"
 					onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-accent)';}}
 					onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-accent-solid)';}}
 				>
-					Apply
+					{t.cropApply}
 				</button>
 			</div>
 		</div>
