@@ -112,7 +112,9 @@ test.describe('Same-route navigation', () => {
 			document.querySelector('main')!.prepend(a);
 		}, href);
 		await page.locator('#e2e-hop').click();
-		await expect(page).toHaveURL(href);
+		// The URL only changes once the target's load resolves; the spot load waits on a live
+		// Open-Meteo request (5 s timeout), so the default 5 s expect timeout races it on CI.
+		await expect(page).toHaveURL(href, { timeout: 15_000 });
 	}
 
 	test('lure detail follows the new lure', async ({ page }) => {
