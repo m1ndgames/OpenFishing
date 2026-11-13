@@ -32,6 +32,6 @@ export const actions: Actions = {
 
 	delete: async ({ params, locals }) => {
 		await db.delete(fishingLine).where(and(eq(fishingLine.id, params.id), userFilter(locals, fishingLine.userId)));
-		redirect(303, '/tackle');
+		redirect(303, '/tackle?tab=lines');
 	}
 };

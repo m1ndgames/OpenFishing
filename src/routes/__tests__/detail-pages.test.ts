@@ -95,6 +95,7 @@ describe('catches/[id] load', () => {
 			id: 'catch-001', species: 'Pike', lat: 52.52, lng: 13.40,
 			shareToken: null, photos: [], lure: null, combo: null,
 		});
+		mockSelect.mockReset();
 		mockSelect.mockImplementation(() => makeChain([]));
 	});
 
@@ -125,6 +126,36 @@ describe('catches/[id] load', () => {
 		});
 		const result = await catchLoad({ params: { id: 'catch-001' } } as any);
 		expect(result.nearbySpot).toBeNull();
+	});
+
+	it('reports personal best and lure catch number', async () => {
+		mockFindFirstCatch.mockResolvedValue({
+			id: 'catch-001', species: 'Pike', lat: null, lng: null, lengthCm: 90, weightG: null,
+			lureId: 'lure-001', caughtAt: new Date('2026-05-01'),
+			shareToken: null, photos: [], lure: { id: 'lure-001' }, combo: null,
+		});
+		let call = 0;
+		mockSelect.mockImplementation(() => {
+			call++;
+			if (call === 1) return makeChain([]); // spots
+			if (call === 2) return makeChain([      // same species
+				{ id: 'catch-001', lengthCm: 90, weightG: null },
+				{ id: 'catch-002', lengthCm: 70, weightG: null },
+			]);
+			return makeChain([{ id: 'x' }, { id: 'y' }, { id: 'catch-001' }]); // lure catches so far
+		});
+		const result = await catchLoad({ params: { id: 'catch-001' } } as any);
+		expect(result.highlights).toEqual({ personalBest: 'length', lureCatchNumber: 3 });
+	});
+
+	it('no highlights without species or lure', async () => {
+		mockFindFirstCatch.mockResolvedValue({
+			id: 'catch-001', species: null, lat: null, lng: null, lengthCm: 90, weightG: null,
+			lureId: null, caughtAt: new Date(), shareToken: null, photos: [], lure: null, combo: null,
+		});
+		const result = await catchLoad({ params: { id: 'catch-001' } } as any);
+		expect(result.highlights).toEqual({ personalBest: null, lureCatchNumber: null });
+		expect(mockSelect).toHaveBeenCalledTimes(1);
 	});
 
 	it('builds shareUrl from shareToken', async () => {

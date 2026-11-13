@@ -36,7 +36,8 @@
 		margin: 24px 0 16px;
 	}
 	:global(.swagger-ui .info .title) {
-		font-family: 'Carter One', sans-serif;
+		font-family: 'DM Sans', sans-serif;
+		font-weight: 500;
 		color: var(--of-text);
 	}
 	:global(.swagger-ui .info .title small) {
@@ -70,9 +71,7 @@
 		font-family: 'DM Sans', sans-serif;
 		font-size: 12px;
 		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-	}
+		}
 	:global(.swagger-ui .scheme-container select) {
 		background: var(--of-bg-elevated);
 		border: 1px solid var(--of-border);
@@ -105,8 +104,9 @@
 	:global(.swagger-ui .opblock-tag) {
 		color: var(--of-text) !important;
 		border-bottom: 1px solid var(--of-border);
-		font-family: 'Carter One', sans-serif !important;
-		font-size: 18px;
+		font-family: 'DM Sans', sans-serif !important;
+		font-weight: 500;
+		font-size: var(--of-fs-section);
 		padding: 12px 4px;
 	}
 	:global(.swagger-ui .opblock-tag:hover) {
@@ -140,8 +140,8 @@
 	:global(.swagger-ui .opblock.opblock-get .opblock-summary-method) {
 		background: var(--of-accent) !important;
 		color: var(--of-ink) !important;
-		font-weight: 700;
-		border-radius: 5px;
+		font-weight:600;
+		border-radius: 6px;
 		min-width: 54px;
 	}
 	:global(.swagger-ui .opblock-summary) {
@@ -175,9 +175,7 @@
 		font-family: 'DM Sans', sans-serif;
 		font-size: 13px;
 		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-	}
+		}
 	:global(.swagger-ui .opblock-section-header label) {
 		color: var(--of-text-2);
 	}
@@ -197,8 +195,6 @@
 		border-bottom: 1px solid var(--of-border);
 		font-size: 12px;
 		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
 		padding: 8px 10px;
 		background: transparent;
 	}
@@ -244,7 +240,7 @@
 	}
 	:global(.swagger-ui .try-out__btn) {
 		background: transparent;
-		border: 1.5px solid rgba(34, 211, 238, 0.4);
+		border: 1.5px solid var(--of-accent-border);
 		color: var(--of-accent);
 		border-radius: 6px;
 		font-family: 'DM Sans', sans-serif;
@@ -274,7 +270,7 @@
 	:global(.swagger-ui textarea:focus) {
 		border-color: var(--of-accent-solid) !important;
 		outline: none !important;
-		box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.15) !important;
+		box-shadow: 0 0 0 2px var(--of-accent-border) !important;
 	}
 	:global(.swagger-ui .btn.execute) {
 		background: var(--of-accent);
@@ -282,7 +278,7 @@
 		border: none;
 		border-radius: 8px;
 		font-family: 'DM Sans', sans-serif;
-		font-weight: 700;
+		font-weight:600;
 	}
 	:global(.swagger-ui .btn.execute:hover) {
 		background: var(--of-accent-solid);
@@ -369,8 +365,9 @@
 	}
 	:global(.swagger-ui section.models h4) {
 		color: var(--of-text) !important;
-		font-family: 'Carter One', sans-serif;
-		font-size: 18px;
+		font-family: 'DM Sans', sans-serif;
+		font-weight: 500;
+		font-size: var(--of-fs-section);
 		padding: 12px 16px;
 		margin: 0;
 	}
@@ -425,7 +422,7 @@
 
 	/* ── Authorize modal ─────────────────────────────────────────────────── */
 	:global(.swagger-ui .dialog-ux .backdrop-ux) {
-		background: rgba(3, 10, 18, 0.7);
+		background: var(--of-scrim);
 		backdrop-filter: blur(4px);
 	}
 	:global(.swagger-ui .dialog-ux .modal-ux) {
@@ -442,7 +439,8 @@
 	}
 	:global(.swagger-ui .dialog-ux .modal-ux-header h3) {
 		color: var(--of-text);
-		font-family: 'Carter One', sans-serif;
+		font-family: 'DM Sans', sans-serif;
+		font-weight: 500;
 	}
 	:global(.swagger-ui .dialog-ux .modal-ux-header .close-modal) {
 		background: none;
@@ -549,7 +547,7 @@
 	}
 	:global(.swagger-ui *::-webkit-scrollbar-thumb) {
 		background: var(--of-border);
-		border-radius: 3px;
+		border-radius: 4px;
 	}
 	:global(.swagger-ui *::-webkit-scrollbar-thumb:hover) {
 		background: var(--of-text-4);

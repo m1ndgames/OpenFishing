@@ -1,14 +1,15 @@
 <script lang="ts">
+	import ModeIcon from '#lib/components/ModeIcon.svelte';
 	import { enhance } from '$app/forms';
 	import { page } from '$app/state';
 	import type { PageData } from './$types';
 	import { THEMES } from '#lib/themes.js';
 
 	let { data }: { data: PageData } = $props();
-	const { t, lang, demoMode } = data;
+	const { t, lang, demoMode } = $derived(data);
 
-	let selectedMode = $state(data.colorMode);
-	let selectedTheme = $state(data.themeName);
+	let selectedMode = $derived(data.colorMode);
+	let selectedTheme = $derived(data.themeName);
 	let saved = $state(false);
 	let saveTimer: ReturnType<typeof setTimeout>;
 
@@ -28,17 +29,17 @@
 			<p style="font-weight:600; color:var(--of-text); margin:0 0 16px; font-size:0.925rem;">{t.settingsLanguage}</p>
 			<form method="POST" action="/api/lang">
 				<input type="hidden" name="redirect" value={page.url.pathname} />
-				<select name="lang" onchange={(e) => (e.currentTarget as HTMLSelectElement).form?.submit()}
+				<select name="lang" aria-label={t.settingsLanguage} onchange={(e) => (e.currentTarget as HTMLSelectElement).form?.submit()}
 					style="font-size:0.875rem; border:1px solid var(--of-border); border-radius:9px; padding:8px 12px; background:var(--of-bg-elevated); color:var(--of-text-2); cursor:pointer; outline:none; min-width:160px;">
-					<option value="en" selected={lang === 'en'}>🇬🇧 English</option>
-					<option value="de" selected={lang === 'de'}>🇩🇪 Deutsch</option>
-					<option value="nl" selected={lang === 'nl'}>🇳🇱 Nederlands</option>
-					<option value="fr" selected={lang === 'fr'}>🇫🇷 Français</option>
-					<option value="es" selected={lang === 'es'}>🇪🇸 Español</option>
-					<option value="it" selected={lang === 'it'}>🇮🇹 Italiano</option>
-					<option value="pt" selected={lang === 'pt'}>🇵🇹 Português</option>
-					<option value="pl" selected={lang === 'pl'}>🇵🇱 Polski</option>
-					<option value="uk" selected={lang === 'uk'}>🇺🇦 Українська</option>
+					<option value="en" selected={lang === 'en'}>English</option>
+					<option value="de" selected={lang === 'de'}>Deutsch</option>
+					<option value="nl" selected={lang === 'nl'}>Nederlands</option>
+					<option value="fr" selected={lang === 'fr'}>Français</option>
+					<option value="es" selected={lang === 'es'}>Español</option>
+					<option value="it" selected={lang === 'it'}>Italiano</option>
+					<option value="pt" selected={lang === 'pt'}>Português</option>
+					<option value="pl" selected={lang === 'pl'}>Polski</option>
+					<option value="uk" selected={lang === 'uk'}>Українська</option>
 				</select>
 			</form>
 		</div>
@@ -61,9 +62,9 @@
 			>
 				<div style="display:flex; gap:8px; flex-wrap:wrap;">
 					{#each [
-						{ value: 'dark',   icon: '🌑', label: t.appearanceModeDark },
-						{ value: 'light',  icon: '☀️', label: t.appearanceModeLight },
-						{ value: 'system', icon: '💻', label: t.appearanceModeSystem }
+						{ value: 'dark', label: t.appearanceModeDark },
+						{ value: 'light', label: t.appearanceModeLight },
+						{ value: 'system', label: t.appearanceModeSystem }
 					] as opt}
 						<label style="cursor:pointer;">
 							<input
@@ -81,8 +82,8 @@
 									el.form?.requestSubmit();
 								}}
 							/>
-							<span style="display:flex; align-items:center; gap:8px; padding:10px 18px; border-radius:10px; font-size:0.875rem; font-weight:600; font-family:'DM Sans',sans-serif; transition:all 0.15s; border:1px solid {selectedMode === opt.value ? 'var(--of-accent-border)' : 'var(--of-border)'}; background:{selectedMode === opt.value ? 'var(--of-accent-bg-hover)' : 'var(--of-bg-elevated)'}; color:{selectedMode === opt.value ? 'var(--of-accent)' : 'var(--of-text-2)'};">
-								<span style="font-size:1rem; line-height:1;">{opt.icon}</span>
+							<span style="display:flex; align-items:center; gap:8px; padding:10px 18px; border-radius:10px; font-size:0.875rem; font-weight:600; font-family:'DM Sans',sans-serif; transition:var(--of-transition); border:1px solid {selectedMode === opt.value ? 'var(--of-accent-border)' : 'var(--of-border)'}; background:{selectedMode === opt.value ? 'var(--of-accent-bg-hover)' : 'var(--of-bg-elevated)'}; color:{selectedMode === opt.value ? 'var(--of-accent)' : 'var(--of-text-2)'};">
+								<ModeIcon mode={opt.value} />
 								{opt.label}
 							</span>
 						</label>
@@ -90,7 +91,7 @@
 				</div>
 
 				{#if saved}
-					<p style="margin:12px 0 0; font-size:0.8rem; color:var(--of-success);">{t.appearanceSaved}</p>
+					<p style="margin:12px 0 0; font-size:0.8125rem; color:var(--of-success);">{t.appearanceSaved}</p>
 				{/if}
 			</form>
 		</div>
@@ -134,7 +135,7 @@
 								flex:1 1 100px; min-width:100px; max-width:160px; border-radius:12px; overflow:hidden;
 								border:2px solid {active ? 'var(--of-accent-border)' : 'var(--of-border)'};
 								background:{active ? 'var(--of-accent-bg-hover)' : 'var(--of-bg-elevated)'};
-								transition:all 0.15s;
+								transition:var(--of-transition);
 							">
 								<!-- Swatch preview -->
 								<div style="height:56px; background:{theme.bg}; display:flex; align-items:flex-end; padding:8px; gap:5px; border-bottom:1px solid {theme.border};">
@@ -144,7 +145,7 @@
 								</div>
 								<!-- Label -->
 								<div style="padding:8px 10px;">
-									<p style="margin:0; font-size:0.8rem; font-weight:600; color:{active ? 'var(--of-accent)' : 'var(--of-text-2)'}; font-family:'DM Sans',sans-serif;">{theme.label}</p>
+									<p style="margin:0; font-size:0.8125rem; font-weight:600; color:{active ? 'var(--of-accent)' : 'var(--of-text-2)'}; font-family:'DM Sans',sans-serif;">{theme.label}</p>
 								</div>
 							</div>
 						</label>

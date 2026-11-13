@@ -4,6 +4,7 @@
 	import { marked } from 'marked';
 	import type { Translations } from '#lib/i18n/index.js';
 	import icon from '#lib/assets/openfishing-mark.svg?raw';
+	import { modal } from '#lib/modal.js';
 
 	function renderMarkdown(text: string): string {
 		return marked.parse(text, { async: false }) as string;
@@ -36,6 +37,15 @@
 	let showHistory = $state(false);
 	let sessions = $state<Session[]>([]);
 	let loadingHistory = $state(false);
+	let fabEl = $state<HTMLButtonElement | null>(null);
+
+	// The open button is unmounted while the panel is open, so focus it again once it's back.
+	async function close() {
+		open = false;
+		showHistory = false;
+		await tick();
+		fabEl?.focus();
+	}
 
 	$effect(() => {
 		if (open && !location && typeof navigator !== 'undefined' && navigator.geolocation) {
@@ -166,7 +176,7 @@
 
 <!-- FAB: open button -->
 {#if !open}
-<button onclick={() => (open = true)} aria-label={t.chatbotOpen} class="chat-fab">
+<button bind:this={fabEl} onclick={() => (open = true)} aria-label={t.chatbotOpen} class="chat-fab">
 	<svg width="22" height="22" viewBox="0 0 24 24" fill="none">
 		<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
 		<path d="M8 10h8M8 14h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
@@ -176,12 +186,12 @@
 
 <!-- Backdrop (mobile only) -->
 {#if open}
-<div class="chat-backdrop" onclick={() => { open = false; showHistory = false; }} aria-hidden="true"></div>
+<div class="chat-backdrop" onclick={close} aria-hidden="true"></div>
 {/if}
 
 <!-- Chat panel -->
 {#if open}
-<div class="chat-panel">
+<div class="chat-panel" role="dialog" aria-label={t.chatbotTitle} use:modal={{ onClose: close, initialFocus: 'textarea' }}>
 
 	<!-- Header -->
 	<div style="padding:14px 16px 13px;border-bottom:1px solid var(--of-border);display:flex;align-items:center;gap:8px;background:var(--of-bg-elevated);flex-shrink:0;" class="chat-panel-header">
@@ -189,12 +199,12 @@
 			<button onclick={() => (showHistory = false)} aria-label={t.chatbotBack} style={headerBtnStyle()}>
 				<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
 			</button>
-			<span style="font-family:'Carter One',sans-serif;font-size:0.9rem;color:var(--of-text);">{t.chatbotHistory}</span>
+			<span style="font-family:'DM Sans',sans-serif;font-size:0.9rem;color:var(--of-text);">{t.chatbotHistory}</span>
 		{:else}
 			<div style="width:32px;height:32px;border-radius:50%;background:var(--of-accent-bg-hover);border:1px solid var(--of-accent-border);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--of-accent);">
 				{@html icon.replace('<svg ', '<svg width="18" height="18" ')}
 			</div>
-			<span style="font-family:'Carter One',sans-serif;font-size:0.9rem;color:var(--of-text);">{t.chatbotTitle}</span>
+			<span style="font-family:'DM Sans',sans-serif;font-size:0.9rem;color:var(--of-text);">{t.chatbotTitle}</span>
 		{/if}
 
 		<div style="flex:1;"></div>
@@ -208,7 +218,7 @@
 			</button>
 		{/if}
 
-		<button onclick={() => { open = false; showHistory = false; }} aria-label={t.chatbotClose} style={headerBtnStyle()}>
+		<button onclick={close} aria-label={t.chatbotClose} style={headerBtnStyle()}>
 			<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
 		</button>
 	</div>
@@ -217,9 +227,9 @@
 		<!-- History list -->
 		<div style="flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:6px;scrollbar-width:thin;scrollbar-color:var(--of-border) transparent;">
 			{#if loadingHistory}
-				<div style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--of-text-4);font-size:0.82rem;font-family:'DM Sans',sans-serif;">…</div>
+				<div style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--of-text-4);font-size:0.8125rem;font-family:'DM Sans',sans-serif;">…</div>
 			{:else if sessions.length === 0}
-				<div style="flex:1;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;color:var(--of-text-4);font-size:0.82rem;font-family:'DM Sans',sans-serif;">{t.chatbotNoHistory}</div>
+				<div style="flex:1;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;color:var(--of-text-4);font-size:0.8125rem;font-family:'DM Sans',sans-serif;">{t.chatbotNoHistory}</div>
 			{:else}
 				{#each sessions as session (session.sessionId)}
 					<div
@@ -230,8 +240,8 @@
 						style="width:100%;text-align:left;padding:10px 12px;border-radius:10px;background:{session.sessionId === sessionId ? 'var(--of-accent-bg)' : 'var(--of-bg-overlay)'};border:1px solid {session.sessionId === sessionId ? 'var(--of-accent-border)' : 'var(--of-bg-hover)'};cursor:pointer;display:flex;align-items:center;gap:10px;"
 					>
 						<div style="flex:1;min-width:0;">
-							<div style="font-size:0.82rem;color:var(--of-text);font-family:'DM Sans',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4;">{truncate(session.firstMessage)}</div>
-							<div style="font-size:0.72rem;color:var(--of-text-4);font-family:'DM Sans',sans-serif;margin-top:3px;">{formatDate(session.lastAt)} · {t.chatbotMsgCount.replace('{n}', String(session.count))}</div>
+							<div style="font-size:0.8125rem;color:var(--of-text);font-family:'DM Sans',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4;">{truncate(session.firstMessage)}</div>
+							<div style="font-size:0.75rem;color:var(--of-text-4);font-family:'DM Sans',sans-serif;margin-top:3px;">{formatDate(session.lastAt)} · {t.chatbotMsgCount.replace('{n}', String(session.count))}</div>
 						</div>
 						<button
 							onclick={(e) => deleteSession(session.sessionId, e)}
@@ -246,14 +256,16 @@
 		</div>
 
 	{:else}
-		<!-- Messages -->
+		<!-- Messages. The click handler only intercepts in-app links inside rendered
+		     replies; links already work from the keyboard (Enter fires click). -->
+		<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
 		<div bind:this={messagesEl} onclick={handleLinkClick} style="flex:1;overflow-y:auto;padding:14px 14px 8px;display:flex;flex-direction:column;gap:10px;scrollbar-width:thin;scrollbar-color:var(--of-border) transparent;">
 			{#if messages.length === 0}
 				<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:20px;">
 					<div style="color:var(--of-border);flex-shrink:0;">
 						{@html icon.replace('<svg ', '<svg width="36" height="36" ')}
 					</div>
-					<p style="color:var(--of-text-4);font-size:0.82rem;font-family:'DM Sans',sans-serif;line-height:1.5;margin:0;">{t.chatbotEmptyHint}</p>
+					<p style="color:var(--of-text-4);font-size:0.8125rem;font-family:'DM Sans',sans-serif;line-height:1.5;margin:0;">{t.chatbotEmptyHint}</p>
 					<div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:4px;">
 						{#each [t.chatbotSuggestion1, t.chatbotSuggestion2, t.chatbotSuggestion3] as suggestion}
 							<button
@@ -283,15 +295,15 @@
 			{#if loading}
 				<div style="display:flex;justify-content:flex-start;">
 					<div style="padding:10px 14px;border-radius:14px 14px 14px 4px;background:var(--of-bg-overlay);border:1px solid var(--of-bg-hover);display:flex;align-items:center;gap:5px;">
-						<span style="width:6px;height:6px;border-radius:50%;background:var(--of-text-4);animation:pulse 1.2s ease-in-out infinite;"></span>
-						<span style="width:6px;height:6px;border-radius:50%;background:var(--of-text-4);animation:pulse 1.2s ease-in-out 0.4s infinite;"></span>
-						<span style="width:6px;height:6px;border-radius:50%;background:var(--of-text-4);animation:pulse 1.2s ease-in-out 0.8s infinite;"></span>
+						<span class="of-busy" style="width:6px;height:6px;border-radius:50%;background:var(--of-text-4);animation:pulse 1.2s ease-in-out infinite;"></span>
+						<span class="of-busy" style="width:6px;height:6px;border-radius:50%;background:var(--of-text-4);animation:pulse 1.2s ease-in-out 0.4s infinite;"></span>
+						<span class="of-busy" style="width:6px;height:6px;border-radius:50%;background:var(--of-text-4);animation:pulse 1.2s ease-in-out 0.8s infinite;"></span>
 					</div>
 				</div>
 			{/if}
 
 			{#if errorMsg}
-				<div style="padding:9px 13px;border-radius:10px;background:var(--of-danger-bg);border:1px solid var(--of-danger-border);color:var(--of-danger);font-size:0.8rem;font-family:'DM Sans',sans-serif;">⚠ {errorMsg}</div>
+				<div style="padding:8px 12px;border-radius:10px;background:var(--of-danger-bg);border:1px solid var(--of-danger-border);color:var(--of-danger);font-size:0.8125rem;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true" style="flex-shrink:0;"><path d="M12 3l10 18H2L12 3z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 10v5M12 18h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>{errorMsg}</span></div>
 			{/if}
 		</div>
 
@@ -361,7 +373,7 @@
 			display: block;
 			position: fixed;
 			inset: 0;
-			background: rgba(0, 0, 0, 0.5);
+			background: var(--of-scrim);
 			z-index: 198;
 			animation: fadeIn 0.25s ease-out;
 		}
@@ -424,11 +436,11 @@
 	:global(.md-bubble) { white-space: normal !important; }
 	:global(.md-bubble p) { margin: 0 0 0.4em; }
 	:global(.md-bubble p:last-child) { margin-bottom: 0; }
-	:global(.md-bubble h1, .md-bubble h2, .md-bubble h3) { font-size: 0.88rem; font-weight: 700; margin: 0.6em 0 0.2em; color: var(--of-accent); }
+	:global(.md-bubble h1, .md-bubble h2, .md-bubble h3) { font-size: 0.88rem; font-weight:600; margin: 0.6em 0 0.2em; color: var(--of-accent); }
 	:global(.md-bubble ul, .md-bubble ol) { margin: 0.3em 0; padding-left: 1.2em; }
 	:global(.md-bubble li) { margin-bottom: 0.2em; }
 	:global(.md-bubble strong) { color: var(--of-text-bright); font-weight: 600; }
-	:global(.md-bubble code) { background: var(--of-accent-glow); border-radius: 3px; padding: 1px 4px; font-size: 0.8em; }
+	:global(.md-bubble code) { background: var(--of-accent-glow); border-radius: 4px; padding: 1px 4px; font-size: 0.8em; }
 	:global(.md-bubble a) { color: var(--of-accent); text-decoration: underline; text-decoration-color: var(--of-accent-bg-hover); }
 	:global(.md-bubble a:hover) { text-decoration-color: var(--of-accent); }
 </style>

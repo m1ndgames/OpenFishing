@@ -27,6 +27,6 @@ export const actions: Actions = {
 
 	delete: async ({ params, locals }) => {
 		await db.delete(reel).where(and(eq(reel.id, params.id), userFilter(locals, reel.userId)));
-		redirect(303, '/tackle');
+		redirect(303, '/tackle?tab=reels');
 	}
 };

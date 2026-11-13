@@ -211,6 +211,22 @@ describe('layout server load', () => {
 		expect(result.lang).toBe('en');
 	});
 
+	it('passes OpenStreetMap tiles by default and a configured tile server when set', async () => {
+		const call = () => layoutLoad({
+			cookies: { get: vi.fn().mockReturnValue(null) },
+			request: { headers: { get: vi.fn().mockReturnValue('') } },
+		} as any);
+		expect((await call()).mapTiles.url).toBe('https://tile.openstreetmap.org/{z}/{x}/{y}.png');
+		mockEnv.env.MAP_TILE_URL = 'https://tiles.example/{z}/{x}/{y}.png';
+		mockEnv.env.MAP_TILE_ATTRIBUTION = '© Example';
+		try {
+			expect((await call()).mapTiles).toEqual({ url: 'https://tiles.example/{z}/{x}/{y}.png', attribution: '© Example' });
+		} finally {
+			mockEnv.env.MAP_TILE_URL = undefined;
+			mockEnv.env.MAP_TILE_ATTRIBUTION = undefined;
+		}
+	});
+
 	it('uses the global appSetting as the default theme/mode (logged out)', async () => {
 		mockSelect.mockReturnValue(makeChain([{ key: 'themeName', value: 'dusk' }, { key: 'colorMode', value: 'light' }]));
 		const result = await layoutLoad({

@@ -19,7 +19,7 @@ export const THEMES: ThemeDefinition[] = [
 	},
 	{
 		id: 'forrest',
-		label: 'Forrest',
+		label: 'Forest', // id keeps the historic spelling: it is stored in user settings
 		accent: '#4ade80',
 		bg: '#050e07',
 		surface: '#0d1e14',

@@ -2,7 +2,7 @@
 	import type { LayoutData } from '../$types';
 
 	let { data }: { data: LayoutData } = $props();
-	const { t } = data;
+	const { t } = $derived(data);
 
 	const year = new Date().getFullYear();
 	let from = $state(`${year}-01-01`);
@@ -17,14 +17,16 @@
 
 			<div style="padding:18px 20px; border-bottom:1px solid var(--of-border-subtle);">
 				<p style="font-weight:600; color:var(--of-text); margin:0 0 4px; font-size:0.925rem;">{t.catchExportTitle}</p>
-				<p style="font-size:0.8rem; color:var(--of-text-4); margin:0;">{t.catchExportDesc}</p>
+				<p style="font-size:0.8125rem; color:var(--of-text-3); margin:0;">{t.catchExportDesc}</p>
+				<p style="font-size:0.8125rem; margin:6px 0 0;"><a href="/settings" style="color:var(--of-accent);">{t.catchExportBackupHint}</a></p>
 			</div>
 
 			<div style="padding:20px;">
 				<div style="display:flex; gap:16px; flex-wrap:wrap; align-items:flex-end; margin-bottom:20px;">
 					<div>
-						<label style="display:block; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.07em; color:var(--of-text-4); margin-bottom:6px;">{t.catchExportFrom}</label>
+						<label for="export-from" style="display:block; font-size:0.75rem; color:var(--of-text-4); margin-bottom:6px;">{t.catchExportFrom}</label>
 						<input
+							id="export-from"
 							type="date"
 							bind:value={from}
 							style="background:var(--of-bg-elevated); color:var(--of-text); border:1px solid var(--of-border); border-radius:9px; padding:7px 12px; font-size:0.875rem; font-family:'DM Sans',sans-serif; outline:none; cursor:pointer;"
@@ -34,8 +36,9 @@
 					</div>
 
 					<div>
-						<label style="display:block; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.07em; color:var(--of-text-4); margin-bottom:6px;">{t.catchExportTo}</label>
+						<label for="export-to" style="display:block; font-size:0.75rem; color:var(--of-text-4); margin-bottom:6px;">{t.catchExportTo}</label>
 						<input
+							id="export-to"
 							type="date"
 							bind:value={to}
 							style="background:var(--of-bg-elevated); color:var(--of-text); border:1px solid var(--of-border); border-radius:9px; padding:7px 12px; font-size:0.875rem; font-family:'DM Sans',sans-serif; outline:none; cursor:pointer;"
@@ -48,7 +51,7 @@
 				<a
 					href={exportUrl}
 					download
-					style="display:inline-flex; align-items:center; gap:7px; background:var(--of-accent-solid); color:var(--of-ink); font-size:0.875rem; font-weight:700; padding:9px 18px; border-radius:9px; text-decoration:none; transition:background 0.15s; font-family:'DM Sans',sans-serif; white-space:nowrap;"
+					style="display:inline-flex; align-items:center; gap:7px; background:var(--of-accent-solid); color:var(--of-ink); font-size:0.875rem; font-weight:600; padding:9px 18px; border-radius:9px; text-decoration:none; transition:background 0.15s; font-family:'DM Sans',sans-serif; white-space:nowrap;"
 					onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-accent)';}}
 					onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-accent-solid)';}}
 				>

@@ -3,9 +3,9 @@
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
-	const { t } = data;
+	const { t } = $derived(data);
 
-	let items = $state(data.items);
+	let items = $derived(data.items);
 
 	function formatNumber(n: number | null | undefined): string {
 		if (n == null) return '—';
@@ -19,7 +19,7 @@
 		<div style="display:flex; justify-content:flex-end; margin-bottom:16px;">
 			<button
 				onclick={() => window.print()}
-				style="background:var(--of-bg-elevated); color:var(--of-text-2); font-size:0.875rem; font-weight:500; padding:9px 18px; border-radius:9px; border:1px solid var(--of-border); cursor:pointer; transition:all 0.15s; font-family:'DM Sans',sans-serif; display:flex; align-items:center; gap:7px;"
+				style="background:var(--of-bg-elevated); color:var(--of-text-2); font-size:0.875rem; font-weight:500; padding:9px 18px; border-radius:9px; border:1px solid var(--of-border); cursor:pointer; transition:var(--of-transition); font-family:'DM Sans',sans-serif; display:flex; align-items:center; gap:7px;"
 				onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-bg-hover)'; (e.currentTarget as HTMLElement).style.color='var(--of-accent)'; (e.currentTarget as HTMLElement).style.borderColor='var(--of-accent-border)';}}
 				onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-bg-elevated)'; (e.currentTarget as HTMLElement).style.color='var(--of-text-2)'; (e.currentTarget as HTMLElement).style.borderColor='var(--of-border)';}}
 			>
@@ -47,17 +47,17 @@
 					<rect x="24" y="24" width="4" height="4" fill="currentColor" opacity="0.4"/>
 				</svg>
 			</div>
-			<p style="font-family:'Carter One',sans-serif; font-weight:700; font-size:1rem; color:var(--of-text-2); margin:0 0 6px;">{t.noUnlabeledLures}</p>
+			<p style="font-family:'DM Sans',sans-serif; font-weight:500; font-size:1rem; color:var(--of-text-2); margin:0 0 6px;">{t.noUnlabeledLures}</p>
 		</div>
 	{:else}
 		<div style="display:flex; flex-direction:column; gap:6px;">
 			{#each items as item}
 				<div style="display:flex; align-items:center; gap:12px; background:var(--of-bg-surface); border:1px solid var(--of-border-subtle); border-radius:12px; padding:10px 14px;">
-					<div class="qr-thumb" style="flex-shrink:0; background:#e8f0f7; border-radius:6px; padding:3px; width:44px; height:44px; overflow:hidden;">
+					<div class="qr-thumb" style="flex-shrink:0; background:var(--of-bg-elevated); border-radius:6px; padding:3px; width:44px; height:44px; overflow:hidden;">
 						{@html item.qrSvg}
 					</div>
-					<span style="width:56px; flex-shrink:0; font-family:'JetBrains Mono',monospace; font-size:0.8rem; font-weight:600; color:var(--of-accent-hover);">{formatNumber(item.lureNumber)}</span>
-					<span style="width:120px; flex-shrink:0; font-size:0.8rem; color:var(--of-text-3); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{item.brand ?? '—'}</span>
+					<span style="width:56px; flex-shrink:0; font-family:'JetBrains Mono',monospace; font-size:0.8125rem; font-weight:600; color:var(--of-accent);">{formatNumber(item.lureNumber)}</span>
+					<span style="flex:0 1 120px; min-width:0; font-size:0.8125rem; color:var(--of-text-3); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{item.brand ?? '—'}</span>
 					<span style="font-size:0.875rem; font-weight:600; color:var(--of-text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1;">{item.name}</span>
 					<form
 						method="POST"
@@ -73,8 +73,8 @@
 					>
 						<input type="hidden" name="id" value={item.id} />
 						<button type="submit"
-							style="background:var(--of-accent-bg); color:var(--of-accent); font-size:0.78rem; font-weight:500; padding:6px 12px; border-radius:7px; border:1px solid var(--of-accent-bg-hover); cursor:pointer; transition:all 0.15s; font-family:'DM Sans',sans-serif; white-space:nowrap;"
-							onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='rgba(6,182,212,0.16)';}}
+							style="background:var(--of-accent-bg); color:var(--of-accent); font-size:0.8125rem; font-weight:500; padding:6px 12px; border-radius:var(--of-radius-control-sm); border:1px solid var(--of-accent-bg-hover); cursor:pointer; transition:var(--of-transition); font-family:'DM Sans',sans-serif; white-space:nowrap;"
+							onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-accent-bg-hover)';}}
 							onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-accent-bg)';}}
 						>
 							{t.placeLabel}

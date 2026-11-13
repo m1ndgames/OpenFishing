@@ -122,10 +122,10 @@ describe('tackle/rods/[id]/edit', () => {
 		).rejects.toMatchObject({ status: 303, location: '/tackle/rods/r1' });
 	});
 
-	it('delete redirects to /tackle', async () => {
+	it('delete redirects back to its tackle tab', async () => {
 		await expect(
 			rodEditActions.delete({ params: { id: 'r1' } } as any)
-		).rejects.toMatchObject({ status: 303, location: '/tackle' });
+		).rejects.toMatchObject({ status: 303, location: '/tackle?tab=rods' });
 	});
 });
 
@@ -232,10 +232,10 @@ describe('tackle/reels/[id]/edit', () => {
 		).rejects.toMatchObject({ status: 303, location: '/tackle/reels/re1' });
 	});
 
-	it('delete redirects to /tackle', async () => {
+	it('delete redirects back to its tackle tab', async () => {
 		await expect(
 			reelEditActions.delete({ params: { id: 're1' } } as any)
-		).rejects.toMatchObject({ status: 303, location: '/tackle' });
+		).rejects.toMatchObject({ status: 303, location: '/tackle?tab=reels' });
 	});
 });
 
@@ -311,8 +311,8 @@ describe('tackle/lines/[id]/edit', () => {
 		).rejects.toMatchObject({ status: 303, location: '/tackle/lines/l1' });
 	});
 
-	it('delete redirects to /tackle', async () => {
-		await expect(lineEditActions.delete({ params: { id: 'l1' } } as any)).rejects.toMatchObject({ location: '/tackle' });
+	it('delete redirects back to its tackle tab', async () => {
+		await expect(lineEditActions.delete({ params: { id: 'l1' } } as any)).rejects.toMatchObject({ location: '/tackle?tab=lines' });
 	});
 });
 
@@ -404,8 +404,8 @@ describe('tackle/combos/[id]/edit', () => {
 		).rejects.toMatchObject({ status: 303, location: '/tackle/combos/c1' });
 	});
 
-	it('delete redirects to /tackle', async () => {
-		await expect(comboEditActions.delete({ params: { id: 'c1' } } as any)).rejects.toMatchObject({ location: '/tackle' });
+	it('delete redirects back to its tackle tab', async () => {
+		await expect(comboEditActions.delete({ params: { id: 'c1' } } as any)).rejects.toMatchObject({ location: '/tackle?tab=combos' });
 	});
 });
 

@@ -27,7 +27,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	const qrSvg = await QRCode.toString(`${baseUrl}/lures/${lure.id}`, {
 		type: 'svg',
 		margin: 1,
-		color: { dark: '#1e293b', light: '#ffffff' }
+		color: { dark: '#000000', light: '#ffffff' }
 	});
 
 	const authEnabled = isAuthEnabled();

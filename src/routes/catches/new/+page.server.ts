@@ -1,19 +1,13 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { db } from '#lib/server/db/index.js';
-import { fishCatch, catchPhoto, lure, combo } from '#lib/server/db/schema.js';
+import { fishCatch, catchPhoto } from '#lib/server/db/schema.js';
 import { saveUpload, deleteUpload, QuotaExceededError } from '#lib/server/uploads.js';
-import { asc } from 'drizzle-orm';
 import { fetchWeather } from '#lib/server/biteIndex.js';
-import { ownerId, userFilter } from '#lib/server/scope.js';
+import { ownerId } from '#lib/server/scope.js';
+import { loadCatchFormData } from '#lib/server/catchForm.js';
 
-export const load: PageServerLoad = async ({ locals }) => {
-	const [lures, combos] = await Promise.all([
-		db.select({ id: lure.id, lureNumber: lure.lureNumber, name: lure.name }).from(lure).where(userFilter(locals, lure.userId)).orderBy(asc(lure.lureNumber)),
-		db.query.combo.findMany({ where: userFilter(locals, combo.userId), orderBy: [asc(combo.name)], with: { rod: true, reel: true } })
-	]);
-	return { lures, combos };
-};
+export const load: PageServerLoad = async ({ locals }) => loadCatchFormData(locals);
 
 export const actions: Actions = {
 	default: async ({ request, locals }) => {
@@ -68,6 +62,7 @@ export const actions: Actions = {
 			);
 		}
 
-		redirect(303, `/catches/${newCatch.id}`);
+		// ?saved=1 lets the detail page confirm the catch and offer "Log another".
+		redirect(303, `/catches/${newCatch.id}?saved=1`);
 	}
 };

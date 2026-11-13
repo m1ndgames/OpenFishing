@@ -4,18 +4,18 @@
 	import CropModal from '#lib/components/CropModal.svelte';
 
 	let { form, data }: { form: ActionData; data: PageData } = $props();
-	const { lure, suggestions, t } = data;
+	const { lure, suggestions, t } = $derived(data);
 
 	let photoInput: HTMLInputElement;
 	let uploadInput: HTMLInputElement;
 	let cameraInput: HTMLInputElement;
 	let previewUrl = $state<string | null>(null);
 	let clearPhoto = $state(false);
-	let lightValue = $state<number | null>(lure.lightConditions ?? null);
+	let lightValue = $derived<number | null>(lure.lightConditions ?? null);
 	let showCrop = $state(false);
 	let cropSrc = $state<string | null>(null);
 
-	const existingPhoto = lure.photoPath ? `/uploads/${lure.photoPath}` : null;
+	const existingPhoto = $derived(lure.photoPath ? `/uploads/${lure.photoPath}` : null);
 	const displayPhoto = $derived(clearPhoto ? null : (previewUrl ?? existingPhoto));
 
 	function handleFile(file: File | null | undefined) {
@@ -52,7 +52,7 @@
 	}
 
 	const inputStyle = "width:100%; padding:9px 12px; background:var(--of-bg-elevated); border:1px solid var(--of-border); border-radius:9px; color:var(--of-text); font-size:0.875rem; outline:none; box-sizing:border-box; font-family:'DM Sans',sans-serif; transition:border-color 0.15s, box-shadow 0.15s;";
-	const labelStyle = "display:block; font-size:0.78rem; font-weight:500; color:var(--of-text-3); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.06em;";
+	const labelStyle = "display:block; font-size:0.8125rem; font-weight:500; color:var(--of-text-2); margin-bottom:6px; ";
 	const selectStyle = "width:100%; padding:9px 12px; background:var(--of-bg-elevated); border:1px solid var(--of-border); border-radius:9px; color:var(--of-text); font-size:0.875rem; outline:none; box-sizing:border-box; font-family:'DM Sans',sans-serif; cursor:pointer;";
 
 	function focusInput(e: FocusEvent) {
@@ -69,18 +69,18 @@
 
 <div style="max-width:560px; margin:0 auto;">
 	<div style="margin-bottom:24px; display:flex; align-items:center; gap:12px;">
-		<a href="/lures/{lure.id}" style="color:var(--of-text-4); font-size:0.875rem; text-decoration:none; display:flex; align-items:center; gap:4px; white-space:nowrap;"
+		<a href="/lures/{lure.id}" class="of-tap" style="color:var(--of-text-3); font-size:0.875rem; text-decoration:none; display:flex; align-items:center; gap:4px; white-space:nowrap;"
 			onmouseenter={function(e){(e.currentTarget as HTMLElement).style.color='var(--of-accent)';}}
-			onmouseleave={function(e){(e.currentTarget as HTMLElement).style.color='var(--of-text-4)';}}
+			onmouseleave={function(e){(e.currentTarget as HTMLElement).style.color='var(--of-text-3)';}}
 		>
 			<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7L9 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
 			{t.back}
 		</a>
-		<h1 style="font-family:'Carter One',sans-serif; font-weight:800; font-size:1.5rem; color:var(--of-text-bright); margin:0;">{t.editLureTitle}</h1>
+		<h1 style="font-family:'DM Sans',sans-serif; font-weight:500; font-size:1.5rem; color:var(--of-text-bright); margin:0;">{t.editLureTitle}</h1>
 	</div>
 
 	{#if form?.error}
-		<div style="margin-bottom:16px; background:var(--of-danger-bg); border:1px solid var(--of-danger-border); color:var(--of-danger); font-size:0.875rem; padding:12px 16px; border-radius:10px;">
+		<div role="alert" style="margin-bottom:16px; background:var(--of-danger-bg); border:1px solid var(--of-danger-border); color:var(--of-danger); font-size:0.875rem; padding:12px 16px; border-radius:10px;">
 			{t[form.error as keyof typeof t] ?? form.error}
 		</div>
 	{/if}
@@ -107,7 +107,7 @@
 		onchange={(e) => handleFile((e.target as HTMLInputElement).files?.[0])} />
 
 	<form method="POST" action="?/update" enctype="multipart/form-data"
-		style="background:var(--of-bg-surface); border:1px solid var(--of-border-subtle); border-radius:16px; padding:24px; display:flex; flex-direction:column; gap:20px;">
+		class="of-panel" style="background:var(--of-bg-surface); border:1px solid var(--of-border-subtle); border-radius:16px; padding:24px; display:flex; flex-direction:column; gap:20px;">
 		<input bind:this={photoInput} type="file" name="photo" accept="image/*" class="hidden" />
 		<input type="hidden" name="clear_photo" value={clearPhoto ? '1' : '0'} />
 
@@ -118,9 +118,9 @@
 			{#if displayPhoto}
 				<div style="position:relative; border-radius:12px; overflow:hidden; background:var(--of-bg-overlay); aspect-ratio:4/3; margin-bottom:10px;">
 					<img src={displayPhoto} alt={lure.name} style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;" />
-					<button type="button" onclick={removePhoto}
+					<button type="button" class="of-hit" onclick={removePhoto}
 						style="position:absolute; top:10px; right:10px; background:rgba(0,0,0,0.6); border:none; color:var(--of-text-bright); border-radius:50%; width:30px; height:30px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:0.75rem; z-index:10;"
-						aria-label="Remove photo">✕</button>
+						aria-label={t.removePhoto}><svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
 					<svg style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none;" viewBox="0 0 400 300" preserveAspectRatio="none">
 						<path d="M16,36 L16,16 L36,16" fill="none" stroke="var(--of-accent-border)" stroke-width="2" stroke-linecap="round"/>
 						<path d="M364,16 L384,16 L384,36" fill="none" stroke="var(--of-accent-border)" stroke-width="2" stroke-linecap="round"/>
@@ -132,7 +132,7 @@
 
 			<div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
 				<button type="button" onclick={() => uploadInput.click()}
-					style="display:flex; align-items:center; justify-content:center; gap:8px; padding:10px; background:var(--of-bg-elevated); border:1px solid var(--of-border); border-radius:9px; color:var(--of-text-2); font-size:0.8rem; font-weight:500; cursor:pointer; transition:all 0.15s; font-family:'DM Sans',sans-serif;"
+					style="display:flex; align-items:center; justify-content:center; gap:8px; padding:10px; background:var(--of-bg-elevated); border:1px solid var(--of-border); border-radius:9px; color:var(--of-text-2); font-size:0.8125rem; font-weight:500; cursor:pointer; transition:var(--of-transition); font-family:'DM Sans',sans-serif;"
 					onmouseenter={function(e){(e.currentTarget as HTMLElement).style.borderColor='var(--of-accent-solid)'; (e.currentTarget as HTMLElement).style.color='var(--of-accent)';}}
 					onmouseleave={function(e){(e.currentTarget as HTMLElement).style.borderColor='var(--of-border)'; (e.currentTarget as HTMLElement).style.color='var(--of-text-2)';}}
 				>
@@ -142,7 +142,7 @@
 					{t.uploadPhoto}
 				</button>
 				<button type="button" onclick={() => cameraInput.click()}
-					style="display:flex; align-items:center; justify-content:center; gap:8px; padding:10px; background:var(--of-bg-elevated); border:1px solid var(--of-border); border-radius:9px; color:var(--of-text-2); font-size:0.8rem; font-weight:500; cursor:pointer; transition:all 0.15s; font-family:'DM Sans',sans-serif;"
+					style="display:flex; align-items:center; justify-content:center; gap:8px; padding:10px; background:var(--of-bg-elevated); border:1px solid var(--of-border); border-radius:9px; color:var(--of-text-2); font-size:0.8125rem; font-weight:500; cursor:pointer; transition:var(--of-transition); font-family:'DM Sans',sans-serif;"
 					onmouseenter={function(e){(e.currentTarget as HTMLElement).style.borderColor='var(--of-accent-solid)'; (e.currentTarget as HTMLElement).style.color='var(--of-accent)';}}
 					onmouseleave={function(e){(e.currentTarget as HTMLElement).style.borderColor='var(--of-border)'; (e.currentTarget as HTMLElement).style.color='var(--of-text-2)';}}
 				>
@@ -229,40 +229,41 @@
 			</div>
 			<div>
 				<div style="display:flex; align-items:baseline; justify-content:space-between; margin-bottom:6px;">
-					<label style="font-size:0.78rem; font-weight:500; color:var(--of-text-3); text-transform:uppercase; letter-spacing:0.06em;" for="light_conditions">{t.lightConditions}</label>
+					<label style="font-size:0.8125rem; font-weight:500; color:var(--of-text-2); " for="light_conditions">{t.lightConditions}</label>
 					{#if lightValue !== null}
-						<span style="font-size:0.82rem; font-weight:600; color:var(--of-accent);">{t[`lightConditions_${lightValue}` as keyof typeof t]}</span>
+						<span style="font-size:0.8125rem; font-weight:600; color:var(--of-accent);">{t[`lightConditions_${lightValue}` as keyof typeof t]}</span>
 					{/if}
 				</div>
 				<input type="hidden" name="light_conditions" value={lightValue !== null ? String(lightValue) : ''} />
 				{#if lightValue !== null}
-					<input id="light_conditions" type="range" min="0" max="10" step="1"
+					<input id="light_conditions" aria-describedby="light-hint" type="range" min="0" max="10" step="1"
 						value={lightValue}
 						oninput={(e) => lightValue = Number((e.target as HTMLInputElement).value)}
 						style="width:100%; accent-color:var(--of-accent-solid); cursor:pointer; margin-bottom:4px;" />
-					<div style="display:flex; justify-content:space-between; font-size:0.68rem; color:var(--of-text-4);">
+					<div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--of-text-4);">
 						<span>{t.lightConditions_0}</span>
 						<span>{t.lightConditions_10}</span>
 					</div>
 				{:else}
 					<button type="button" onclick={() => lightValue = 5}
-						style="width:100%; padding:8px 12px; background:transparent; border:1px dashed var(--of-border); border-radius:9px; color:var(--of-text-4); font-size:0.82rem; font-family:'DM Sans',sans-serif; cursor:pointer; text-align:left; transition:border-color 0.15s, color 0.15s;"
+						style="width:100%; padding:8px 12px; background:transparent; border:1px dashed var(--of-border); border-radius:9px; color:var(--of-text-4); font-size:0.8125rem; font-family:'DM Sans',sans-serif; cursor:pointer; text-align:left; transition:border-color 0.15s, color 0.15s;"
 						onmouseenter={(e) => { (e.target as HTMLElement).style.borderColor='var(--of-text-4)'; (e.target as HTMLElement).style.color='var(--of-text-3)'; }}
 						onmouseleave={(e) => { (e.target as HTMLElement).style.borderColor='var(--of-border)'; (e.target as HTMLElement).style.color='var(--of-text-4)'; }}>
 						＋ {t.lightConditions}
 					</button>
 				{/if}
+				<p id="light-hint" style="font-size:0.75rem; color:var(--of-text-4); margin:6px 0 0; line-height:1.45;">{t.lightConditionsHint}</p>
 			</div>
 		</div>
 
 		<!-- Species + Tags -->
 		<div>
-			<label style={labelStyle}>{t.fishSpecies}</label>
-			<TagInput name="species" value={lure.species ?? ''} suggest={suggestions.species} placeholder={t.speciesPlaceholder} />
+			<label style={labelStyle} for="lure-species">{t.fishSpecies}</label>
+			<TagInput id="lure-species" name="species" value={lure.species ?? ''} suggest={suggestions.species} placeholder={t.speciesPlaceholder} removeLabel={t.removeTag} />
 		</div>
 		<div>
-			<label style={labelStyle}>{t.tags}</label>
-			<TagInput name="tags" value={lure.tags.map((tag) => tag.name).join(' ')} placeholder={t.lureTagsPlaceholder} />
+			<label style={labelStyle} for="lure-tags">{t.tags}</label>
+			<TagInput id="lure-tags" name="tags" value={lure.tags.map((tag) => tag.name).join(' ')} placeholder={t.lureTagsPlaceholder} removeLabel={t.removeTag} />
 		</div>
 
 		<!-- Notes -->
@@ -279,20 +280,20 @@
 			<input type="checkbox" name="qr_coded" value="1" checked={lure.qrCoded}
 				style="width:16px; height:16px; cursor:pointer; accent-color:var(--of-accent-solid);" />
 			<span style="font-size:0.875rem; font-weight:500; color:var(--of-text-2);">{t.labeled}</span>
-			<span style="font-size:0.78rem; color:var(--of-text-4);">{t.labeledHint}</span>
+			<span style="font-size:0.8125rem; color:var(--of-text-4);">{t.labeledHint}</span>
 		</label>
 
 		<!-- Save / Cancel -->
-		<div style="display:flex; justify-content:space-between; gap:10px; padding-top:16px; border-top:1px solid var(--of-border-subtle); margin-top:8px;">
-			<button type="submit"
-				style="background:var(--of-accent-solid); color:var(--of-ink); font-size:0.875rem; font-weight:700; padding:10px 24px; border-radius:9px; border:none; cursor:pointer; transition:background 0.15s; font-family:'DM Sans',sans-serif;"
+		<div class="of-actions" style="display:flex; gap:10px; padding-top:16px; border-top:1px solid var(--of-border-subtle);">
+			<button type="submit" class="of-primary"
+				style="background:var(--of-accent-solid); color:var(--of-ink); font-size:0.875rem; font-weight:600; padding:10px 24px; border-radius:9px; border:none; cursor:pointer; transition:background 0.15s; font-family:'DM Sans',sans-serif;"
 				onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-accent)';}}
 				onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-accent-solid)';}}
 			>
 				{t.saveChanges}
 			</button>
 			<a href="/lures/{lure.id}"
-				style="display:inline-flex; align-items:center; background:var(--of-bg-elevated); color:var(--of-text-2); font-size:0.875rem; font-weight:500; padding:10px 20px; border-radius:9px; border:1px solid var(--of-border); text-decoration:none; transition:all 0.15s; font-family:'DM Sans',sans-serif;"
+				style="display:inline-flex; align-items:center; background:var(--of-bg-elevated); color:var(--of-text-2); font-size:0.875rem; font-weight:500; padding:10px 20px; border-radius:9px; border:1px solid var(--of-border); text-decoration:none; transition:var(--of-transition); font-family:'DM Sans',sans-serif;"
 				onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-bg-hover)'; (e.currentTarget as HTMLElement).style.color='var(--of-text)';}}
 				onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-bg-elevated)'; (e.currentTarget as HTMLElement).style.color='var(--of-text-2)';}}
 			>
@@ -305,9 +306,9 @@
 	<form method="POST" action="?/delete" style="margin-top:12px;"
 		onsubmit={(e) => { if (!confirm(t.deleteConfirm)) e.preventDefault(); }}>
 		<button type="submit"
-			style="width:100%; background:var(--of-danger-bg); color:var(--of-danger); font-size:0.875rem; font-weight:500; padding:10px 20px; border-radius:9px; border:1px solid var(--of-danger-bg); cursor:pointer; transition:all 0.15s; font-family:'DM Sans',sans-serif;"
-			onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='rgba(239,68,68,0.12)'; (e.currentTarget as HTMLElement).style.borderColor='var(--of-danger-border)';}}
-			onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-danger-bg)'; (e.currentTarget as HTMLElement).style.borderColor='var(--of-danger-bg)';}}
+			style="width:100%; background:var(--of-danger-bg); color:var(--of-danger); font-size:0.875rem; font-weight:500; padding:10px 20px; border-radius:9px; border:1px solid var(--of-danger-border); cursor:pointer; transition:var(--of-transition); font-family:'DM Sans',sans-serif;"
+			onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-danger-bg-hover)';}}
+			onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-danger-bg)';}}
 		>
 			{t.deleteLure}
 		</button>
@@ -317,9 +318,9 @@
 	{#if lure.lost}
 		<form method="POST" action="?/markFound" style="margin-top:8px;">
 			<button type="submit"
-				style="width:100%; background:rgba(34,197,94,0.06); color:var(--of-success); font-size:0.875rem; font-weight:500; padding:10px 20px; border-radius:9px; border:1px solid rgba(34,197,94,0.2); cursor:pointer; transition:all 0.15s; font-family:'DM Sans',sans-serif;"
-				onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='rgba(34,197,94,0.12)'; (e.currentTarget as HTMLElement).style.borderColor='rgba(34,197,94,0.35)';}}
-				onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='rgba(34,197,94,0.06)'; (e.currentTarget as HTMLElement).style.borderColor='rgba(34,197,94,0.2)';}}
+				style="width:100%; background:var(--of-success-bg); color:var(--of-success); font-size:0.875rem; font-weight:500; padding:10px 20px; border-radius:9px; border:1px solid var(--of-success-border); cursor:pointer; transition:var(--of-transition); font-family:'DM Sans',sans-serif;"
+				onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-success-bg-hover)';}}
+				onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-success-bg)';}}
 			>
 				{t.markAsFound}
 			</button>
@@ -328,9 +329,9 @@
 		<form method="POST" action="?/markLost" style="margin-top:8px;"
 			onsubmit={(e) => { if (!confirm(t.markAsLostConfirm)) e.preventDefault(); }}>
 			<button type="submit"
-				style="width:100%; background:rgba(245,158,11,0.06); color:var(--of-warning); font-size:0.875rem; font-weight:500; padding:10px 20px; border-radius:9px; border:1px solid var(--of-warning-border); cursor:pointer; transition:all 0.15s; font-family:'DM Sans',sans-serif;"
-				onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-warning-bg)'; (e.currentTarget as HTMLElement).style.borderColor='rgba(245,158,11,0.35)';}}
-				onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='rgba(245,158,11,0.06)'; (e.currentTarget as HTMLElement).style.borderColor='var(--of-warning-border)';}}
+				style="width:100%; background:var(--of-warning-bg); color:var(--of-warning); font-size:0.875rem; font-weight:500; padding:10px 20px; border-radius:9px; border:1px solid var(--of-warning-border); cursor:pointer; transition:var(--of-transition); font-family:'DM Sans',sans-serif;"
+				onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-warning-bg-hover)';}}
+				onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-warning-bg)';}}
 			>
 				{t.markAsLost}
 			</button>
@@ -339,5 +340,5 @@
 </div>
 
 {#if showCrop && cropSrc}
-	<CropModal src={cropSrc} onConfirm={onCropConfirm} onCancel={onCropCancel} />
+	<CropModal {t} src={cropSrc} onConfirm={onCropConfirm} onCancel={onCropCancel} />
 {/if}

@@ -1,3 +1,4 @@
+import { resolveMapTiles } from '#lib/mapTiles.js';
 import type { LayoutServerLoad } from './$types';
 import { translations, defaultLang, SUPPORTED_LANGS, type Lang } from '#lib/i18n/index.js';
 import { env } from '#lib/server/env.js';
@@ -41,6 +42,7 @@ export const load: LayoutServerLoad = async ({ cookies, request, locals }) => {
 		t: translations[lang],
 		lang,
 		demoMode: !!env.DEMO_MODE,
+		mapTiles: resolveMapTiles(env.MAP_TILE_URL, env.MAP_TILE_ATTRIBUTION),
 		chatbotEnabled,
 		colorMode,
 		themeName,

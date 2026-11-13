@@ -1,7 +1,7 @@
 import type { PageServerLoad } from './$types';
 import { db } from '#lib/server/db/index.js';
 import { fishCatch, lure } from '#lib/server/db/schema.js';
-import { and, isNotNull } from 'drizzle-orm';
+import { and, count, isNotNull } from 'drizzle-orm';
 import { userFilter } from '#lib/server/scope.js';
 
 export const load: PageServerLoad = async ({ locals }) => {
@@ -11,12 +11,15 @@ export const load: PageServerLoad = async ({ locals }) => {
 			with: { tags: true },
 			orderBy: (lure, { asc }) => [asc(lure.lureNumber)]
 		}),
-		db.selectDistinct({ lureId: fishCatch.lureId })
+		db.select({ lureId: fishCatch.lureId, n: count() })
 			.from(fishCatch)
 			.where(and(isNotNull(fishCatch.lureId), userFilter(locals, fishCatch.userId)))
+			.groupBy(fishCatch.lureId)
 	]);
 
-	const lureIdsWithCatches = new Set(catchRows.map(r => r.lureId as string));
+	// Catch count per lure: drives the card badge and the "has catch" filter.
+	const catchCounts: Record<string, number> = {};
+	for (const r of catchRows) if (r.lureId) catchCounts[r.lureId] = Number(r.n) || 0;
 
-	return { lures, lureIdsWithCatches: [...lureIdsWithCatches] };
+	return { lures, catchCounts, lureIdsWithCatches: Object.keys(catchCounts) };
 };

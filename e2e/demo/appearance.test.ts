@@ -39,7 +39,7 @@ test.describe('Demo mode — appearance preview', () => {
 		const htmlEl = page.locator('html');
 		await expect(htmlEl).toHaveAttribute('data-theme', 'ocean');
 
-		await page.locator('label').filter({ hasText: /forrest/i }).click();
+		await page.locator('label').filter({ hasText: /forest/i }).click();
 		await expect(htmlEl).toHaveAttribute('data-theme', 'forrest');
 		expect(writes).toHaveLength(0);
 

@@ -3,7 +3,7 @@
 	import { enhance } from '$app/forms';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
-	const { t } = data;
+	const { t } = $derived(data);
 
 	let importing = $state(false);
 	let fileName = $state<string | null>(null);
@@ -32,23 +32,24 @@
 			<!-- Stats row -->
 			<div style="padding:16px 20px; border-bottom:1px solid var(--of-border-subtle); display:flex; align-items:center; gap:24px; flex-wrap:wrap;">
 				<div>
-					<p style="font-size:0.7rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--of-text-4); margin:0 0 3px;">{t.navLures}</p>
-					<p style="font-family:'JetBrains Mono',monospace; font-size:1.1rem; font-weight:600; color:var(--of-text-bright); margin:0;">{data.lureCount}</p>
+					<p style="font-size:0.75rem; color:var(--of-text-4); margin:0 0 3px;">{t.navLures}</p>
+					<p style="font-family:'JetBrains Mono',monospace; font-size:var(--of-fs-section); font-weight:600; color:var(--of-text-bright); margin:0;">{data.lureCount}</p>
 				</div>
 				<div style="height:32px; width:1px; background:var(--of-border-subtle);"></div>
 				<div>
-					<p style="font-size:0.7rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--of-text-4); margin:0 0 3px;">{t.navSpots}</p>
-					<p style="font-family:'JetBrains Mono',monospace; font-size:1.1rem; font-weight:600; color:var(--of-text-bright); margin:0;">{data.spotCount}</p>
+					<p style="font-size:0.75rem; color:var(--of-text-4); margin:0 0 3px;">{t.navSpots}</p>
+					<p style="font-family:'JetBrains Mono',monospace; font-size:var(--of-fs-section); font-weight:600; color:var(--of-text-bright); margin:0;">{data.spotCount}</p>
 				</div>
 				<div style="height:32px; width:1px; background:var(--of-border-subtle);"></div>
 				<div>
-					<p style="font-size:0.7rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--of-text-4); margin:0 0 3px;">{t.navCatches}</p>
-					<p style="font-family:'JetBrains Mono',monospace; font-size:1.1rem; font-weight:600; color:var(--of-text-bright); margin:0;">{data.catchCount}</p>
+					<p style="font-size:0.75rem; color:var(--of-text-4); margin:0 0 3px;">{t.navCatches}</p>
+					<p style="font-family:'JetBrains Mono',monospace; font-size:var(--of-fs-section); font-weight:600; color:var(--of-text-bright); margin:0;">{data.catchCount}</p>
 				</div>
 				<div style="height:32px; width:1px; background:var(--of-border-subtle);"></div>
 				<div>
-					<p style="font-size:0.7rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--of-text-4); margin:0 0 3px;">{t.backupSchemaHash}</p>
-					<p style="font-family:'JetBrains Mono',monospace; font-size:0.78rem; color:var(--of-text-3); margin:0; word-break:break-all;">{data.schemaHash.slice(0, 16)}…</p>
+					<p style="font-size:0.75rem; color:var(--of-text-4); margin:0 0 3px;">{t.backupSchemaHash}</p>
+					<p title={t.backupSchemaHashHint} style="font-family:'JetBrains Mono',monospace; font-size:0.8125rem; color:var(--of-text-3); margin:0; word-break:break-all;">{data.schemaHash.slice(0, 8)}</p>
+					<p style="font-size:0.75rem; color:var(--of-text-4); margin:3px 0 0; max-width:220px; line-height:1.4;">{t.backupSchemaHashHint}</p>
 				</div>
 			</div>
 
@@ -57,12 +58,13 @@
 				<div style="display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap;">
 					<div>
 						<p style="font-weight:600; color:var(--of-text); margin:0 0 4px; font-size:0.925rem;">{t.backupExportTitle}</p>
-						<p style="font-size:0.8rem; color:var(--of-text-4); margin:0;">{t.backupExportDesc}</p>
+						<p style="font-size:0.8125rem; color:var(--of-text-3); margin:0;">{t.backupExportDesc}</p>
+						<p style="font-size:0.8125rem; margin:6px 0 0;"><a href="/settings/export" style="color:var(--of-accent);">{t.backupCsvHint}</a></p>
 					</div>
 					<a
 						href="/api/settings/export"
 						download
-						style="flex-shrink:0; display:inline-flex; align-items:center; gap:7px; background:var(--of-accent-solid); color:var(--of-ink); font-size:0.875rem; font-weight:700; padding:9px 18px; border-radius:9px; text-decoration:none; transition:background 0.15s; font-family:'DM Sans',sans-serif; white-space:nowrap;"
+						style="flex-shrink:0; display:inline-flex; align-items:center; gap:7px; background:var(--of-accent-solid); color:var(--of-ink); font-size:0.875rem; font-weight:600; padding:9px 18px; border-radius:9px; text-decoration:none; transition:background 0.15s; font-family:'DM Sans',sans-serif; white-space:nowrap;"
 						onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-accent)';}}
 						onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-accent-solid)';}}
 					>
@@ -77,16 +79,16 @@
 			<!-- Import -->
 			<div style="padding:18px 20px;">
 				<p style="font-weight:600; color:var(--of-text); margin:0 0 4px; font-size:0.925rem;">{t.backupImportTitle}</p>
-				<p style="font-size:0.8rem; color:var(--of-text-4); margin:0 0 14px;">{t.backupImportDesc}</p>
+				<p style="font-size:0.8125rem; color:var(--of-text-4); margin:0 0 14px;">{t.backupImportDesc}</p>
 
 				{#if form?.error}
-					<div style="background:var(--of-danger-bg); border:1px solid var(--of-danger-border); color:var(--of-danger); font-size:0.82rem; padding:10px 14px; border-radius:9px; margin-bottom:12px; line-height:1.5;">
+					<div role="alert" style="background:var(--of-danger-bg); border:1px solid var(--of-danger-border); color:var(--of-danger); font-size:0.8125rem; padding:10px 14px; border-radius:9px; margin-bottom:12px; line-height:1.5;">
 						{(t as unknown as Record<string,string>)[form.error] ?? form.error}
 					</div>
 				{/if}
 
 				{#if form?.success}
-					<div style="background:var(--of-success-bg); border:1px solid var(--of-success-border); color:var(--of-success); font-size:0.82rem; padding:10px 14px; border-radius:9px; margin-bottom:12px;">
+					<div role="status" style="background:var(--of-success-bg); border:1px solid var(--of-success-border); color:var(--of-success); font-size:0.8125rem; padding:10px 14px; border-radius:9px; margin-bottom:12px;">
 						{importSuccessMsg(form.lureCount, form.spotCount, form.catchCount)}
 					</div>
 				{/if}
@@ -110,27 +112,25 @@
 					}}
 				>
 					<!-- File picker -->
-					<label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+					<!-- sr-only, not display:none, so the picker stays reachable by keyboard -->
+					<label class="of-file-pick" style="display:flex; align-items:center; gap:10px; cursor:pointer;">
 						<input
 							type="file"
 							name="backup"
 							accept=".zip"
-							class="hidden"
+							class="sr-only"
 							onchange={onFileChange}
 						/>
-						<span style="display:inline-flex; align-items:center; gap:7px; background:var(--of-bg-elevated); color:var(--of-text-2); font-size:0.82rem; font-weight:500; padding:8px 14px; border-radius:8px; border:1px solid var(--of-border); cursor:pointer; transition:all 0.15s; white-space:nowrap;"
-							onmouseenter={function(e){(e.currentTarget as HTMLElement).style.borderColor='var(--of-accent-solid)'; (e.currentTarget as HTMLElement).style.color='var(--of-accent)';}}
-							onmouseleave={function(e){(e.currentTarget as HTMLElement).style.borderColor='var(--of-border)'; (e.currentTarget as HTMLElement).style.color='var(--of-text-2)';}}
-						>
+						<span class="of-file-pick__btn">
 							<svg width="13" height="13" viewBox="0 0 15 15" fill="none">
 								<path d="M3 12.5h9M7.5 9V1.5M4.5 4.5l3-3 3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
 							</svg>
 							{t.backupChooseFile}
 						</span>
 						{#if fileName}
-							<span style="font-size:0.8rem; color:var(--of-text-3); font-family:'JetBrains Mono',monospace; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{fileName}</span>
+							<span style="font-size:0.8125rem; color:var(--of-text-3); font-family:'JetBrains Mono',monospace; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{fileName}</span>
 						{:else}
-							<span style="font-size:0.8rem; color:var(--of-text-4);">{t.backupNoFile}</span>
+							<span style="font-size:0.8125rem; color:var(--of-text-4);">{t.backupNoFile}</span>
 						{/if}
 					</label>
 
@@ -139,7 +139,7 @@
 						<label style="display:flex; align-items:flex-start; gap:10px; cursor:pointer; user-select:none; margin-top:2px;">
 							<input type="checkbox" bind:checked={confirmed}
 								style="margin-top:2px; width:15px; height:15px; flex-shrink:0; accent-color:var(--of-warning-solid); cursor:pointer;" />
-							<span style="font-size:0.8rem; color:var(--of-text-2); line-height:1.5;">
+							<span style="font-size:0.8125rem; color:var(--of-text-2); line-height:1.5;">
 								{t.backupConfirmBefore} <strong style="color:var(--of-warning);">{t.backupConfirmBold}</strong> {t.backupConfirmAfter}
 							</span>
 						</label>
@@ -148,8 +148,8 @@
 							<button
 								type="submit"
 								disabled={!confirmed || importing}
-								style="display:inline-flex; align-items:center; gap:7px; background:var(--of-warning-bg); color:var(--of-warning); font-size:0.875rem; font-weight:700; padding:9px 18px; border-radius:9px; border:1px solid var(--of-warning-border); cursor:pointer; transition:all 0.15s; font-family:'DM Sans',sans-serif; {(!confirmed || importing) ? 'opacity:0.45; cursor:not-allowed;' : ''}"
-								onmouseenter={function(e){ if (confirmed && !importing) { (e.currentTarget as HTMLElement).style.background='rgba(245,158,11,0.18)'; }}}
+								style="display:inline-flex; align-items:center; gap:7px; background:var(--of-warning-bg); color:var(--of-warning); font-size:0.875rem; font-weight:600; padding:9px 18px; border-radius:9px; border:1px solid var(--of-warning-border); cursor:pointer; transition:var(--of-transition); font-family:'DM Sans',sans-serif; {(!confirmed || importing) ? 'opacity:0.45; cursor:not-allowed;' : ''}"
+								onmouseenter={function(e){ if (confirmed && !importing) { (e.currentTarget as HTMLElement).style.background='var(--of-warning-bg-hover)'; }}}
 								onmouseleave={function(e){ (e.currentTarget as HTMLElement).style.background='var(--of-warning-bg)'; }}
 							>
 								{#if importing}
@@ -168,3 +168,17 @@
 		</div>
 	</section>
 </div>
+
+<style>
+	.of-file-pick__btn {
+		display: inline-flex; align-items: center; gap: 7px;
+		background: var(--of-bg-elevated); color: var(--of-text-2);
+		font-size: 0.8125rem; font-weight: 500; white-space: nowrap;
+		padding: 8px 14px; border-radius: var(--of-radius-control-sm); border: 1px solid var(--of-border);
+		transition: var(--of-transition);
+	}
+	.of-file-pick:hover .of-file-pick__btn,
+	.of-file-pick:focus-within .of-file-pick__btn { border-color: var(--of-accent-solid); color: var(--of-accent); }
+	/* The real input is visually hidden, so draw its keyboard focus on the button */
+	.of-file-pick:has(input:focus-visible) .of-file-pick__btn { outline: 2px solid var(--of-accent); outline-offset: 2px; }
+</style>

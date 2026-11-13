@@ -1,5 +1,60 @@
 @import 'tailwindcss';
 
+/* ── Fonts ─────────────────────────────────────────────────────────────────
+   Self-hosted (static/fonts, SIL OFL 1.1, from Fontsource 5.3.0) so no page
+   load contacts a third party: no visitor IPs to Google, no render-blocking
+   round trip on a weak signal, and the app keeps its type offline.
+   Variable files: DM Sans wght + opsz, JetBrains Mono wght. DM Sans has no
+   Cyrillic; Ukrainian falls back to the system sans, as it did before. */
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 1000;
+  src: url('/fonts/dm-sans-latin-opsz-normal.woff2') format('woff2-variations');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 1000;
+  src: url('/fonts/dm-sans-latin-ext-opsz-normal.woff2') format('woff2-variations');
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 800;
+  src: url('/fonts/jetbrains-mono-latin-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 800;
+  src: url('/fonts/jetbrains-mono-latin-ext-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 800;
+  src: url('/fonts/jetbrains-mono-cyrillic-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 800;
+  src: url('/fonts/jetbrains-mono-cyrillic-ext-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F;
+}
+
 @theme {
   --color-ocean-950: #030a12;
   --color-ocean-900: #060d17;
@@ -25,9 +80,57 @@
   --color-hook-400: #fbbf24;
   --color-hook-500: #f59e0b;
 
-  --font-heading: 'Carter One', sans-serif;
   --font-sans: 'DM Sans', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
+}
+
+/* ── Scale tokens: 4px spacing grid, radii, type, motion ────────────────────── */
+
+:root {
+  --of-space-1: 4px;
+  --of-space-2: 8px;
+  --of-space-3: 12px;
+  --of-space-4: 16px;
+  --of-space-5: 20px;
+  --of-space-6: 24px;
+  --of-space-8: 32px;
+  --of-radius-sm: 6px;
+  --of-radius-control-sm: 8px;  /* compact buttons: share, directions, pagination */
+  --of-radius-md: 10px;
+  --of-radius-subpanel: 12px;   /* panels nested in a page: banners, list rows, weather tiles */
+  --of-radius-lg: 14px;
+  --of-radius-xl: 16px;         /* page panels and cards */
+  --of-radius-full: 999px;      /* fully round ends: progress bars, carousel dots */
+  --of-text-xs: 0.75rem;
+  --of-text-sm: 0.8125rem;
+  --of-text-base: 0.875rem;
+  /* Display steps. Headings stay DM Sans; figures are JetBrains Mono (the Stencil Rule). */
+  --of-fs-section: 1rem;        /* h2 inside panels, empty-state headings */
+  --of-fs-headline: 1.5rem;     /* page h1 */
+  --of-fs-figure-sm: 1.5rem;    /* stat tiles */
+  --of-fs-figure: 2rem;         /* the number a page is about: length, weight, bite index, lure plate */
+  --of-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --of-dur-fast: 150ms;
+  --of-dur-enter: 300ms;
+  --of-transition: background-color var(--of-dur-fast) var(--of-ease), border-color var(--of-dur-fast) var(--of-ease), color var(--of-dur-fast) var(--of-ease), opacity var(--of-dur-fast) var(--of-ease), transform var(--of-dur-fast) var(--of-ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important; /* a looping spinner would otherwise flicker at 0.01ms */
+    transition-duration: 0.01ms !important;
+  }
+  /* Loading indicators keep saying "working…" without motion: a slow fade
+     instead of rotation or scaling. Opt in with .of-busy. */
+  .of-busy {
+    animation: of-busy-fade 2s ease-in-out infinite !important;
+    transform: none !important;
+  }
+}
+@keyframes of-busy-fade {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
 }
 
 /* ── Semantic tokens: ocean dark (default) ────────────────────────────────── */
@@ -45,9 +148,9 @@
   --of-border-strong:     #2d5270;
   --of-text-bright:       #e0eaf8;
   --of-text:              #c2dce8;
-  --of-text-2:            #8ab8cc;
-  --of-text-3:            #5d8fa8;
-  --of-text-4:            #3d6a84;
+  --of-text-2:            #98c0d2;
+  --of-text-3:            #84aabd;
+  --of-text-4:            #6b9ebb;
   --of-accent:            #22d3ee;
   --of-accent-solid:      #06b6d4;
   --of-accent-hover:      #67e8f9;
@@ -60,15 +163,20 @@
   --of-ink:               #030a12;
   --of-danger:            #f87171;
   --of-danger-bg:         rgba(239, 68, 68, 0.08);
+  --of-danger-bg-hover:   rgba(239, 68, 68, 0.14);
+  /* Modal backdrop: the theme's own deepest surface, so it never shows Ocean navy elsewhere. */
+  --of-scrim:             color-mix(in srgb, var(--of-bg-base) 80%, transparent);
   --of-danger-border:     rgba(239, 68, 68, 0.25);
   --of-success:           #4ade80;
   --of-success-bg:        rgba(74, 222, 128, 0.08);
+  --of-success-bg-hover:  rgba(74, 222, 128, 0.14);
   --of-success-border:    rgba(74, 222, 128, 0.15);
   --of-warning:           #fbbf24;
   --of-warning-solid:     #f59e0b;
   --of-warning-bg:        rgba(245, 158, 11, 0.08);
+  --of-warning-bg-hover:  rgba(245, 158, 11, 0.14);
   --of-warning-border:    rgba(245, 158, 11, 0.2);
-  --of-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2 4.5l4 4 4-4' stroke='%235d8fa8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --of-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2 4.5l4 4 4-4' stroke='%2384aabd' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
 
 /* ── Semantic tokens: ocean light ─────────────────────────────────────────── */
@@ -84,30 +192,35 @@
   --of-border-strong:     #7aaec4;
   --of-text-bright:       #0a1e2e;
   --of-text:              #1a3448;
-  --of-text-2:            #2d5268;
-  --of-text-3:            #4d7a94;
-  --of-text-4:            #6894a8;
-  --of-accent:            #0891b2;
-  --of-accent-solid:      #0891b2;
-  --of-accent-hover:      #06b6d4;
-  --of-accent-dark:       #0e7490;
-  --of-accent-bg:         rgba(8, 145, 178, 0.08);
-  --of-accent-bg-hover:   rgba(8, 145, 178, 0.14);
-  --of-accent-glow:       rgba(8, 145, 178, 0.1);
-  --of-accent-border:     rgba(8, 145, 178, 0.25);
+  --of-text-2:            #244153;
+  --of-text-3:            #325061;
+  --of-text-4:            #3d5c6a;
+  --of-accent:            #0c627a;
+  --of-accent-solid:      #0c627a;
+  --of-accent-hover:      #155e75;
+  --of-accent-dark:       #164e63;
+  --of-accent-bg:         rgba(12, 98, 122, 0.08);
+  --of-accent-bg-hover:   rgba(12, 98, 122, 0.14);
+  --of-accent-glow:       rgba(12, 98, 122, 0.1);
+  --of-accent-border:     rgba(12, 98, 122, 0.25);
   --of-badge-num-text:    #ffffff;
   --of-ink:               #ffffff;
-  --of-danger:            #dc2626;
+  --of-danger:            #b11d1d;
   --of-danger-bg:         rgba(220, 38, 38, 0.08);
+  --of-danger-bg-hover:   rgba(220, 38, 38, 0.14);
+  /* Light modes veil with the theme's darkest ink rather than a pale wash. */
+  --of-scrim:             color-mix(in srgb, var(--of-text-bright) 55%, transparent);
   --of-danger-border:     rgba(220, 38, 38, 0.25);
-  --of-success:           #16a34a;
+  --of-success:           #0e682f;
   --of-success-bg:        rgba(22, 163, 74, 0.08);
+  --of-success-bg-hover:  rgba(22, 163, 74, 0.14);
   --of-success-border:    rgba(22, 163, 74, 0.15);
-  --of-warning:           #b45309;
+  --of-warning:           #934407;
   --of-warning-solid:     #d97706;
   --of-warning-bg:        rgba(180, 83, 9, 0.08);
+  --of-warning-bg-hover:  rgba(180, 83, 9, 0.14);
   --of-warning-border:    rgba(180, 83, 9, 0.2);
-  --of-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2 4.5l4 4 4-4' stroke='%234d7a94' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --of-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2 4.5l4 4 4-4' stroke='%23325061' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
 
 /* System: override to light when OS prefers light */
@@ -123,30 +236,35 @@
     --of-border-strong:     #7aaec4;
     --of-text-bright:       #0a1e2e;
     --of-text:              #1a3448;
-    --of-text-2:            #2d5268;
-    --of-text-3:            #4d7a94;
-    --of-text-4:            #6894a8;
-    --of-accent:            #0891b2;
-    --of-accent-solid:      #0891b2;
-    --of-accent-hover:      #06b6d4;
-    --of-accent-dark:       #0e7490;
-    --of-accent-bg:         rgba(8, 145, 178, 0.08);
-    --of-accent-bg-hover:   rgba(8, 145, 178, 0.14);
-    --of-accent-glow:       rgba(8, 145, 178, 0.1);
-    --of-accent-border:     rgba(8, 145, 178, 0.25);
+    --of-text-2:            #244153;
+    --of-text-3:            #325061;
+    --of-text-4:            #3d5c6a;
+    --of-accent:            #0c627a;
+    --of-accent-solid:      #0c627a;
+    --of-accent-hover:      #155e75;
+    --of-accent-dark:       #164e63;
+    --of-accent-bg:         rgba(12, 98, 122, 0.08);
+    --of-accent-bg-hover:   rgba(12, 98, 122, 0.14);
+    --of-accent-glow:       rgba(12, 98, 122, 0.1);
+    --of-accent-border:     rgba(12, 98, 122, 0.25);
     --of-badge-num-text:    #ffffff;
     --of-ink:               #ffffff;
-    --of-danger:            #dc2626;
+    --of-danger:            #b11d1d;
     --of-danger-bg:         rgba(220, 38, 38, 0.08);
+    --of-danger-bg-hover:   rgba(220, 38, 38, 0.14);
+    /* Light modes veil with the theme's darkest ink rather than a pale wash. */
+    --of-scrim:             color-mix(in srgb, var(--of-text-bright) 55%, transparent);
     --of-danger-border:     rgba(220, 38, 38, 0.25);
-    --of-success:           #16a34a;
+    --of-success:           #0e682f;
     --of-success-bg:        rgba(22, 163, 74, 0.08);
+    --of-success-bg-hover:  rgba(22, 163, 74, 0.14);
     --of-success-border:    rgba(22, 163, 74, 0.15);
-    --of-warning:           #b45309;
+    --of-warning:           #934407;
     --of-warning-solid:     #d97706;
     --of-warning-bg:        rgba(180, 83, 9, 0.08);
+    --of-warning-bg-hover:  rgba(180, 83, 9, 0.14);
     --of-warning-border:    rgba(180, 83, 9, 0.2);
-    --of-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2 4.5l4 4 4-4' stroke='%234d7a94' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    --of-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2 4.5l4 4 4-4' stroke='%23325061' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   }
 }
 
@@ -163,9 +281,9 @@
   --of-border-strong:     #2d5a3d;
   --of-text-bright:       #d4edd8;
   --of-text:              #a8d4b0;
-  --of-text-2:            #72a87c;
-  --of-text-3:            #4d7857;
-  --of-text-4:            #335040;
+  --of-text-2:            #9fc4a5;
+  --of-text-3:            #84b08f;
+  --of-text-4:            #70a487;
   --of-accent:            #4ade80;
   --of-accent-solid:      #22c55e;
   --of-accent-hover:      #86efac;
@@ -176,16 +294,6 @@
   --of-accent-border:     rgba(74, 222, 128, 0.25);
   --of-badge-num-text:    var(--of-accent-hover);
   --of-ink:               #030a04;
-  --of-danger:            #f87171;
-  --of-danger-bg:         rgba(239, 68, 68, 0.08);
-  --of-danger-border:     rgba(239, 68, 68, 0.25);
-  --of-success:           #4ade80;
-  --of-success-bg:        rgba(74, 222, 128, 0.08);
-  --of-success-border:    rgba(74, 222, 128, 0.15);
-  --of-warning:           #fbbf24;
-  --of-warning-solid:     #f59e0b;
-  --of-warning-bg:        rgba(245, 158, 11, 0.08);
-  --of-warning-border:    rgba(245, 158, 11, 0.2);
   --of-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2 4.5l4 4 4-4' stroke='%2372a87c' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
 
@@ -202,30 +310,20 @@
   --of-border-strong:     #6daa7c;
   --of-text-bright:       #0a1f0e;
   --of-text:              #1a3520;
-  --of-text-2:            #2d5a3d;
-  --of-text-3:            #4d7857;
-  --of-text-4:            #6a9474;
-  --of-accent:            #16a34a;
-  --of-accent-solid:      #16a34a;
-  --of-accent-hover:      #22c55e;
-  --of-accent-dark:       #15803d;
-  --of-accent-bg:         rgba(22, 163, 74, 0.08);
-  --of-accent-bg-hover:   rgba(22, 163, 74, 0.14);
-  --of-accent-glow:       rgba(22, 163, 74, 0.1);
-  --of-accent-border:     rgba(22, 163, 74, 0.25);
+  --of-text-2:            #224630;
+  --of-text-3:            #35543c;
+  --of-text-4:            #445f4a;
+  --of-accent:            #116932;
+  --of-accent-solid:      #116932;
+  --of-accent-hover:      #166534;
+  --of-accent-dark:       #14532d;
+  --of-accent-bg:         rgba(17, 105, 50, 0.08);
+  --of-accent-bg-hover:   rgba(17, 105, 50, 0.14);
+  --of-accent-glow:       rgba(17, 105, 50, 0.1);
+  --of-accent-border:     rgba(17, 105, 50, 0.25);
   --of-badge-num-text:    #ffffff;
   --of-ink:               #ffffff;
-  --of-danger:            #dc2626;
-  --of-danger-bg:         rgba(220, 38, 38, 0.08);
-  --of-danger-border:     rgba(220, 38, 38, 0.25);
-  --of-success:           #16a34a;
-  --of-success-bg:        rgba(22, 163, 74, 0.08);
-  --of-success-border:    rgba(22, 163, 74, 0.15);
-  --of-warning:           #b45309;
-  --of-warning-solid:     #d97706;
-  --of-warning-bg:        rgba(180, 83, 9, 0.08);
-  --of-warning-border:    rgba(180, 83, 9, 0.2);
-  --of-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2 4.5l4 4 4-4' stroke='%234d7857' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --of-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2 4.5l4 4 4-4' stroke='%2335543c' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
 
 /* System: override to light when OS prefers light */
@@ -241,30 +339,20 @@
     --of-border-strong:     #6daa7c;
     --of-text-bright:       #0a1f0e;
     --of-text:              #1a3520;
-    --of-text-2:            #2d5a3d;
-    --of-text-3:            #4d7857;
-    --of-text-4:            #6a9474;
-    --of-accent:            #16a34a;
-    --of-accent-solid:      #16a34a;
-    --of-accent-hover:      #22c55e;
-    --of-accent-dark:       #15803d;
-    --of-accent-bg:         rgba(22, 163, 74, 0.08);
-    --of-accent-bg-hover:   rgba(22, 163, 74, 0.14);
-    --of-accent-glow:       rgba(22, 163, 74, 0.1);
-    --of-accent-border:     rgba(22, 163, 74, 0.25);
+    --of-text-2:            #224630;
+    --of-text-3:            #35543c;
+    --of-text-4:            #445f4a;
+    --of-accent:            #116932;
+    --of-accent-solid:      #116932;
+    --of-accent-hover:      #166534;
+    --of-accent-dark:       #14532d;
+    --of-accent-bg:         rgba(17, 105, 50, 0.08);
+    --of-accent-bg-hover:   rgba(17, 105, 50, 0.14);
+    --of-accent-glow:       rgba(17, 105, 50, 0.1);
+    --of-accent-border:     rgba(17, 105, 50, 0.25);
     --of-badge-num-text:    #ffffff;
     --of-ink:               #ffffff;
-    --of-danger:            #dc2626;
-    --of-danger-bg:         rgba(220, 38, 38, 0.08);
-    --of-danger-border:     rgba(220, 38, 38, 0.25);
-    --of-success:           #16a34a;
-    --of-success-bg:        rgba(22, 163, 74, 0.08);
-    --of-success-border:    rgba(22, 163, 74, 0.15);
-    --of-warning:           #b45309;
-    --of-warning-solid:     #d97706;
-    --of-warning-bg:        rgba(180, 83, 9, 0.08);
-    --of-warning-border:    rgba(180, 83, 9, 0.2);
-    --of-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2 4.5l4 4 4-4' stroke='%234d7857' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    --of-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2 4.5l4 4 4-4' stroke='%2335543c' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   }
 }
 
@@ -281,9 +369,9 @@
   --of-border-strong:     #6e3f1a;
   --of-text-bright:       #fde8d0;
   --of-text:              #f5c9a0;
-  --of-text-2:            #d4905a;
-  --of-text-3:            #a06035;
-  --of-text-4:            #6b3f1e;
+  --of-text-2:            #dfab81;
+  --of-text-3:            #ce936d;
+  --of-text-4:            #cc824a;
   --of-accent:            #fb923c;
   --of-accent-solid:      #f97316;
   --of-accent-hover:      #fdba74;
@@ -294,16 +382,6 @@
   --of-accent-border:     rgba(249, 115, 22, 0.25);
   --of-badge-num-text:    var(--of-accent-hover);
   --of-ink:               #0a0502;
-  --of-danger:            #f87171;
-  --of-danger-bg:         rgba(239, 68, 68, 0.08);
-  --of-danger-border:     rgba(239, 68, 68, 0.25);
-  --of-success:           #4ade80;
-  --of-success-bg:        rgba(74, 222, 128, 0.08);
-  --of-success-border:    rgba(74, 222, 128, 0.15);
-  --of-warning:           #fbbf24;
-  --of-warning-solid:     #f59e0b;
-  --of-warning-bg:        rgba(245, 158, 11, 0.08);
-  --of-warning-border:    rgba(245, 158, 11, 0.2);
   --of-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2 4.5l4 4 4-4' stroke='%23d4905a' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
 
@@ -320,30 +398,20 @@
   --of-border-strong:     #f59550;
   --of-text-bright:       #1c0a02;
   --of-text:              #431e06;
-  --of-text-2:            #7c3a0f;
-  --of-text-3:            #a05220;
-  --of-text-4:            #c47238;
-  --of-accent:            #ea580c;
-  --of-accent-solid:      #ea580c;
-  --of-accent-hover:      #f97316;
-  --of-accent-dark:       #c2410c;
-  --of-accent-bg:         rgba(234, 88, 12, 0.08);
-  --of-accent-bg-hover:   rgba(234, 88, 12, 0.14);
-  --of-accent-glow:       rgba(234, 88, 12, 0.1);
-  --of-accent-border:     rgba(234, 88, 12, 0.25);
+  --of-text-2:            #632e0c;
+  --of-text-3:            #753c18;
+  --of-text-4:            #7f4a24;
+  --of-accent:            #a0350a;
+  --of-accent-solid:      #a0350a;
+  --of-accent-hover:      #9a3412;
+  --of-accent-dark:       #7c2d12;
+  --of-accent-bg:         rgba(160, 53, 10, 0.08);
+  --of-accent-bg-hover:   rgba(160, 53, 10, 0.14);
+  --of-accent-glow:       rgba(160, 53, 10, 0.1);
+  --of-accent-border:     rgba(160, 53, 10, 0.25);
   --of-badge-num-text:    #ffffff;
   --of-ink:               #ffffff;
-  --of-danger:            #dc2626;
-  --of-danger-bg:         rgba(220, 38, 38, 0.08);
-  --of-danger-border:     rgba(220, 38, 38, 0.25);
-  --of-success:           #16a34a;
-  --of-success-bg:        rgba(22, 163, 74, 0.08);
-  --of-success-border:    rgba(22, 163, 74, 0.15);
-  --of-warning:           #b45309;
-  --of-warning-solid:     #d97706;
-  --of-warning-bg:        rgba(180, 83, 9, 0.08);
-  --of-warning-border:    rgba(180, 83, 9, 0.2);
-  --of-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2 4.5l4 4 4-4' stroke='%23a05220' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --of-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2 4.5l4 4 4-4' stroke='%23753c18' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
 
 /* System: override to light when OS prefers light */
@@ -359,30 +427,20 @@
     --of-border-strong:     #f59550;
     --of-text-bright:       #1c0a02;
     --of-text:              #431e06;
-    --of-text-2:            #7c3a0f;
-    --of-text-3:            #a05220;
-    --of-text-4:            #c47238;
-    --of-accent:            #ea580c;
-    --of-accent-solid:      #ea580c;
-    --of-accent-hover:      #f97316;
-    --of-accent-dark:       #c2410c;
-    --of-accent-bg:         rgba(234, 88, 12, 0.08);
-    --of-accent-bg-hover:   rgba(234, 88, 12, 0.14);
-    --of-accent-glow:       rgba(234, 88, 12, 0.1);
-    --of-accent-border:     rgba(234, 88, 12, 0.25);
+    --of-text-2:            #632e0c;
+    --of-text-3:            #753c18;
+    --of-text-4:            #7f4a24;
+    --of-accent:            #a0350a;
+    --of-accent-solid:      #a0350a;
+    --of-accent-hover:      #9a3412;
+    --of-accent-dark:       #7c2d12;
+    --of-accent-bg:         rgba(160, 53, 10, 0.08);
+    --of-accent-bg-hover:   rgba(160, 53, 10, 0.14);
+    --of-accent-glow:       rgba(160, 53, 10, 0.1);
+    --of-accent-border:     rgba(160, 53, 10, 0.25);
     --of-badge-num-text:    #ffffff;
     --of-ink:               #ffffff;
-    --of-danger:            #dc2626;
-    --of-danger-bg:         rgba(220, 38, 38, 0.08);
-    --of-danger-border:     rgba(220, 38, 38, 0.25);
-    --of-success:           #16a34a;
-    --of-success-bg:        rgba(22, 163, 74, 0.08);
-    --of-success-border:    rgba(22, 163, 74, 0.15);
-    --of-warning:           #b45309;
-    --of-warning-solid:     #d97706;
-    --of-warning-bg:        rgba(180, 83, 9, 0.08);
-    --of-warning-border:    rgba(180, 83, 9, 0.2);
-    --of-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2 4.5l4 4 4-4' stroke='%23a05220' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    --of-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2 4.5l4 4 4-4' stroke='%23753c18' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   }
 }
 
@@ -399,9 +457,9 @@
   --of-border-strong:     #523876;
   --of-text-bright:       #ede0ff;
   --of-text:              #c4a8e8;
-  --of-text-2:            #9370c4;
-  --of-text-3:            #6a4a9c;
-  --of-text-4:            #472f6e;
+  --of-text-2:            #bda7db;
+  --of-text-3:            #a891cb;
+  --of-text-4:            #9e82ca;
   --of-accent:            #a78bfa;
   --of-accent-solid:      #8b5cf6;
   --of-accent-hover:      #c4b5fd;
@@ -412,16 +470,6 @@
   --of-accent-border:     rgba(139, 92, 246, 0.25);
   --of-badge-num-text:    var(--of-accent-hover);
   --of-ink:               #060310;
-  --of-danger:            #f87171;
-  --of-danger-bg:         rgba(239, 68, 68, 0.08);
-  --of-danger-border:     rgba(239, 68, 68, 0.25);
-  --of-success:           #4ade80;
-  --of-success-bg:        rgba(74, 222, 128, 0.08);
-  --of-success-border:    rgba(74, 222, 128, 0.15);
-  --of-warning:           #fbbf24;
-  --of-warning-solid:     #f59e0b;
-  --of-warning-bg:        rgba(245, 158, 11, 0.08);
-  --of-warning-border:    rgba(245, 158, 11, 0.2);
   --of-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2 4.5l4 4 4-4' stroke='%239370c4' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
 
@@ -438,30 +486,20 @@
   --of-border-strong:     #9470d0;
   --of-text-bright:       #150830;
   --of-text:              #2d1558;
-  --of-text-2:            #4a2888;
-  --of-text-3:            #6a48a8;
-  --of-text-4:            #8a6ac0;
-  --of-accent:            #7c3aed;
-  --of-accent-solid:      #7c3aed;
-  --of-accent-hover:      #8b5cf6;
-  --of-accent-dark:       #6d28d9;
-  --of-accent-bg:         rgba(124, 58, 237, 0.08);
-  --of-accent-bg-hover:   rgba(124, 58, 237, 0.14);
-  --of-accent-glow:       rgba(124, 58, 237, 0.1);
-  --of-accent-border:     rgba(124, 58, 237, 0.25);
+  --of-text-2:            #412377;
+  --of-text-3:            #50367e;
+  --of-text-4:            #5e3f94;
+  --of-accent:            #6624ce;
+  --of-accent-solid:      #6624ce;
+  --of-accent-hover:      #5b21b6;
+  --of-accent-dark:       #4c1d95;
+  --of-accent-bg:         rgba(102, 36, 206, 0.08);
+  --of-accent-bg-hover:   rgba(102, 36, 206, 0.14);
+  --of-accent-glow:       rgba(102, 36, 206, 0.1);
+  --of-accent-border:     rgba(102, 36, 206, 0.25);
   --of-badge-num-text:    #ffffff;
   --of-ink:               #ffffff;
-  --of-danger:            #dc2626;
-  --of-danger-bg:         rgba(220, 38, 38, 0.08);
-  --of-danger-border:     rgba(220, 38, 38, 0.25);
-  --of-success:           #16a34a;
-  --of-success-bg:        rgba(22, 163, 74, 0.08);
-  --of-success-border:    rgba(22, 163, 74, 0.15);
-  --of-warning:           #b45309;
-  --of-warning-solid:     #d97706;
-  --of-warning-bg:        rgba(180, 83, 9, 0.08);
-  --of-warning-border:    rgba(180, 83, 9, 0.2);
-  --of-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2 4.5l4 4 4-4' stroke='%236a48a8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --of-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2 4.5l4 4 4-4' stroke='%2350367e' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
 
 /* System: override to light when OS prefers light */
@@ -477,38 +515,69 @@
     --of-border-strong:     #9470d0;
     --of-text-bright:       #150830;
     --of-text:              #2d1558;
-    --of-text-2:            #4a2888;
-    --of-text-3:            #6a48a8;
-    --of-text-4:            #8a6ac0;
-    --of-accent:            #7c3aed;
-    --of-accent-solid:      #7c3aed;
-    --of-accent-hover:      #8b5cf6;
-    --of-accent-dark:       #6d28d9;
-    --of-accent-bg:         rgba(124, 58, 237, 0.08);
-    --of-accent-bg-hover:   rgba(124, 58, 237, 0.14);
-    --of-accent-glow:       rgba(124, 58, 237, 0.1);
-    --of-accent-border:     rgba(124, 58, 237, 0.25);
+    --of-text-2:            #412377;
+    --of-text-3:            #50367e;
+    --of-text-4:            #5e3f94;
+    --of-accent:            #6624ce;
+    --of-accent-solid:      #6624ce;
+    --of-accent-hover:      #5b21b6;
+    --of-accent-dark:       #4c1d95;
+    --of-accent-bg:         rgba(102, 36, 206, 0.08);
+    --of-accent-bg-hover:   rgba(102, 36, 206, 0.14);
+    --of-accent-glow:       rgba(102, 36, 206, 0.1);
+    --of-accent-border:     rgba(102, 36, 206, 0.25);
     --of-badge-num-text:    #ffffff;
     --of-ink:               #ffffff;
-    --of-danger:            #dc2626;
-    --of-danger-bg:         rgba(220, 38, 38, 0.08);
-    --of-danger-border:     rgba(220, 38, 38, 0.25);
-    --of-success:           #16a34a;
-    --of-success-bg:        rgba(22, 163, 74, 0.08);
-    --of-success-border:    rgba(22, 163, 74, 0.15);
-    --of-warning:           #b45309;
-    --of-warning-solid:     #d97706;
-    --of-warning-bg:        rgba(180, 83, 9, 0.08);
-    --of-warning-border:    rgba(180, 83, 9, 0.2);
-    --of-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2 4.5l4 4 4-4' stroke='%236a48a8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    --of-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2 4.5l4 4 4-4' stroke='%2350367e' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   }
 }
 
 /* ── Typography ───────────────────────────────────────────────────────────── */
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-heading);
+body {
+  font-family: var(--font-sans);
 }
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+/* ── Focus, placeholders, skip link ───────────────────────────────────────── */
+
+/* Placeholders inherit a themed tone that clears 4.5:1 on field surfaces
+   (the UA default grey is ~3.9:1 on the dark fields). */
+::placeholder { color: var(--of-text-4); opacity: 1; }
+
+/* One themed keyboard focus ring. Many controls style themselves inline with
+   `outline:none`, so text fields need !important to get it back. */
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible,
+[role="button"]:focus-visible,
+[tabindex]:not([tabindex="-1"]):focus-visible {
+  outline: 2px solid var(--of-accent-solid);
+  outline-offset: 2px;
+}
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--of-accent-border) !important;
+  outline-offset: 0;
+}
+main:focus { outline: none; }
+
+.of-skip {
+  position: absolute; left: 12px; top: -48px; z-index: 3000;
+  padding: 10px 16px; border-radius: 9px;
+  background: var(--of-accent-solid); color: var(--of-ink);
+  font-weight: 600; font-size: 0.875rem; text-decoration: none;
+  transition: top 0.15s;
+}
+.of-skip:focus { top: 12px; }
+
+.of-num { font-variant-numeric: tabular-nums; }
+.of-tag { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 
 /* ── Select / dropdown ────────────────────────────────────────────────────── */
 
@@ -526,7 +595,7 @@ select:focus,
 select:focus-visible,
 select:-moz-focusring {
   outline: none !important;
-  box-shadow: 0 0 0 3px var(--of-accent-glow) !important;
+  box-shadow: 0 0 0 2px var(--of-accent-border) !important;
   border-color: var(--of-accent-solid) !important;
 }
 
@@ -550,8 +619,167 @@ option:checked {
 .of-grid-2    { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .of-grid-2-sm { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .of-grid-3    { display: grid; grid-template-columns: 1fr 1fr 0.65fr; gap: 16px; }
+/* Two short numeric fields (length / weight) that read as a pair: never collapses. */
+.of-grid-pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+/* Stat / weather tiles. minmax(0,1fr) lets a long label wrap instead of
+   widening its column past the viewport. */
+.of-grid-4    { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
 
 @media (max-width: 480px) {
   .of-grid-2, .of-grid-2-sm { grid-template-columns: 1fr; }
   .of-grid-3                 { grid-template-columns: 1fr 1fr; }
+  .of-grid-4                 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* ── Maps ─────────────────────────────────────────────────────────────────── */
+
+/* Leaflet panes carry z-index 400–1000 without a stacking context of their own,
+   so a map scrolled under the fixed tab bar or a sticky action bar drew on top of
+   it. Isolating the container keeps every pane inside the map. */
+.leaflet-container { isolation: isolate; z-index: 0; }
+/* Zoom buttons are 30px on touch by default: below the 44px floor for wet or gloved fingers. */
+@media (pointer: coarse), (max-width: 767px) {
+  /* Leaflet's zoom buttons are 30px even in touch mode. Extra class: leaflet.css
+     loads after this file with the same specificity. */
+  .leaflet-container.leaflet-touch .leaflet-bar a { width: 44px; height: 44px; line-height: 44px; font-size: var(--of-fs-headline); }
+}
+
+/* Shown by setupMapGestures (src/lib/mapGestures.ts) when a touch user drags
+   the map with one finger: that gesture scrolls the page, two fingers move
+   the map. Sits above Leaflet's panes and controls, never takes input. */
+.of-map-hint {
+  position: absolute;
+  inset: 0;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--of-space-4);
+  /* Over map tiles with fixed white ink: neutral, like the photo scrims. */
+  background: rgba(0, 0, 0, 0.55);
+  color: #ffffff;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+  text-wrap: balance;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--of-dur-fast) var(--of-ease);
+}
+.of-map-hint.of-map-hint--on { opacity: 1; }
+
+/* Instructions that name the input: "Tap" on touch screens, "Click" with a mouse.
+   Both are rendered; CSS picks one, so there is no hydration flash. */
+.of-when-touch { display: none; }
+@media (pointer: coarse) {
+  .of-when-touch { display: block; }
+  .of-when-mouse { display: none; }
+}
+
+/* "More details" disclosure on long field forms (catch new/edit): the secondary
+   fields fold away so the essentials fit the first screens. A ruled row, not a
+   nested card. The summary shows what is set inside while collapsed. */
+.of-more > summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 10px 0;
+  border-top: 1px solid var(--of-border-subtle);
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--of-text-2);
+}
+.of-more > summary::-webkit-details-marker { display: none; }
+.of-more > summary:hover { color: var(--of-text); }
+.of-more > summary:focus-visible { outline: 2px solid var(--of-accent-solid); outline-offset: 2px; border-radius: 4px; }
+.of-more__summary {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--of-accent);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.of-more__chevron { margin-left: auto; flex-shrink: 0; transition: transform var(--of-dur-fast) var(--of-ease); }
+.of-more[open] .of-more__chevron { transform: rotate(180deg); }
+.of-more__body { display: flex; flex-direction: column; gap: 20px; padding-top: 8px; }
+
+/* ── Field-use layer ──────────────────────────────────────────────────────────
+   Touch and phone-width adjustments for use at the water (DESIGN.md: the Thumb
+   Rule and the Glare Rule). Page markup is inline-styled, so these rules use
+   !important to win over inline values; they apply only on touch screens or
+   below the md breakpoint, so desktop keeps its compact sizing. */
+
+@media (pointer: coarse), (max-width: 767px) {
+  /* iOS zooms the whole page when a focused field's text is under 16px. */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="hidden"]):not([type="color"]),
+  select,
+  textarea {
+    font-size: 16px !important;
+    min-height: 44px;
+  }
+
+  form button[type="submit"],
+  .of-touch { min-height: 44px; }
+
+  /* Filter chips sit in dense wrapping rows, so they stop at 36px; the 6px
+     row gap brings the effective target to 42px. */
+  .of-chip {
+    min-height: 36px;
+    padding-inline: 12px !important;
+    font-size: 0.8125rem !important;
+  }
+
+  /* Small text-link buttons ("Use my location") keep their look; the padding
+     grows the tap area to 44px and the negative margin cancels it in layout. */
+  .of-linkbtn {
+    padding: 12px 6px !important;
+    margin: -12px -6px !important;
+  }
+
+  /* Range sliders: the whole box takes the drag, so a 44px box makes the small
+     native thumb easy to grab with a wet thumb. */
+  input[type="range"] { min-height: 44px; }
+
+  /* Small icon buttons placed absolutely (remove photo, favourite heart). */
+  .of-hit::after { content: ""; position: absolute; inset: -12px; }
+
+  /* Small in-flow links and toggles (back links, info buttons): an invisible
+     hit area around them, without changing their size or the layout. */
+  .of-tap { position: relative; }
+  .of-tap::after { content: ""; position: absolute; inset: -12px -8px; }
+}
+
+@media (max-width: 767px) {
+  /* Form panels: the page gutter already gives 16px, so 24–28px more inside
+     the panel wasted a fifth of a phone's width. */
+  .of-panel { padding: 16px !important; }
+
+  /* The save row of a long form stays in reach, just above the tab bar. */
+  .of-actions {
+    position: sticky;
+    bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+    z-index: 20;
+    margin: 0 -16px -16px !important;
+    padding: 12px 16px !important;
+    background: var(--of-bg-surface);
+    border-top: 1px solid var(--of-border-subtle) !important;
+    border-radius: 0 0 calc(var(--of-radius-xl) - 1px) calc(var(--of-radius-xl) - 1px);
+  }
+  .of-actions > * { min-height: 48px; justify-content: center; }
+
+  /* The one primary action of a form: full width, 48px, larger label. */
+  .of-primary {
+    flex: 1;
+    width: 100%;
+    min-height: 48px;
+    font-size: 1rem !important;
+    justify-content: center;
+  }
 }

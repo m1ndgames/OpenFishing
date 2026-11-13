@@ -4,7 +4,7 @@
 	import logo from '#lib/assets/openfishing-logo.svg?raw';
 
 	let { form, data }: { form: ActionData; data: PageData } = $props();
-	const { t } = data;
+	const { t } = $derived(data);
 
 	let showPassword = $state(false);
 	const justReset = $derived(page.url.searchParams.has('reset'));
@@ -35,13 +35,15 @@
 			{/if}
 
 			{#if form?.error}
-				<div style="background:var(--of-danger-bg); border:1px solid var(--of-danger-border); color:var(--of-danger); font-size:0.875rem; padding:10px 14px; border-radius:9px;">
+				<div role="alert" style="background:var(--of-danger-bg); border:1px solid var(--of-danger-border); color:var(--of-danger); font-size:0.875rem; padding:10px 14px; border-radius:9px;">
 					{t.loginError}
 				</div>
 			{/if}
 
 			<div>
-				<label for="identifier" style="display:block; font-size:0.78rem; font-weight:500; color:var(--of-text-3); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.06em;">{t.loginIdentifierLabel}</label>
+				<label for="identifier" style="display:block; font-size:0.8125rem; font-weight:500; color:var(--of-text-2); margin-bottom:6px; ">{t.loginIdentifierLabel}</label>
+				<!-- Single-purpose page: start in its first field -->
+				<!-- svelte-ignore a11y_autofocus -->
 				<input
 					id="identifier"
 					name="identifier"
@@ -55,7 +57,7 @@
 			</div>
 
 			<div>
-				<label for="password" style="display:block; font-size:0.78rem; font-weight:500; color:var(--of-text-3); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.06em;">{t.loginPasswordLabel}</label>
+				<label for="password" style="display:block; font-size:0.8125rem; font-weight:500; color:var(--of-text-2); margin-bottom:6px; ">{t.loginPasswordLabel}</label>
 				<div style="position:relative;">
 					<input
 						id="password"
@@ -90,7 +92,8 @@
 
 			<button
 				type="submit"
-				style="background:var(--of-accent-solid); color:var(--of-ink); font-size:0.875rem; font-weight:700; padding:11px; border-radius:9px; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; transition:background 0.15s;"
+				class="of-primary"
+				style="background:var(--of-accent-solid); color:var(--of-ink); font-size:0.875rem; font-weight:600; padding:11px; border-radius:9px; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; transition:background 0.15s;"
 				onmouseenter={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-accent)';}}
 				onmouseleave={function(e){(e.currentTarget as HTMLElement).style.background='var(--of-accent-solid)';}}
 			>
@@ -98,7 +101,7 @@
 			</button>
 
 			{#if data.mailEnabled}
-				<a href="/forgot-password" style="text-align:center; font-size:0.8rem; color:var(--of-text-4); text-decoration:none;"
+				<a href="/forgot-password" style="text-align:center; font-size:0.8125rem; color:var(--of-text-4); text-decoration:none;"
 					onmouseenter={function(e){(e.currentTarget as HTMLElement).style.color='var(--of-accent)';}}
 					onmouseleave={function(e){(e.currentTarget as HTMLElement).style.color='var(--of-text-4)';}}
 				>{t.loginForgotPassword}</a>

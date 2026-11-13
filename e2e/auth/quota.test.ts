@@ -32,7 +32,7 @@ test.describe('Upload quota enforcement', () => {
 		await page.locator('input[type="file"][accept="image/*"]:not([capture]):not([name])').setInputFiles('e2e/fixtures/test-photo.jpg');
 		await page.waitForSelector('cropper-canvas', { state: 'visible', timeout: 30000 });
 		await page.getByRole('button', { name: 'Apply' }).click();
-		await expect(page.locator('img[alt="Preview"]')).toBeVisible({ timeout: 15000 });
+		await expect(page.locator('img[alt="Photo"]')).toBeVisible({ timeout: 15000 });
 
 		const [resp] = await Promise.all([
 			page.waitForResponse((r) => r.url().includes('/lures/new') && r.request().method() === 'POST'),

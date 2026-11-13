@@ -32,6 +32,6 @@ export const actions: Actions = {
 
 	delete: async ({ params, locals }) => {
 		await db.delete(combo).where(and(eq(combo.id, params.id), userFilter(locals, combo.userId)));
-		redirect(303, '/tackle');
+		redirect(303, '/tackle?tab=combos');
 	}
 };

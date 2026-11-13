@@ -57,6 +57,10 @@ export default async function globalSetup() {
 	writeFileSync('e2e/fixtures/large-photo.png', buildPng(1600, 1200, 0, 128, 200));
 	// JPEG with EXIF GPS (52.52 N, 13.405 E) + DateTimeOriginal, for the location-from-photo tests (#37)
 	writeFileSync('e2e/fixtures/gps-photo.jpg', buildGpsJpeg(52.52, 13.405, '2026:06:15 07:30:00'));
+	// Seeded lure photo (Gold Jig) for the thumbnail tests; drop cached thumbnails so
+	// every run exercises the generate-on-first-request path.
+	writeFileSync('e2e/uploads/seed-lure.png', buildPng(1600, 1200, 200, 120, 40));
+	rmSync('e2e/uploads/.thumbs', { recursive: true, force: true });
 
 	const sqlite = new Database('e2e/test.db');
 	const db = drizzle(sqlite, { schema });
@@ -94,6 +98,7 @@ export default async function globalSetup() {
 			lightConditions: 3,
 			favourite: true,
 			amount: 1,
+			photoPath: 'seed-lure.png',
 			createdAt: now,
 			updatedAt: now,
 		},
@@ -171,6 +176,19 @@ export default async function globalSetup() {
 			lureId: LURE_IDS[1],
 			catchAndRelease: true,
 			caughtAt: new Date(now.getTime() - 86_400_000),
+			createdAt: now,
+			updatedAt: now,
+		},
+		{
+			// An earlier, smaller Pike so CATCH_IDS[0] (62 cm) is a personal best.
+			// No location, so it never shows up on a spot page.
+			id: CATCH_IDS[2],
+			species: 'Pike',
+			weightG: 1200,
+			lengthCm: 48,
+			lureId: LURE_IDS[1],
+			catchAndRelease: true,
+			caughtAt: new Date(now.getTime() - 3 * 86_400_000),
 			createdAt: now,
 			updatedAt: now,
 		},

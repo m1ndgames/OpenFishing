@@ -1,0 +1,53 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-color",
+        "value": "*",
+        "files": [
+          "src/lib/server/mail.ts"
+        ],
+        "createdAt": "2026-11-13T20:07:50.992Z",
+        "reason": "Inline styles in the reset email; mail clients ignore CSS variables"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "*",
+        "files": [
+          "src/lib/themes.ts"
+        ],
+        "createdAt": "2026-11-13T20:07:51.112Z",
+        "reason": "Theme picker preview swatches: data describing each theme, not UI colours"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "*",
+        "files": [
+          "src/app.html"
+        ],
+        "createdAt": "2026-11-13T20:07:51.234Z",
+        "reason": "Document shell before layout.css loads; body colours come from the theme tokens"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "*",
+        "files": [
+          "src/routes/settings/qr/+page.svelte"
+        ],
+        "createdAt": "2026-11-13T20:07:51.349Z",
+        "reason": "Printed QR label sheet: black/grey print ink on white paper, independent of theme"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#000000",
+        "files": [
+          "src/routes/**/+page.server.ts"
+        ],
+        "createdAt": "2026-11-13T20:07:51.465Z",
+        "reason": "QR code SVG ink: must stay pure black for scanner contrast"
+      }
+    ]
+  }
+}

@@ -1,13 +1,14 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { db } from '#lib/server/db/index.js';
-import { fishCatch, catchPhoto, lure, combo } from '#lib/server/db/schema.js';
+import { fishCatch, catchPhoto } from '#lib/server/db/schema.js';
 import { eq, asc, and } from 'drizzle-orm';
 import { saveUpload, deleteUpload, QuotaExceededError } from '#lib/server/uploads.js';
 import { userFilter } from '#lib/server/scope.js';
+import { loadCatchFormData } from '#lib/server/catchForm.js';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
-	const [found, lures, combos] = await Promise.all([
+	const [found, formData] = await Promise.all([
 		db.query.fishCatch.findFirst({
 			where: and(eq(fishCatch.id, params.id), userFilter(locals, fishCatch.userId)),
 			with: {
@@ -16,11 +17,10 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 				combo: true
 			}
 		}),
-		db.select({ id: lure.id, lureNumber: lure.lureNumber, name: lure.name }).from(lure).where(userFilter(locals, lure.userId)).orderBy(asc(lure.lureNumber)),
-		db.query.combo.findMany({ where: userFilter(locals, combo.userId), orderBy: [asc(combo.name)], with: { rod: true, reel: true } })
+		loadCatchFormData(locals)
 	]);
 	if (!found) error(404, 'Catch not found');
-	return { catch: found, lures, combos };
+	return { catch: found, ...formData };
 };
 
 export const actions: Actions = {

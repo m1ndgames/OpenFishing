@@ -10,12 +10,22 @@ test.describe('Spots list', () => {
 
 	test('links to spot detail', async ({ page }) => {
 		await page.goto('/spots');
-		// Verify spot appears as a clickable row in the list
-		await expect(page.getByRole('row', { name: /Test Lake North/ })).toBeVisible();
-		// Navigate via JS (same as the onclick handler does) and verify the detail page
-		await page.evaluate((url) => { window.location.href = url; }, `/spots/${SPOT_IDS[0]}`);
+		await page.waitForLoadState('networkidle');
+		// Rows are real links (keyboard, middle-click and screen readers work)
+		const link = page.getByRole('link', { name: /Test Lake North/ });
+		await expect(link).toHaveAttribute('href', `/spots/${SPOT_IDS[0]}`);
+		await link.click();
 		await expect(page).toHaveURL(`/spots/${SPOT_IDS[0]}`, { timeout: 10000 });
-		await expect(page.getByText('Test Lake North')).toBeVisible();
+		await expect(page.getByRole('heading', { level: 1, name: 'Test Lake North' })).toBeVisible();
+	});
+
+	test('map layer toggles expose their state', async ({ page }) => {
+		await page.goto('/spots');
+		await page.waitForLoadState('networkidle');
+		const heat = page.getByRole('button', { name: /Heatmap/i });
+		const before = await heat.getAttribute('aria-pressed');
+		await heat.click();
+		await expect(heat).toHaveAttribute('aria-pressed', before === 'true' ? 'false' : 'true');
 	});
 });
 
