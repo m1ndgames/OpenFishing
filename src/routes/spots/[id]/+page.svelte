@@ -49,6 +49,34 @@
 		return t.biteRatingPoor;
 	}
 
+	function signed(n: number) {
+		return (n > 0 ? '+' : n < 0 ? '−' : '±') + Math.abs(n).toFixed(1);
+	}
+	function contribColor(n: number) {
+		return n > 0 ? 'var(--of-success)' : n < 0 ? 'var(--of-danger)' : 'var(--of-text-4)';
+	}
+	const fmt = (v: number | null, unit = '') => (v == null ? '—' : `${v}${unit}`);
+
+	// One row per bite-index contribution, ordered by strength of evidence.
+	const biteRows = $derived.by(() => {
+		if (!weather) return [];
+		const c = weather.biteContributions;
+		return [
+			{ key: 'light', label: t.biteInfoLight, value: c.light, desc: t.biteInfoLightDesc,
+				detail: t.biteInfoLightDetail.replace('{deg}', String(Math.round(weather.sunElevation))).replace('{pct}', fmt(weather.cloudCover)) },
+			{ key: 'tempTrend', label: t.biteInfoTempTrend, value: c.tempTrend, desc: t.biteInfoTempTrendDesc,
+				detail: weather.tempTrend == null ? t.biteInfoNoData
+					: t.biteInfoTempTrendDetail.replace('{delta}', `${weather.tempTrend > 0 ? '+' : ''}${weather.tempTrend}`) },
+			{ key: 'weather', label: t.biteInfoWeather, value: c.weather, desc: t.biteInfoWeatherDesc, detail: '' },
+			{ key: 'wind', label: t.biteInfoWind, value: c.wind, desc: t.biteInfoWindDesc,
+				detail: weather.windSpeed == null ? t.biteInfoNoData
+					: t.biteInfoWindDetail.replace('{speed}', fmt(weather.windSpeed)).replace('{gust}', fmt(weather.windGusts)) },
+			{ key: 'pressure', label: t.biteInfoPressure, value: c.pressure, desc: t.biteInfoPressureDesc,
+				detail: `${weather.pressureDelta > 0 ? '+' : ''}${weather.pressureDelta} hPa / 3 h` },
+			{ key: 'moon', label: t.biteInfoMoon, value: c.moon, desc: t.biteInfoMoonDesc, detail: moonPhaseLabels[weather.moonPhaseIndex] },
+		];
+	});
+
 	let mapEl: HTMLElement;
 	let mapInstance: any = null;
 
@@ -353,9 +381,6 @@
 
 	<!-- Bite index info modal -->
 	{#if showBiteInfo && weather}
-		{@const ps = weather.biteScores.pressure}
-		{@const ls = weather.biteScores.light}
-		{@const ts = weather.biteScores.temp}
 		<div style="position:fixed; inset:0; z-index:2000; display:flex; align-items:center; justify-content:center; padding:20px;">
 			<div aria-hidden="true" onclick={() => showBiteInfo = false}
 				style="position:absolute; inset:0; background:var(--of-scrim); backdrop-filter:blur(4px);"></div>
@@ -364,7 +389,7 @@
 				aria-modal="true"
 				aria-labelledby="bite-info-title"
 				use:modal={{ onClose: () => (showBiteInfo = false), trap: true }}
-				style="position:relative; background:var(--of-bg-surface); border:1px solid var(--of-border); border-radius:16px; padding:24px; max-width:420px; width:100%;"
+				style="position:relative; background:var(--of-bg-surface); border:1px solid var(--of-border); border-radius:16px; padding:24px; max-width:440px; width:100%; max-height:calc(100dvh - 40px); overflow-y:auto;"
 			>
 				<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
 					<h2 id="bite-info-title" style="font-family:'DM Sans',sans-serif; font-size:1rem; color:var(--of-text-bright); margin:0;">{t.biteInfoTitle}</h2>
@@ -373,60 +398,30 @@
 					</button>
 				</div>
 
-				<!-- Pressure -->
-				<div style="margin-bottom:14px;">
-					<div style="display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin-bottom:4px;">
-						<div style="display:flex; align-items:center; gap:8px;">
-							<span style="font-size:0.8125rem; font-weight:600; color:var(--of-text);">{t.biteInfoPressure}</span>
-							<span style="font-size:0.75rem; color:var(--of-text-4); background:var(--of-bg-overlay); border:1px solid var(--of-border-subtle); padding:1px 6px; border-radius:10px; white-space:nowrap;">50% {t.biteInfoWeight}</span>
-						</div>
-						<span style="font-family:'JetBrains Mono',monospace; font-size:0.8125rem; font-weight:600; white-space:nowrap; color:{biteColor(ps)};">{ps}/10 {t.biteInfoScore}</span>
-					</div>
-					<div style="background:var(--of-border-subtle); border-radius:var(--of-radius-full); height:4px; margin-bottom:5px;">
-						<div style="background:{biteColor(ps)}; border-radius:var(--of-radius-full); height:4px; width:{ps*10}%;"></div>
-					</div>
-					<p style="font-size:0.75rem; color:var(--of-text-4); margin:0;">
-						{weather.pressureDelta > 0 ? '+' : ''}{weather.pressureDelta} hPa / 3h — {t.biteInfoPressureDesc}
-					</p>
-				</div>
+				<p style="font-size:0.8125rem; color:var(--of-text-3); margin:0 0 16px; line-height:1.5;">{t.biteInfoIntro}</p>
 
-				<!-- Light -->
-				<div style="margin-bottom:14px;">
-					<div style="display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin-bottom:4px;">
-						<div style="display:flex; align-items:center; gap:8px;">
-							<span style="font-size:0.8125rem; font-weight:600; color:var(--of-text);">{t.biteInfoLight}</span>
-							<span style="font-size:0.75rem; color:var(--of-text-4); background:var(--of-bg-overlay); border:1px solid var(--of-border-subtle); padding:1px 6px; border-radius:10px; white-space:nowrap;">30% {t.biteInfoWeight}</span>
-						</div>
-						<span style="font-family:'JetBrains Mono',monospace; font-size:0.8125rem; font-weight:600; white-space:nowrap; color:{biteColor(ls)};">{ls}/10 {t.biteInfoScore}</span>
-					</div>
-					<div style="background:var(--of-border-subtle); border-radius:var(--of-radius-full); height:4px; margin-bottom:5px;">
-						<div style="background:{biteColor(ls)}; border-radius:var(--of-radius-full); height:4px; width:{ls*10}%;"></div>
-					</div>
-					<p style="font-size:0.75rem; color:var(--of-text-4); margin:0;">{t.biteInfoLightDesc}</p>
-				</div>
-
-				<!-- Temperature -->
-				<div style="margin-bottom:20px;">
-					<div style="display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin-bottom:4px;">
-						<div style="display:flex; align-items:center; gap:8px;">
-							<span style="font-size:0.8125rem; font-weight:600; color:var(--of-text);">{t.biteInfoTemp}</span>
-							<span style="font-size:0.75rem; color:var(--of-text-4); background:var(--of-bg-overlay); border:1px solid var(--of-border-subtle); padding:1px 6px; border-radius:10px; white-space:nowrap;">20% {t.biteInfoWeight}</span>
-						</div>
-						<span style="font-family:'JetBrains Mono',monospace; font-size:0.8125rem; font-weight:600; white-space:nowrap; color:{biteColor(ts)};">{ts}/10 {t.biteInfoScore}</span>
-					</div>
-					<div style="background:var(--of-border-subtle); border-radius:var(--of-radius-full); height:4px; margin-bottom:5px;">
-						<div style="background:{biteColor(ts)}; border-radius:var(--of-radius-full); height:4px; width:{ts*10}%;"></div>
-					</div>
-					<p style="font-size:0.75rem; color:var(--of-text-4); margin:0;">
-						Δ {weather.tempDelta} °C / 3h — {t.biteInfoTempDesc}
-					</p>
-				</div>
+				<ul style="list-style:none; margin:0 0 16px; padding:0; display:flex; flex-direction:column; gap:12px;">
+					{#each biteRows as row (row.key)}
+						<li>
+							<div style="display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin-bottom:2px;">
+								<span style="font-size:0.8125rem; font-weight:600; color:var(--of-text);">{row.label}</span>
+								<span style="font-family:'JetBrains Mono',monospace; font-size:0.8125rem; font-weight:600; white-space:nowrap; color:{contribColor(row.value)};">{signed(row.value)}</span>
+							</div>
+							{#if row.detail}
+								<p style="font-family:'JetBrains Mono',monospace; font-size:0.75rem; color:var(--of-text-3); margin:0 0 2px;">{row.detail}</p>
+							{/if}
+							<p style="font-size:0.75rem; color:var(--of-text-4); margin:0; line-height:1.45;">{row.desc}</p>
+						</li>
+					{/each}
+				</ul>
 
 				<!-- Formula result -->
-				<div style="background:var(--of-bg-overlay); border:1px solid var(--of-border-subtle); border-radius:10px; padding:12px 16px; font-family:'JetBrains Mono',monospace; font-size:0.8125rem; color:var(--of-text-3);">
-					{t.biteInfoFormula} = ({ps}×0.5) + ({ls}×0.3) + ({ts}×0.2) =
+				<div style="background:var(--of-bg-overlay); border:1px solid var(--of-border-subtle); border-radius:10px; padding:12px 16px; font-family:'JetBrains Mono',monospace; font-size:0.8125rem; color:var(--of-text-3); overflow-wrap:anywhere;">
+					{t.biteInfoFormula} = 5 {#each biteRows as row (row.key)}{#if row.value !== 0}{' '}{row.value > 0 ? '+' : '−'} {Math.abs(row.value).toFixed(1)}{/if}{/each} =
 					<span style="color:{biteColor(weather.biteIndex)}; font-weight:600;"> {weather.biteIndex}/10</span>
 				</div>
+
+				<p style="font-size:0.75rem; color:var(--of-text-4); margin:12px 0 0; line-height:1.45;">{t.biteInfoNote}</p>
 			</div>
 		</div>
 	{/if}

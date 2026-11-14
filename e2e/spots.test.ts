@@ -52,6 +52,23 @@ test.describe('Spot detail', () => {
 		await page.getByRole('link', { name: /edit/i }).click();
 		await expect(page).toHaveURL(`/spots/${SPOT_IDS[0]}/edit`);
 	});
+
+	test('bite index info lists each contribution and the total', async ({ page }) => {
+		await page.goto(`/spots/${SPOT_IDS[0]}`);
+		await page.waitForLoadState('networkidle');
+		// Weather comes live from Open-Meteo; without network the card (and this check) is absent.
+		const open = page.getByRole('button', { name: 'Bite Index' });
+		test.skip((await open.count()) === 0, 'weather unavailable (Open-Meteo unreachable)');
+		await open.click();
+		const dialog = page.getByRole('dialog', { name: 'How is the Bite Index calculated?' });
+		await expect(dialog).toBeVisible();
+		for (const label of ['Light', 'Temperature Trend', 'Weather', 'Wind', 'Pressure Trend', 'Moon']) {
+			await expect(dialog.getByText(label, { exact: true })).toBeVisible();
+		}
+		await expect(dialog.getByText(/^Total = 5/)).toBeVisible();
+		await page.keyboard.press('Escape');
+		await expect(dialog).toBeHidden();
+	});
 });
 
 test.describe('Add new spot', () => {

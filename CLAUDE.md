@@ -300,7 +300,16 @@ The overview is a "tackle box": `.of-lure-grid` (scoped CSS in `src/routes/+page
 
 ### Bite index
 
-The bite index (0–10) is a weighted score: pressure trend × 0.5, light conditions × 0.3, temperature stability × 0.2. Scores: pressure falling > 1.5 hPa/3h = 10, stable = 7, rising = 2; dawn/dusk = 10, golden = 8, night/morning = 6, day = 2; temp delta < 3 °C = 10, ≥ 3 °C = 2. Data comes from the Open-Meteo API (5 s timeout, silently ignored on failure).
+The bite index (0–10, v2) is species-agnostic and evidence-weighted: it starts at **5** (an ordinary day) and adds signed contributions sized by how well field studies support each factor (sources in the `biteIndex.ts` header). `computeBiteIndex()` is pure; `biteIndex = clamp(5 + Σ, 0, 10)`:
+
+- **Light** (strongest evidence) from the real sun elevation (`sunElevation()`, NOAA algorithm, timezone-independent): twilight −6°…+6° +2.0, low sun 6°…20° +0.8, high sun −1.0 × (1 − cloud% × 0.7), −18°…−6° +0.3, deeper night −0.3.
+- **Temp trend** (cold-front proxy): mean of the last 24 h minus the mean of the 72 h before. ≤ −5 °C −1.5, ≤ −3 °C −0.8, ≥ +3 °C while the baseline is < 15 °C +0.4.
+- **Weather code**: thunderstorm (95/96/99) −2.5, heavy rain (65/67/82) −0.7, drizzle/light rain (51/53/61/80) +0.3.
+- **Wind**: 1.5–8 m/s +0.5, > 12 m/s or gusts > 17 m/s −1.0.
+- **Pressure trend** (weak evidence, small term): −3…−1 hPa/3h +0.5, rise > 2 or crash < −4 −0.5.
+- **Moon**: phase index 0 or 4 (new/full) +0.3.
+
+Data comes from the Open-Meteo API (`timeformat=unixtime`, `past_days=4`, 5 s timeout, silently ignored on failure). Don't reintroduce heavy pressure or solunar weighting — the literature doesn't support it. The spot page's info modal lists each contribution (`biteContributions`) and the `5 + … = X` sum.
 
 The shared utility lives in `src/lib/server/biteIndex.ts` and exports `fetchWeather(lat, lng)`. Both `spots/[id]/+page.server.ts` (live display) and `catches/new/+page.server.ts` (snapshot on insert) import from it. The snapshot is stored as `fishCatch.biteIndex` (nullable real) and displayed on the catch detail page with the same progress-bar + color + rating label (Poor/Fair/Good/Excellent) as the spot page. Thresholds: ≥ 8.5 Excellent (#22d3ee), ≥ 6.5 Good (#4ade80), ≥ 4 Fair (#f59e0b), < 4 Poor (#ef4444).
 
