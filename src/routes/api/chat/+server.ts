@@ -49,9 +49,13 @@ function buildContextBlock(
 		lines.push(`Temperature: ${weather.temperature}°C (Δ${weather.tempDelta}°C/3h)`);
 		lines.push(`Humidity: ${weather.humidity}%`);
 		lines.push(`Pressure: ${weather.pressure} hPa, ${pressureTrend}`);
-		lines.push(`Light: ${weather.lightingKey}`);
+		if (weather.tempTrend != null) lines.push(`Temperature trend (last 24 h vs 3 days before): ${weather.tempTrend > 0 ? '+' : ''}${weather.tempTrend}°C`);
+		if (weather.windSpeed != null) lines.push(`Wind: ${weather.windSpeed} m/s${weather.windGusts != null ? `, gusts ${weather.windGusts} m/s` : ''}`);
+		if (weather.cloudCover != null) lines.push(`Cloud cover: ${weather.cloudCover}%`);
+		lines.push(`Light: ${weather.lightingKey} (sun elevation ${weather.sunElevation}°)`);
 		lines.push(`Moon: ${MOON_PHASES[weather.moonPhaseIndex]}`);
-		lines.push(`Bite index: ${weather.biteIndex}/10`);
+		const c = weather.biteContributions;
+		lines.push(`Bite index: ${weather.biteIndex}/10 (baseline 5; light ${c.light}, temp trend ${c.tempTrend}, weather ${c.weather}, wind ${c.wind}, pressure ${c.pressure}, moon ${c.moon})`);
 	}
 
 	if (!lines.length) return '';

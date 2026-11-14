@@ -30,6 +30,7 @@ vite.config.ts.timestamp-*
 
 # Claude Code
 .claude/
+.bin/
 
 # Local / test artifacts
 .playwright-mcp/
